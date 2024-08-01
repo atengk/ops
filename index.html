@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="UTF-8">
+  <title>阿腾知识库</title>
+  <link rel="icon" href="_media/favicon.ico" />
+  <link rel="stylesheet" href="css/vue.css">
+  <!-- 一个docsify插件，为gif添加可定制的播放器控件 -->
+  <link rel="stylesheet" href="css/docsify-gifcontrol.css">
+  <!-- 支持docsify侧边栏目录展开和折叠的样式 -->
+  <link rel="stylesheet" href="css/sidebar.min.css" />
+</head>
+<body>
+  <div id="app">加载中...</div>
+  <script>
+    window.$docsify = {
+        // 项目名称
+        name: '阿腾知识库',
+        // 网站的基本路径
+        basePath: '/work/',
+        // 点击文档标题后跳转的链接地址。
+        nameLink: '/work/#/README',
+        // 仓库地址，点击右上角的Github章鱼猫头像会跳转到此地址
+        repo: 'https://github.com/kongyu666/work/tree/main/work/',
+        // 侧边栏支持，默认加载的是项目根目录下的_sidebar.md文件
+        loadSidebar: true,
+        // 支持docsify侧边栏目录展开和折叠，设置侧边栏显示级别
+        sidebarDisplayLevel: 1,
+        // 导航栏支持，默认加载的是项目根目录下的_navbar.md文件
+        loadNavbar: true,
+        // 封面支持，默认加载的是项目根目录下的_coverpage.md文件
+        coverpage: true,
+        // 只在访问主页时加载封面。
+        onlyCover: true,
+        // 最大支持渲染的标题层级
+        maxLevel: 7,
+        // 自定义侧边栏后默认不会再生成目录，设置生成目录的最大层级（建议配置为2-4）
+        subMaxLevel: 7,
+        // 小屏设备下合并导航栏到侧边栏
+        mergeNavbar: true,
+        // 外部链接的打开方式。默认为 _blank （在新窗口或者标签页中打开）
+        externalLinkTarget: '_blank',
+        // 右上角链接的打开方式。默认为 _blank （在新窗口或者标签页中打开）
+        cornerExternalLinkTarget: '_blank',
+        // 全文搜索插件会根据当前页面上的超链接获取文档内容，在 localStorage 内建立文档索引。默认过期时间为一天，当然我们可以自己指定需要缓存的文件列表或者配置过期时间。
+        search: {
+            placeholder: '搜索',
+            noData: '没有数据!',
+        },
+        // 复制到剪贴板
+        copyCode: {
+            buttonText : '点击复制',
+            errorText  : '错误',
+            successText: '复制'
+        },
+        // 字数统计
+        count:{
+            countable:true,
+            fontsize:'0.9em',
+            color:'rgb(90,90,90)',
+            language:'chinese'
+        },
+        // 分页导航
+        pagination: {
+            previousText: '上一章节',
+            nextText: '下一章节',
+            crossChapter: true,
+            crossChapterText: true,
+        },
+        // 在 docsify 中呈现阅读进度的插件
+        progress: {
+            position: "top",
+            color: "var(--theme-color,#42b983)",
+            height: "3px",
+        },
+        // 为每个 docsify markdown 添加更新时间
+        timeUpdater: {
+            text: "<div align='right' width='100px' style='color:gray;font-size:16px'>更新时间 @ {docsify-updated}</div>",
+            formatUpdated: "{YYYY}年{MM}月{DD}日 {HH}时{mm}分{ss}秒",
+            whereToPlace: "bottom",  // "top" or "bottom", default to "bottom"
+        },
+        // 一个 docsify 插件，用于启用busuanzi，显示您的网站访问数据
+        busuanzi: true,
+    }
+  </script>
+  <script src="js/docsify.min.js"></script>
+  <!-- 整合自定义导航栏与 emoji 插件 -->
+  <script src="js/emoji.min.js"></script>
+  <!-- 全文搜索 - Search -->
+  <script src="js/search.min.js"></script>
+  <!-- Medium's 风格的图片缩放插件. 基于 medium-zoom。 -->
+  <script src="js/zoom-image.min.js"></script>
+  <!-- 复制到剪贴板 -->
+  <script src="js/docsify-copy-code.min.js"></script>
+  <!-- 字数统计 -->
+  <script src="js/countable.js"></script>
+  <!-- 代码高亮 -->
+  <script src="js/prism-bash.js"></script>
+  <script src="js/prism-java.js"></script>
+  <!-- docsify的分页导航插件 -->
+  <script src="js/docsify-pagination.min.js"></script>
+  <!-- 在 docsify 中呈现阅读进度的插件 -->
+  <script src="js/progress.min.js"></script>
+  <!-- 为每个 docsify markdown 添加更新时间 -->
+  <script src="js/time-updater.min.js"></script>
+  <!-- 一个 docsify 插件，用于启用busuanzi，显示您的网站访问数据 -->
+  <script src="js/docsify-busuanzi.min.js"></script>
+  <!-- 一个docsify插件，为gif添加可定制的播放器控件 -->
+  <script src="js/docsify-gifcontrol.js"></script>
+  <!-- 支持docsify侧边栏目录展开和折叠 -->
+  <script src="js/docsify-sidebar-collapse.min.js"></script>
+  <!-- Docsify PDF嵌入插件 -->
+  <!-- PDFObject.js is a required dependency of this plugin -->
+  <script src="js/pdfobject.min.js"></script> 
+  <!-- This is the source code of the pdf embed plugin -->
+  <script src="js/docsify-pdf-embed.js"></script>
+</body>
+</html>
