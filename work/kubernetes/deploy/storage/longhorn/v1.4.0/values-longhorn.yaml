@@ -1,0 +1,168 @@
+image:
+  longhorn:
+    engine:
+      repository: longhornio/longhorn-engine
+      tag: v1.4.0
+    manager:
+      repository: longhornio/longhorn-manager
+      tag: v1.4.0
+    ui:
+      repository: longhornio/longhorn-ui
+      tag: v1.4.0
+    instanceManager:
+      repository: longhornio/longhorn-instance-manager
+      tag: v1.4.0
+    shareManager:
+      repository: longhornio/longhorn-share-manager
+      tag: v1.4.0
+    backingImageManager:
+      repository: longhornio/backing-image-manager
+      tag: v1.4.0
+    supportBundleKit:
+      repository: longhornio/support-bundle-kit
+      tag: v0.0.17
+  csi:
+    attacher:
+      repository: longhornio/csi-attacher
+      tag: v3.4.0
+    provisioner:
+      repository: longhornio/csi-provisioner
+      tag: v2.1.2
+    nodeDriverRegistrar:
+      repository: longhornio/csi-node-driver-registrar
+      tag: v2.5.0
+    resizer:
+      repository: longhornio/csi-resizer
+      tag: v1.3.0
+    snapshotter:
+      repository: longhornio/csi-snapshotter
+      tag: v5.0.1
+    livenessProbe:
+      repository: longhornio/livenessprobe
+      tag: v2.8.0
+  pullPolicy: IfNotPresent
+service:
+  ui:
+    type: NodePort
+    nodePort: "32111"
+  manager:
+    type: ClusterIP
+    nodePort: ""
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: ""
+persistence:
+  defaultClass: false
+  defaultFsType: ext4
+  defaultMkfsParams: ""
+  defaultClassReplicaCount: 3
+  defaultDataLocality: disabled # best-effort otherwise
+  reclaimPolicy: Delete
+  migratable: true
+  recurringJobSelector:
+    enable: false
+    jobList: []
+  backingImage:
+    enable: false
+    name: ~
+    dataSourceType: ~
+    dataSourceParameters: ~
+    expectedChecksum: ~
+  defaultNodeSelector:
+    enable: false
+    selector:
+    - node.longhorn.io/create-default-disk="true"
+  removeSnapshotsDuringFilesystemTrim: ignored # "enabled" or "disabled" otherwise
+csi:
+  kubeletRootDir: ~
+  attacherReplicaCount: 3
+  provisionerReplicaCount: 3
+  resizerReplicaCount: 3
+  snapshotterReplicaCount: 3
+defaultSettings:
+  # https://longhorn.io/docs/1.4.0/references/settings/
+  # backupTarget: s3://192.168.1.101:9000@local/longhorn-backupstore
+  # backupTargetCredentialSecret: minio-secret
+  backupTarget: ~
+  backupTargetCredentialSecret: ~
+  allowRecurringJobWhileVolumeDetached: false
+  createDefaultDiskLabeledNodes: true
+  defaultDataPath: /data/storage/longhorn
+  defaultDataLocality: disabled
+  replicaSoftAntiAffinity: false
+  replicaAutoBalance: disabled
+  storageOverProvisioningPercentage: 300
+  storageMinimalAvailablePercentage: 15
+  upgradeChecker: false
+  defaultReplicaCount: ~
+  defaultLonghornStaticStorageClass: ~
+  backupstorePollInterval: ~
+  failedBackupTTL: ~
+  restoreVolumeRecurringJobs: ~
+  recurringSuccessfulJobsHistoryLimit: ~
+  recurringFailedJobsHistoryLimit: ~
+  supportBundleFailedHistoryLimit: ~
+  taintToleration: "nodetype=storage:NoSchedule"
+  systemManagedComponentsNodeSelector: ~
+  priorityClass: ~
+  autoSalvage: ~
+  autoDeletePodWhenVolumeDetachedUnexpectedly: ~
+  disableSchedulingOnCordonedNode: ~
+  replicaZoneSoftAntiAffinity: ~
+  nodeDownPodDeletionPolicy: ~
+  allowNodeDrainWithLastHealthyReplica: ~
+  mkfsExt4Parameters: ~
+  disableReplicaRebuild: ~
+  replicaReplenishmentWaitInterval: ~
+  concurrentReplicaRebuildPerNodeLimit: ~
+  concurrentVolumeBackupRestorePerNodeLimit: ~
+  disableRevisionCounter: ~
+  systemManagedPodsImagePullPolicy: ~
+  allowVolumeCreationWithDegradedAvailability: ~
+  autoCleanupSystemGeneratedSnapshot: ~
+  concurrentAutomaticEngineUpgradePerNodeLimit: ~
+  backingImageCleanupWaitInterval: ~
+  backingImageRecoveryWaitInterval: ~
+  guaranteedEngineManagerCPU: ~
+  guaranteedReplicaManagerCPU: ~
+  kubernetesClusterAutoscalerEnabled: ~
+  orphanAutoDeletion: ~
+  storageNetwork: ~
+  deletingConfirmationFlag: true
+  engineReplicaTimeout: ~
+  snapshotDataIntegrity: ~
+  snapshotDataIntegrityImmediateCheckAfterSnapshotCreation: ~
+  snapshotDataIntegrityCronjob: ~
+  removeSnapshotsDuringFilesystemTrim: ~
+  fastReplicaRebuildEnabled: ~
+  replicaFileSyncHttpClientTimeout: ~
+privateRegistry:
+  createSecret: ~
+  registryUrl: ~
+  registryUser: ~
+  registryPasswd: ~
+  registrySecret: ~
+longhornManager:
+  log:
+    ## Allowed values are `plain` or `json`.
+    format: plain
+  priorityClass: ~
+  tolerations:
+  - effect: NoSchedule
+    operator: Exists
+  nodeSelector:
+    node.longhorn.io/create-default-disk: "true"
+longhornDriver:
+  priorityClass: ~
+  tolerations:
+  - effect: NoSchedule
+    operator: Exists
+  nodeSelector:
+    node.longhorn.io/create-default-disk: "true"
+longhornUI:
+  replicas: 2
+longhornConversionWebhook:
+  replicas: 2
+longhornAdmissionWebhook:
+  replicas: 2
+longhornRecoveryBackend:
+  replicas: 2

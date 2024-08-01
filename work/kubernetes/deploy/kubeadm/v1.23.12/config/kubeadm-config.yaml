@@ -1,0 +1,138 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+# 本地API服务器配置
+localAPIEndpoint:
+  # 广告地址，填写当前节点的 IP 地址
+  advertiseAddress: 192.168.1.101
+  # 绑定端口，默认为 6443
+  bindPort: 6443
+# 节点注册配置
+nodeRegistration:
+  # CRI套接字路径，默认为 /var/run/dockershim.sock
+  criSocket: /var/run/dockershim.sock
+  # kubelet附加参数
+  kubeletExtraArgs:
+    # 使用 systemd 作为 cgroup 驱动程序
+    cgroup-driver: systemd
+  # 污点
+  taints:
+  - effect: NoSchedule
+    # 污点键
+    key: node-role.kubernetes.io/master
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+# Kubernetes版本
+kubernetesVersion: 1.23.12
+# 集群名称
+clusterName: kubernetes
+# 控制平面终结点
+controlPlaneEndpoint: apiserver.k8s.local:6443
+# 镜像仓库
+imageRepository: registry.lingo.local/kubernetes
+# 网络配置
+networking:
+  # DNS域
+  dnsDomain: cluster.local
+  # Pod子网
+  podSubnet: 10.244.0.0/16
+  # Service子网
+  serviceSubnet: 10.96.0.0/16
+# API服务器配置
+apiServer:
+  # 附加参数
+  extraArgs:
+    # 审计日志最大保存天数
+    audit-log-maxage: "7"
+    # 审计日志最大备份数量
+    audit-log-maxbackup: "10"
+    # 审计日志最大大小（MB）
+    audit-log-maxsize: "100"
+    # 绑定地址
+    bind-address: 0.0.0.0
+    # 事件生存时间
+    event-ttl: '24h'
+    # Service节点端口范围
+    service-node-port-range: '20000-40000'
+  # 附加卷
+  extraVolumes:
+  - name: host-time
+    # 主机路径
+    hostPath: /etc/localtime
+    # 挂载路径
+    mountPath: /etc/localtime
+    # 只读
+    readOnly: true
+# 控制器管理器配置
+controllerManager:
+  # 附加参数
+  extraArgs:
+    # 绑定地址
+    bind-address: 0.0.0.0
+  # 附加卷
+  extraVolumes:
+  - name: host-time
+    # 主机路径
+    hostPath: /etc/localtime
+    # 挂载路径
+    mountPath: /etc/localtime
+    # 只读
+    readOnly: true
+# 调度器配置
+scheduler:
+  # 附加参数
+  extraArgs:
+    # 绑定地址
+    bind-address: 0.0.0.0
+    # 添加节点选择器同步的时间间隔
+  # 附加卷
+  extraVolumes:
+  - name: host-time
+    # 主机路径
+    hostPath: /etc/localtime
+    # 挂载路径
+    mountPath: /etc/localtime
+    # 只读
+    readOnly: true
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+# iptables配置
+iptables:
+  # 是否对所有流量使用masquerade
+  masqueradeAll: true
+  # masquerade位
+  masqueradeBit: 14
+  # 最小同步周期
+  minSyncPeriod: 1s
+  # 同步周期
+  syncPeriod: 30s
+# 代理模式
+mode: ipvs
+# IPVS配置
+ipvs:
+  # 最小同步周期
+  minSyncPeriod: 5s
+  # 同步周期
+  syncPeriod: 5s
+  # 负载均衡算法
+  scheduler: 'wrr'
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+# cgroup驱动程序
+cgroupDriver: systemd
+# 最大Pod数量
+maxPods: 300
+# 是否轮转证书
+rotateCertificates: true
+# 功能开关
+featureGates:
+  # 启用CSI存储容量
+  CSIStorageCapacity: true
+  # 扩展CSI卷
+  ExpandCSIVolumes: true
+  # 轮转Kubelet服务器证书
+  RotateKubeletServerCertificate: true
+  # 启用作业完成后的TTL
+  TTLAfterFinished: true

@@ -1,0 +1,176 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "mysql"
+image:
+  debug: false
+  registry: registry.lingo.local
+  repository: service/mysql
+  tag: 8.0.34
+  pullPolicy: IfNotPresent
+architecture: replication
+auth:
+  rootPassword: "Admin@123"
+  createDatabase: true
+  database: kongyu
+  username: "kongyu"
+  password: "kongyu"
+primary:
+  configuration: |-
+    [mysqld]
+    #default_authentication_plugin=mysql_native_password
+    authentication_policy=caching_sha2_password
+    skip-name-resolve
+    explicit_defaults_for_timestamp
+    basedir=/opt/bitnami/mysql
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    port=3306
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    datadir=/bitnami/mysql/data
+    tmpdir=/opt/bitnami/mysql/tmp
+    max_allowed_packet=100M
+    bind-address=*
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+    log-error=/opt/bitnami/mysql/logs/mysqld.log
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_general_ci
+    init_connect='SET NAMES utf8mb4'
+    slow_query_log=1
+    slow_query_log_file=/bitnami/mysql/data/slow_query.log
+    long_query_time=10.0
+    default_time_zone = "+8:00"
+    lower_case_table_names = 1
+    max_connections = 10240
+    max_connect_errors = 100000
+    server-id=1
+    log-bin=mysql-bin
+    max_binlog_size=200M
+    binlog_expire_logs_seconds=604800
+    [client]
+    port=3306
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    default-character-set=UTF8
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    [manager]
+    port=3306
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+
+  extraEnvVars:
+    - name: TZ
+      value: "Asia/Shanghai"
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 150
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 6
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 150
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 6
+    successThreshold: 1
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 150
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 6
+    successThreshold: 1
+  persistence:
+    enabled: true
+    size: 100Gi
+  service:
+    type: NodePort
+    ports:
+      mysql: 3306
+    nodePorts:
+      mysql: ""
+
+secondary:
+  replicaCount: 3
+  configuration: |-
+    [mysqld]
+    #default_authentication_plugin=mysql_native_password
+    authentication_policy=caching_sha2_password
+    skip-name-resolve
+    explicit_defaults_for_timestamp
+    basedir=/opt/bitnami/mysql
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    port=3306
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    datadir=/bitnami/mysql/data
+    tmpdir=/opt/bitnami/mysql/tmp
+    max_allowed_packet=100M
+    bind-address=*
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+    log-error=/opt/bitnami/mysql/logs/mysqld.log
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_general_ci
+    init_connect='SET NAMES utf8mb4'
+    slow_query_log=1
+    slow_query_log_file=/bitnami/mysql/data/slow_query.log
+    long_query_time=10.0
+    default_time_zone = "+8:00"
+    lower_case_table_names = 1
+    max_connections = 1024
+    max_connect_errors = 100
+    server-id=1
+    log-bin=mysql-bin
+    max_binlog_size=200M
+    binlog_expire_logs_seconds=604800
+    [client]
+    port=3306
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    default-character-set=UTF8
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    [manager]
+    port=3306
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+
+  extraEnvVars:
+    - name: TZ
+      value: "Asia/Shanghai"
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 150
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 6
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 150
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 6
+    successThreshold: 1
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 150
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 6
+    successThreshold: 1
+  persistence:
+    enabled: true
+    size: 100Gi
+  service:
+    type: NodePort
+    ports:
+      mysql: 3306
+    nodePorts:
+      mysql: ""

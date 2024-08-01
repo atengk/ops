@@ -1,0 +1,55 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "zookeeper"
+image:
+  registry: registry.lingo.local
+  repository: service/zookeeper
+  tag: 3.9.2
+  pullPolicy: IfNotPresent
+  debug: false
+auth:
+  enabled: false
+snapCount: 100000
+maxClientCnxns: 60
+heapSize: 1024
+replicaCount: 3
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+containerPorts:
+  client: 2181
+  tls: 3181
+  follower: 2888
+  election: 3888
+service:
+  type: NodePort
+  ports:
+    client: 2181
+    tls: 3181
+    follower: 2888
+    election: 3888
+  nodePorts:
+    client: ""
+    tls: ""
+persistence:
+  size: 20Gi
+resourcesPreset: "none"
+resources: {}
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: "1Gi"
+#   requests:
+#     cpu: "500m"
+#     memory: "512Mi"
+# ## Allowed values: `soft` or `hard`
+# #podAffinityPreset: "soft"  ## 调度到同一节点
+# podAntiAffinityPreset: "hard"  ## 调度到不同节点
+# nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.zookeeper.data=node
+#   type: "hard"
+#   key: "ateng.zookeeper.data"
+#   values:
+#     - node
+# affinity: {}
+# nodeSelector: {}
+# terminationGracePeriodSeconds: "30"

@@ -1,0 +1,85 @@
+apiVersion: mysql.radondb.com/v1beta1
+kind: MysqlCluster
+metadata:
+  name: cluster
+spec:
+  backupOpts:
+    image: registry.lingo.local/service/mysql80-sidecar:v3.0.0
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+  customTLSSecret: {}
+  dataSource:
+    S3backup:
+      name: ""
+      secretName: ""
+    remote: 
+      # sourceConfig:
+      #     name: remotesecret
+      #     items:
+      #     - key: passwd
+      #       path: passwd
+      #     - key: host
+      #       path: host
+    
+  image: registry.lingo.local/service/percona-server-mysql:8.0.36
+  imagePullPolicy: IfNotPresent
+  logOpts:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+  maxLagTime: 30
+  minAvailable: 50%
+  monitoringSpec:
+    exporter:
+      enabled: false
+      image: registry.lingo.local/service/mysqld-exporter:v0.15.1
+      resources:
+        limits:
+          cpu: 100m
+          memory: 128Mi
+        requests:
+          cpu: 10m
+          memory: 32Mi
+  mysqlConfig:
+    myCnf: 
+      expire_logs_days: "7"
+      max_allowed_packet: 100M
+      character_set_server: utf8mb4
+      collation_server: utf8mb4_general_ci
+      init_connect: "SET NAMES utf8mb4"
+      default_time_zone: "+8:00"
+      lower_case_table_names: "1"
+      max_connections: "10240"
+      max_connect_errors: "1024"
+  mysqlVersion: "8.0"
+  replicas: 3
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  storage:
+    accessModes:
+    - ReadWriteOnce
+    storageClassName: openebs-hostpath
+    resources:
+      requests:
+        storage: 20Gi
+  user: kongyu
+  xenonOpts:
+    admitDefeatHearbeatCount: 5
+    electionTimeout: 10000
+    image: registry.lingo.local/service/xenon:v3.0.0
+    resources:
+      limits:
+        cpu: 100m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 128Mi
+

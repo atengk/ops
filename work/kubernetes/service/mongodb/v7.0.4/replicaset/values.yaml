@@ -1,0 +1,86 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "mongodb"
+image:
+  registry: registry.lingo.local
+  repository: service/mongodb
+  tag: 7.0.4
+  pullPolicy: IfNotPresent
+  debug: false
+architecture: replicaset
+useStatefulSet: true
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: "Admin@123"
+  usernames: [kongyu01,kongyu02]
+  passwords: [kongyu01,kongyu02]
+  databases: [kongyu01,kongyu02]
+replicaSetName: rs0
+replicaSetHostnames: true
+enableIPv6: false
+directoryPerDB: false
+systemLogVerbosity: 0
+disableSystemLog: false
+disableJavascript: false
+enableJournal: true
+replicaCount: 3
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+replicaSetConfigurationSettings:
+  enabled: true
+  configuration:
+    chainingAllowed : false
+    heartbeatTimeoutSecs : 10
+    heartbeatIntervalMillis : 2000
+    electionTimeoutMillis : 10000
+    catchUpTimeoutMillis : 30000
+resources:
+  limits: {}
+  requests: {}
+affinity: {}
+nodeSelector: {}
+containerPorts:
+  mongodb: 27017
+service:
+  type: NodePort
+  portName: mongodb
+  ports:
+    mongodb: 27017
+  nodePorts:
+    mongodb: ""
+rbac:
+  create: true
+externalAccess:
+  enabled: true
+  autoDiscovery:
+    enabled: true
+    image:
+      registry: registry.lingo.local
+      repository: service/kubectl
+      tag: 1.28.4
+      digest: ""
+      pullPolicy: IfNotPresent
+  externalMaster:
+    enabled: false
+    host: ""
+    port: 27017
+  service:
+    type: NodePort
+    portName: "mongodb"
+    ports:
+      mongodb: 27017
+    nodePorts:
+      - 30701
+      - 30702
+      - 30703
+    externalTrafficPolicy: Local
+persistence:
+  enabled: true
+  size: 100Gi
+arbiter:
+  enabled: true
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai

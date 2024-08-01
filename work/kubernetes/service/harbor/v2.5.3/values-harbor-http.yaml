@@ -1,0 +1,78 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "harbor"
+adminPassword: "Admin@123"
+externalURL: http://192.168.1.210:30888
+ipFamily:
+  ipv6:
+    enabled: false
+  ipv4:
+    enabled: true
+service:
+  type: NodePort
+  ports:
+    http: 80
+    https: 443
+    notary: 4443
+  nodePorts:
+    http: "30888"
+    https: ""
+    notary: ""
+persistence:
+  persistentVolumeClaim:
+    registry:
+      size: 100Gi
+    jobservice:
+      size: 10Gi
+    chartmuseum:
+      size: 10Gi
+    trivy:
+      size: 10Gi
+nginx:
+  image:
+    registry: docker.io
+    repository: bitnami/nginx
+    tag: 1.23.1-debian-11-r7
+    pullPolicy: IfNotPresent
+    debug: false
+  tls:
+    enabled: false
+    commonName: core.harbor.domain
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+portal:
+  image:
+    registry: docker.io
+    repository: bitnami/harbor-portal
+    tag: 2.5.3-debian-11-r14
+    debug: false
+  replicaCount: 1
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+core:
+  image:
+    registry: docker.io
+    repository: bitnami/harbor-core
+    tag: 2.5.3-debian-11-r11
+    pullPolicy: IfNotPresent
+    debug: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+redis:
+  master:
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    persistence:
+      size: 10Gi
+postgresql:
+  primary:
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    persistence:
+      size: 10Gi

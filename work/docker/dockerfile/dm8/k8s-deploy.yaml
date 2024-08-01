@@ -1,0 +1,86 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: dm8
+  namespace: lingo-service-bigdata
+  labels:
+    app: dm8
+  annotations:
+    kubesphere.io/alias-name: 达梦数据库
+    kubesphere.io/creator: kongyu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dm8
+  template:
+    metadata:
+      labels:
+        app: dm8
+    spec:
+      containers:
+        - name: dm8
+          image: 'registry.lingo.local/service/dm8_single:v20230417'
+          ports:
+            - name: tcp-5236
+              containerPort: 5236
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            tcpSocket:
+              port: 5236
+            initialDelaySeconds: 60
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          startupProbe:
+            tcpSocket:
+              port: 5236
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          imagePullPolicy: IfNotPresent
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/hostname: server03.lingo.local
+  volumeClaimTemplates:
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: data
+        namespace: lingo-service-bigdata
+        creationTimestamp: null
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: openebs-hostpath
+  serviceName: dm8-headless
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dm8-headless
+  namespace: lingo-service-bigdata
+  labels:
+    app: dm8-headless
+spec:
+  ports:
+    - name: tcp-5236
+      protocol: TCP
+      port: 5236
+      targetPort: 5236
+  selector:
+    app: dm8
+  clusterIP: None
+  type: ClusterIP
+
+

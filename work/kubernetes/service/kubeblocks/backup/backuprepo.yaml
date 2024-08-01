@@ -1,0 +1,9 @@
+backupRepo:
+  create: true
+  storageProvider: s3
+  config:
+    region: cn-northwest-1
+    bucket: kb-backup
+  secrets:
+    accessKeyId: admin
+    secretAccessKey: Admin@123

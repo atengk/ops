@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vm-win10
+  namespace: default
+spec:
+  selector:
+    kubevirt.io/vm: vm-win10
+  ports:
+  - protocol: TCP
+    port: 3389
+    targetPort: 3389
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/vm: vm-win10
+  name: vm-win10
+  namespace: default
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-win10
+    spec:
+      #nodeSelector:
+      #  kubernetes.io/hostname: k8s-worker01
+      domain:
+        cpu:
+          cores: 2
+          model: host-passthrough
+        memory:
+          guest: 4Gi
+        resources:
+          overcommitGuestOverhead: true
+        machine:
+          type: q35
+        devices:
+          disks:
+          - name: containerdisk
+            disk:
+              bus: virtio
+          - name: emptydisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            model: e1000
+            masquerade: {}
+            ports:
+             - name: rdp
+               port: 3389
+      terminationGracePeriodSeconds: 30
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: containerdisk
+        containerDisk:
+          image: swr.cn-north-1.myhuaweicloud.com/kongyu/kubevirt/windows:windows_10_business_21h2_2022_x64-01
+      - name: emptydisk
+        emptyDisk:
+          capacity: 100Gi
+

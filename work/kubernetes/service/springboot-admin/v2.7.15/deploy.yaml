@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-admin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: springboot-admin
+  template:
+    metadata:
+      labels:
+        app: springboot-admin
+    spec:
+      containers:
+      - name: springboot-admin
+        image: registry.lingo.local/service/springboot-admin:2.7.15
+        ports:
+        - containerPort: 80
+        env:
+        - name: TZ
+          value: "Asia/Shanghai"
+        - name: JAVA_OPTS
+          value: "-server -Xms128m -Xmx1g -Dfile.encoding=UTF-8"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: springboot-admin
+  labels:
+    app: springboot-admin
+spec:
+  selector:
+    app: springboot-admin
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort

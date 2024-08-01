@@ -1,0 +1,60 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "cert-manager"
+logLevel: 2
+leaderElection:
+  namespace: "kube-system"
+installCRDs: true
+replicaCount: 1
+controller:
+  replicaCount: 1
+  image:
+    registry: registry.lingo.local
+    repository: service/cert-manager
+    tag: 1.15.1
+    pullPolicy: IfNotPresent
+    debug: false
+  acmesolver:
+    image:
+      registry: registry.lingo.local
+      repository: service/acmesolver
+      tag: 1.15.1
+      pullPolicy: IfNotPresent
+      debug: false
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+webhook:
+  replicaCount: 1
+  image:
+    registry: registry.lingo.local
+    repository: service/cert-manager-webhook
+    tag: 1.15.1
+    pullPolicy: IfNotPresent
+    debug: false
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+cainjector:
+  replicaCount: 1
+  image:
+    registry: registry.lingo.local
+    repository: service/cainjector
+    tag: 1.15.1
+    pullPolicy: IfNotPresent
+    debug: false
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai

@@ -1,0 +1,149 @@
+fullnameOverride: "juicefs"
+image:
+  repository: registry.lingo.local/kubernetes/juicefs-csi-driver
+  tag: "v0.17.1"
+  pullPolicy: "IfNotPresent"
+sidecars:
+  livenessProbeImage:
+    repository: registry.lingo.local/kubernetes/k8scsi-livenessprobe
+    tag: "v1.1.0"
+  nodeDriverRegistrarImage:
+    repository: registry.lingo.local/kubernetes/k8scsi-csi-node-driver-registrar
+    tag: "v2.1.0"
+  csiProvisionerImage:
+    repository: registry.lingo.local/kubernetes/k8scsi-csi-provisioner
+    tag: "v1.6.0"
+# -- kubelet working directory,can be set using `--root-dir` when starting kubelet
+kubeletDir: /var/lib/kubelet
+# -- juicefs mount dir
+jfsMountDir: /data/juicefs/volume
+jfsConfigDir: /data/juicefs/config
+controller:
+  # Default is true. This Component will control CSI Driver deployed on node
+  enabled: true
+  # Default is false. Enable provisioner of controller service
+  provisioner: false
+  # Pod Numbers
+  replicas: 1
+  resources:
+    limits: {}
+    requests: {}
+    #limits:
+    #  cpu: 1000m
+    #  memory: 1Gi
+    #requests:
+    #  cpu: 100m
+    #  memory: 512Mi
+  # -- Grace period to allow the controller to shutdown before it is killed
+  terminationGracePeriodSeconds: 30
+  # -- Affinity for controller pods.
+  # @default -- Hard node and soft zone anti-affinity
+  affinity: {}
+  # -- Node selector for controller pods
+  nodeSelector: {}
+  # -- Tolerations for controller pods
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+  # controller service
+  service:
+    port: 9909
+    trpe: ClusterIP
+
+node:
+  # Default is true. Node will be deployed every node to server CSI Plugin
+  enabled: true
+  hostNetwork: false
+  resources:
+    limits: {}
+    requests: {}
+    #limits:
+    #  cpu: 1000m
+    #  memory: 1Gi
+    #requests:
+    #  cpu: 100m
+    #  memory: 512Mi
+  storageClassShareMount: false
+  # -- Grace period to allow the node pod to shutdown before it is killed
+  terminationGracePeriodSeconds: 30
+  # -- Affinity for node pods.
+  # @default -- Hard node and soft zone anti-affinity
+  affinity: {}
+  # -- Node selector for node pods
+  nodeSelector: {}
+  # -- Tolerations for node pods
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+    - key: "node-role.kubernetes.io/master"
+      operator: "Exists"
+      effect: "NoSchedule"
+
+storageClasses:
+- # -- `StorageClass` Name. It is important.
+  name: juicefs
+  # -- Default is true will create a new `StorageClass`. It will create `Secret` and `StorageClass` used by CSI Driver.
+  enabled: true
+  # -- Either `Delete` or `Retain`.
+  reclaimPolicy: Delete
+  # -- Additional annotations for this StorageClass e.g. make it default.
+  #annotations:
+    #storageclass.kubernetes.io/is-default-class: "true"
+
+  backend:
+    # -- The JuiceFS file system name.
+    name: "juicefs-minio"
+    # -- Connection URL for metadata engine (e.g. Redis), using in Community edition. Read [this document](https://juicefs.com/docs/community/databases_for_metadata) for more information.
+    metaurl: "redis://:Admin@123@192.168.1.102:16379/1"
+    # -- Object storage type, such as `s3`, `gs`, `oss`, using in Community edition. Read [this document](https://juicefs.com/docs/community/how_to_setup_object_storage) for the full supported list.
+    storage: "minio"
+    # -- JuiceFS managed token, using in Cloud Service edition. Read [this document](https://juicefs.com/docs/cloud/metadata/#token-management) for more details.
+    token: ""
+    # -- Access key for object storage
+    accessKey: "admin"
+    # -- Secret key for object storage
+    secretKey: "Admin@123"
+    # -- Bucket URL. Read [this document](https://juicefs.com/docs/community/how_to_setup_object_storage) to learn how to setup different object storage.
+    bucket: "http://192.168.1.101:9000/k8s-juicefs"
+    # -- Env for mount pod and format, such as `{"a": "b"}`
+    envs: "{TZ: Asia/Shanghai}"
+    # -- Config for mount pod. Read [this document](https://juicefs.com/docs/csi/examples/config-and-env) for more usage.
+    configs: ""
+    # -- Config for trash days
+    trashDays: "7"
+    # -- Options of juicefs format/auth, connected by `,`, such as `block-size=4096,capacity=10`. Read ["Community Edition document"](https://juicefs.com/docs/community/command_reference#juicefs-format) or ["Cloud Service document"](https://juicefs.com/docs/cloud/commands_reference#auth) for more information.
+    formatOptions: ""
+
+  # -- Mount Options. Read ["Community Edition document"](https://juicefs.com/docs/community/command_reference#juicefs-mount) or ["Cloud Service document"](https://juicefs.com/docs/cloud/commands_reference#mount) to learn how to set different mount options.<br/><br/>
+  # Example:<br/>
+  # - `debug`<br/>
+  # - `cache-size=2048`<br/>
+  # - `cache-dir=/var/foo`
+  mountOptions:
+    - debug
+    - enable-xattr
+    - max-uploads=50
+    - cache-size=2048
+    - cache-dir=/var/foo
+    - allow_other
+  # -- Define subdir format in storageClass, read [this document](https://juicefs.com/docs/csi/examples/subpath/#using-pathpattern) for more details.
+  # If enabled, please make sure `controller.provisioner=true`.
+  # Example: `"${.PVC.name}"`
+  pathPattern: ""
+
+  # -- Using PVC as JuiceFS cache, read [this document](https://juicefs.com/docs/csi/examples/cache-dir/#use-pvc-as-cache-path-1) for more details.
+  cachePVC: ""
+
+  mountPod:
+    # mount pod resource requests & limits
+    resources:
+      #limits: {}
+      #requests: {}
+      limits:
+        cpu: 2
+        memory: 5Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    # image of mount pod, read [this document](https://juicefs.com/docs/csi/examples/mount-image) for more details.
+    image: "registry.lingo.local/kubernetes/juicefs-mount:v1.0.0-4.8.0"

@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vm-openeuler
+  namespace: kongyu
+spec:
+  selector:
+    kubevirt.io/vm: vm-openeuler
+  ports:
+  - protocol: TCP
+    port: 22
+    targetPort: 22
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/vm: vm-openeuler
+  name: vm-openeuler
+  namespace: kongyu
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-openeuler
+    spec:
+      #nodeSelector:
+      #  kubernetes.io/hostname: k8s-worker02
+      domain:
+        cpu:
+          cores: 2
+          model: host-passthrough
+        memory:
+          guest: 4Gi
+        resources:
+          overcommitGuestOverhead: true
+        devices:
+          disks:
+          - name: system
+            disk:
+              bus: virtio
+          - name: data01
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            bridge: {}
+      terminationGracePeriodSeconds: 30
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: system
+        dataVolume:
+          name: vm-openeuler-system
+      - name: data01
+        dataVolume:
+          name: vm-openeuler-data01
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #!/bin/sh
+            echo Admin@123 | passwd --stdin root 
+            sed -i "s#PasswordAuthentication.*#PasswordAuthentication yes#g" /etc/ssh/sshd_config.d/50-cloud-init.conf
+            systemctl restart sshd
+  dataVolumeTemplates:
+  - metadata:
+      name: vm-openeuler-system
+    spec:
+      pvc:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        #storageClassName: "local"
+      source:
+        registry:
+          url: "docker://swr.cn-north-1.myhuaweicloud.com/kongyu/kubevirt/linux:openeuler-24.03-lts-x86_64"
+  - metadata:
+      name: vm-openeuler-data01
+    spec:
+      pvc:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        #storageClassName: "local"
+      source:
+        blank: {}

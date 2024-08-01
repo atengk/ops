@@ -1,0 +1,13 @@
+apiVersion: kadalu-operator.storage/v1alpha1
+kind: KadaluStorage
+metadata:
+  name: kadalu-replica3
+spec:
+  type: Replica3
+  storage:
+    - node: k8s-worker01
+      path: /data/storage/kadalu-replica3
+    - node: k8s-worker02
+      path: /data/storage/kadalu-replica3
+    - node: k8s-worker03
+      path: /data/storage/kadalu-replica3

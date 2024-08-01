@@ -1,0 +1,252 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "harbor"
+adminPassword: "Admin@123"
+externalURL: http://192.168.1.10:30888
+## @param logLevel The log level used for Harbor services. Allowed values are [ fatal \| error \| warn \| info \| debug \| trace ]
+logLevel: warn
+internalTLS:
+  enabled: false
+  caBundleSecret: ""
+ipFamily:
+  ipv6:
+    enabled: false
+  ipv4:
+    enabled: true
+## @param exposureType The way to expose Harbor. Allowed values are [ ingress \| proxy ]
+## Use "proxy" to use a deploy NGINX proxy in front of Harbor services
+## Use "ingress" to use an Ingress Controller as proxy
+exposureType: proxy
+service:
+  type: NodePort
+  ports:
+    http: 80
+  nodePorts:
+    http: "30888"
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 100Gi
+    jobservice:
+      size: 10Gi
+    trivy:
+      size: 10Gi
+nginx:
+  image:
+    registry: registry.lingo.local
+    repository: service/nginx
+    tag: 1.27.0
+    pullPolicy: IfNotPresent
+    debug: false
+  tls:
+    enabled: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+portal:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-portal
+    tag: 2.11.0
+    pullPolicy: IfNotPresent
+    debug: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+core:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-core
+    tag: 2.11.0
+    pullPolicy: IfNotPresent
+    debug: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+jobservice:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-jobservice
+    tag: 2.11.0
+    pullPolicy: IfNotPresent
+    debug: false
+  maxJobWorkers: 10
+  redisNamespace: harbor_job_service_namespace
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+registry:
+  replicaCount: 1
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  server:
+    image:
+      registry: registry.lingo.local
+      repository: service/harbor-registry
+      tag: 2.11.0
+      pullPolicy: IfNotPresent
+      debug: false
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    resourcesPreset: "none"
+    resources: {}
+  controller:
+    image:
+      registry: registry.lingo.local
+      repository: service/harbor-registryctl
+      tag: 2.11.0
+      pullPolicy: IfNotPresent
+      debug: false
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    resourcesPreset: "none"
+    resources: {}
+trivy:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-adapter-trivy
+    tag: 2.11.0
+    pullPolicy: IfNotPresent
+    debug: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+exporter:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-exporter
+    tag: 2.11.0
+    pullPolicy: IfNotPresent
+    debug: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+postgresql:
+  enabled: true
+  fullnameOverride: "postgresql"
+  image:
+    registry: registry.lingo.local
+    repository: service/postgresql
+    tag: 13.13.0
+  auth:
+    enablePostgresUser: true
+    postgresPassword: Admin@123
+  architecture: standalone
+  primary:
+    persistence:
+      size: 100Gi
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    resourcesPreset: "none"
+    resources: {}
+    extendedConfiguration: |
+      max_connections = 1024
+      log_timezone = 'Asia/Shanghai'
+      timezone = 'Asia/Shanghai'
+    initdb:
+      scripts:
+        initial-registry.sql: |
+          CREATE DATABASE registry ENCODING 'UTF8';
+          \c registry;
+          CREATE TABLE schema_migrations(version bigint not null primary key, dirty boolean not null);
+externalDatabase:
+  host: postgresql
+  port: 5432
+  user: postgres
+  password: "Admin@123"
+  sslmode: disable
+  coreDatabase: "harbor"
+redis:
+  enabled: true
+  fullnameOverride: "redis"
+  image:
+    debug: false
+    registry: registry.lingo.local
+    repository: service/redis
+    tag: 7.2.5
+    pullPolicy: IfNotPresent
+  architecture: standalone
+  auth:
+    enabled: false
+  commonConfiguration: |-
+    databases 5
+    appendonly yes
+    appendfsync always
+    save ""
+    maxclients 1024
+    maxmemory 50GB
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    maxmemory-policy volatile-lru
+    io-threads 10
+    io-threads-do-reads yes
+  
+  master:
+    disableCommands:
+      - FLUSHDB
+      - FLUSHALL
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    containerPorts:
+      redis: 6379
+    resourcesPreset: "none"
+    resources: {}
+    persistence:
+      size: 50Gi
+    service:
+      type: ClusterIP
+      ports:
+        redis: 6379
+      nodePorts:
+        redis: ""
+externalRedis:
+  host: redis-master
+  port: 6379
+  password: "Admin@123"
+  coreDatabaseIndex: '0'
+  jobserviceDatabaseIndex: '1'
+  registryDatabaseIndex: '2'
+  trivyAdapterDatabaseIndex: '3'
+  sentinel:
+    enabled: false
+    masterSet: 'mymaster'
+    hosts: ""
+metrics:
+  enabled: false
+  path: /metrics
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    interval: ""
+    scrapeTimeout: ""
+    labels: {}
+    selector: {}
+    relabelings: []
+    metricRelabelings: []
+    honorLabels: false
+    jobLabel: ""
+

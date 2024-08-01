@@ -1,0 +1,40 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "minio"
+image:
+  registry: registry.lingo.local
+  repository: service/minio
+  tag: 2024.7.15
+  pullPolicy: IfNotPresent
+  debug: false
+clientImage:
+  registry: registry.lingo.local
+  repository: service/minio-client
+  tag: 2024.7.15
+mode: standalone
+auth:
+  rootUser: admin
+  rootPassword: "Admin@123"
+defaultBuckets: "bucket01:public,bucket02"
+disableWebUI: false
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+terminationGracePeriodSeconds: "10"
+resourcesPreset: "none"
+resources: {}
+affinity: {}
+nodeSelector: {}
+containerPorts:
+  api: 9000
+  console: 9001
+service:
+  type: NodePort
+  ports:
+    api: 9000
+    console: 9001
+  nodePorts:
+    api: ""
+    console: ""
+persistence:
+  size: 100Gi

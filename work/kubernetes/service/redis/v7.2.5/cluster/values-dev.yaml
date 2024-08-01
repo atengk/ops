@@ -1,0 +1,67 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "redis"
+image:
+  debug: false
+  registry: registry.lingo.local
+  repository: service/redis-cluster
+  tag: 7.2.5
+  pullPolicy: IfNotPresent
+usePassword: true
+password: "Admin@123"
+service:
+  ports:
+    redis: 6379
+  nodePorts:
+    redis: ""
+  type: ClusterIP
+persistence:
+  size: 50Gi
+redis:
+  useAOFPersistence: "yes"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+    - name: REDIS_IO_THREADS
+      value: "10"
+    - name: REDIS_IO_THREADS_DO_READS
+      value: "yes"
+    - name: REDIS_MAXCLIENTS
+      value: "10000"
+  resourcesPreset: "none"
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  # podAntiAffinityPreset: "hard"  ## 调度到不同节点
+  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
+  #   type: "hard"
+  #   key: "ateng.kafka.controller"
+  #   values:
+  #     - node
+  # affinity: {}
+  # nodeSelector: {}
+  # terminationGracePeriodSeconds: "30"
+cluster:
+  init: true
+  nodes: 6
+  replicas: 1
+  externalAccess:
+    enabled: true
+    service:
+      type: LoadBalancer
+      port: 6379
+      ## 必须使用LoadBalancer获取下列IP地址
+      loadBalancerIP:
+        - 192.168.1.41
+        - 192.168.1.42
+        - 192.168.1.43
+        - 192.168.1.44
+        - 192.168.1.45
+        - 192.168.1.46

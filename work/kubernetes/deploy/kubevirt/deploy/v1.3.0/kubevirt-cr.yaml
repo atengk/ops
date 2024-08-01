@@ -1,0 +1,28 @@
+---
+apiVersion: kubevirt.io/v1
+kind: KubeVirt
+metadata:
+  name: kubevirt
+  namespace: kubevirt
+spec:
+  certificateRotateStrategy: {}
+  configuration:
+    developerConfiguration:
+      # CPU虚拟化20倍
+      cpuAllocationRatio: 20
+      # 内存虚拟化1.5倍
+      memoryOvercommit: 150
+      featureGates:
+      - HardDisk
+      - DataVolumes
+      - "HypervStrictCheck"
+      - "CPUManager"
+      # Docker需要开启Root
+      #- Root
+      # 启用 KubeVirt 模拟
+      #useEmulation: true
+  customizeComponents: {}
+  imagePullPolicy: IfNotPresent
+  #imageRegistry: registry.lingo.local/kubevirt
+  imageTag: v1.3.0
+  workloadUpdateStrategy: {}

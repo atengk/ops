@@ -1,0 +1,201 @@
+# ConfigMap，用于存储Nacos服务所需的配置数据，如数据库连接信息和JVM参数
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nacos-cm
+data:
+  mysql.host: "192.168.1.10"
+  mysql.dbname: "lingo_nacos"
+  mysql.port: "35725"
+  mysql.user: "root"
+  mysql.password: "Admin@123"
+  mysql.param: "characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false"
+  jvm.xms: 1g
+  jvm.xmx: 2g
+  nacos.auth.enable: "true"
+  nacos.auth.token: "SGVsbG9Xb3JsZC1NeU5hbWVLb25neXUtQWx3YXlzU3RheVBvc2l0aXZl"
+  nacos.auth.identity.key: "ateng"
+  nacos.auth.identity.value: "kongyu"
+  nacos.auth.token.expire.seconds: "86400"
+
+---
+
+# Headless Service，用于Nacos集群内的服务发现，不分配ClusterIP
+apiVersion: v1
+kind: Service
+metadata:
+  name: nacos-headless
+  labels:
+    app: nacos
+spec:
+  publishNotReadyAddresses: true 
+  ports:
+    - port: 8848
+      name: server
+      targetPort: 8848
+    - port: 9848
+      name: client-rpc
+      targetPort: 9848
+    - port: 9849
+      name: raft-rpc
+      targetPort: 9849
+    - port: 7848
+      name: old-raft-rpc
+      targetPort: 7848
+  clusterIP: None
+  selector:
+    app: nacos
+
+---
+
+# Service，用于暴露Nacos服务，通过NodePort访问
+apiVersion: v1
+kind: Service
+metadata:
+  name: nacos
+  labels:
+    app: nacos
+spec:
+  type: NodePort
+  ports:
+    - port: 8848
+      targetPort: 8848
+      protocol: TCP
+      name: server
+      nodePort: 30848
+    - port: 9848
+      targetPort: 9848
+      protocol: TCP
+      name: client-rpc
+      nodePort: 31848 # 需要和映射出的8848端口加1000，例如30848+1000=31848
+  selector:
+    app: nacos
+
+---
+
+# StatefulSet，用于部署有状态的Nacos服务
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nacos
+spec:
+  serviceName: nacos-headless
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nacos
+  template:
+    metadata:
+      labels:
+        app: nacos
+    spec:
+      terminationGracePeriodSeconds: 30
+      initContainers:
+        - name: peer-finder-plugin-install
+          image: registry.lingo.local/service/nacos-peer-finder-plugin:1.1
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /home/nacos/plugins/peer-finder
+              name: data
+      containers:
+        - name: nacos
+          image: registry.lingo.local/service/nacos-server:v2.3.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8848
+              name: client-port
+            - containerPort: 9848
+              name: client-rpc
+            - containerPort: 9849
+              name: raft-rpc
+            - containerPort: 7848
+              name: old-raft-rpc
+          env:
+            - name: SERVICE_NAME
+              value: "nacos-headless"
+            - name: DOMAIN_NAME
+              value: "cluster.local"
+            - name: NACOS_SERVER_PORT
+              value: "8848"
+            - name: NACOS_APPLICATION_PORT
+              value: "8848"
+            - name: PREFER_HOST_MODE
+              value: "hostname"
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: SPRING_DATASOURCE_PLATFORM
+              value: "mysql"
+            - name: MYSQL_SERVICE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: mysql.host
+            - name: MYSQL_SERVICE_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: mysql.dbname
+            - name: MYSQL_SERVICE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: mysql.port
+            - name: MYSQL_SERVICE_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: mysql.user
+            - name: MYSQL_SERVICE_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: mysql.password
+            - name: MYSQL_SERVICE_DB_PARAM
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: mysql.param
+            - name: NACOS_AUTH_ENABLE
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: nacos.auth.enable
+            - name: NACOS_AUTH_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: nacos.auth.token
+            - name: NACOS_AUTH_IDENTITY_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: nacos.auth.identity.key
+            - name: NACOS_AUTH_IDENTITY_VALUE
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: nacos.auth.identity.value
+            - name: NACOS_AUTH_TOKEN_EXPIRE_SECONDS
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: nacos.auth.token.expire.seconds
+            - name: JVM_XMS
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: jvm.xms
+            - name: JVM_XMX
+              valueFrom:
+                configMapKeyRef:
+                  name: nacos-cm
+                  key: jvm.xmx
+          volumeMounts:
+            - name: data
+              mountPath: /home/nacos/plugins/peer-finder
+      volumes:
+        - name: data
+          emptyDir: { }

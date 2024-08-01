@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vm-centos7-datavolume
+  namespace: default
+spec:
+  selector:
+    kubevirt.io/vm: vm-centos7.9-datavolume
+  ports:
+  - protocol: TCP
+    port: 22
+    targetPort: 22
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/vm: vm-centos7.9-datavolume
+  name: vm-centos7.9-datavolume
+  namespace: default
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-centos7.9-datavolume
+    spec:
+      #nodeSelector:
+      #  kubernetes.io/hostname: k8s-worker02
+      domain:
+        cpu:
+          cores: 2
+          model: host-passthrough
+        memory:
+          guest: 4Gi
+        resources:
+          overcommitGuestOverhead: true
+        devices:
+          disks:
+          - name: system
+            disk:
+              bus: virtio
+          - name: data01
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            bridge: {}
+      terminationGracePeriodSeconds: 30
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: system
+        dataVolume:
+          name: vm-centos7.9-datavolume-system
+      - name: data01
+        dataVolume:
+          name: vm-centos7.9-datavolume-data01
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #!/bin/sh
+            echo Admin@123 | passwd --stdin root 
+  dataVolumeTemplates:
+  - metadata:
+      name: vm-centos7.9-datavolume-system
+    spec:
+      pvc:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: nfs-server
+      source:
+        registry:
+          url: "docker://swr.cn-north-1.myhuaweicloud.com/kongyu/kubevirt/centos:centos7.9.2009"
+  - metadata:
+      name: vm-centos7.9-datavolume-data01
+    spec:
+      pvc:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: nfs-server
+      source:
+        blank: {}

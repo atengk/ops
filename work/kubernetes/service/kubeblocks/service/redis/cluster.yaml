@@ -1,0 +1,48 @@
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: Cluster
+metadata:
+  name: redis-cluster
+  namespace: kongyu
+spec:
+  terminationPolicy: Halt
+  affinity:
+    podAntiAffinity: Preferred
+    topologyKeys:
+      - kubernetes.io/hostname
+    tenancy: SharedNode
+  shardingSpecs:
+  - name: shard
+    shards: 3
+    template:
+      name: redis
+      componentDef: redis-cluster-7
+      replicas: 2
+      systemAccounts:
+      - name: default
+        passwordConfig:
+          length: 10
+          numDigits: 5
+          numSymbols: 0
+          letterCase: MixedCases
+          seed: redis
+      resources:
+        limits:
+          cpu: "4"
+          memory: 8Gi
+        requests:
+          cpu: "1"
+          memory: 1Gi       
+      env:
+        - name: TZ
+          value: Asia/Shanghai
+      services:
+        - name: redis-cluster
+          serviceType: NodePort
+      volumeClaimTemplates:
+        - name: data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 50Gi

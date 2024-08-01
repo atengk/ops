@@ -1,0 +1,122 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "kafka"
+image:
+  debug: false
+  registry: registry.lingo.local
+  repository: service/kafka
+  tag: 3.3.1
+  pullPolicy: IfNotPresent
+heapOpts: -Xmx1024m -Xms1024m
+deleteTopicEnable: true
+autoCreateTopicsEnable: true
+logFlushIntervalMessages: _10000
+logFlushIntervalMs: 1000
+logRetentionBytes: _1073741824
+logRetentionCheckIntervalMs: 300000
+logRetentionHours: 168
+logSegmentBytes: _1073741824
+maxMessageBytes: _1000012
+defaultReplicationFactor: 3
+offsetsTopicReplicationFactor: 3
+transactionStateLogReplicationFactor: 1
+transactionStateLogMinIsr: 1
+numIoThreads: 8
+numNetworkThreads: 3
+numPartitions: 3
+numRecoveryThreadsPerDataDir: 1
+socketReceiveBufferBytes: 102400
+socketRequestMaxBytes: _104857600
+socketSendBufferBytes: 102400
+
+replicaCount: 3
+minBrokerId: 0
+
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+resources:
+  limits: {}
+  requests: {}
+affinity: {}
+nodeSelector: {}
+containerPorts:
+  client: 9092
+  internal: 9093
+  external: 9094
+service:
+  type: NodePort
+  ports:
+    client: 9092
+    internal: 9093
+    external: 9094
+  nodePorts:
+    client: ""
+    external: ""
+persistence:
+  size: 10Gi
+zookeeper:
+  enabled: false
+externalZookeeper:
+  servers:
+    - zookeeper-0.zookeeper-headless
+    - zookeeper-1.zookeeper-headless
+    - zookeeper-2.zookeeper-headless
+externalAccess:
+  enabled: true
+  autoDiscovery:
+    enabled: true
+    image:
+      registry: registry.lingo.local
+      repository: service/kubectl
+      tag: 1.23.12
+  service:
+    type: NodePort
+    ports:
+      external: 9094
+    nodePorts:
+      - 39091
+      - 39092
+      - 39093
+rbac:
+  create: true
+metrics:
+  kafka:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: bitnami/kafka-exporter
+      tag: 1.6.0-debian-11-r17
+      pullPolicy: IfNotPresent
+    containerPorts:
+      metrics: 9308
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    service:
+      ports:
+        metrics: 9308
+  jmx:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: bitnami/jmx-exporter
+      tag: 0.17.2-debian-11-r6
+      pullPolicy: IfNotPresent
+    containerPorts:
+      metrics: 5556
+    service:
+      ports:
+        metrics: 5556
+provisioning:
+  enabled: true
+  numPartitions: 3
+  replicationFactor: 3
+  topics:
+    - name: topic-first
+      partitions: 3
+      replicationFactor: 3
+      ## https://kafka.apache.org/documentation/#topicconfigs
+      config:
+        max.message.bytes: 64000
+        flush.messages: 1

@@ -1,0 +1,53 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "jenkins"
+image:
+  registry: registry.lingo.local
+  repository: service/jenkins
+  tag: 2.452.3
+  pullPolicy: IfNotPresent
+  debug: false
+jenkinsUser: admin
+jenkinsPassword: "Admin@123"
+jenkinsHost: ""
+javaOpts:
+  - "-Xms128m -Xmx1024m"
+disableInitialization: "no"
+latestPlugins: true
+latestSpecifiedPlugins: false
+skipImagePlugins: false
+overridePlugins: false
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+terminationGracePeriodSeconds: "10"
+resourcesPreset: "none"
+resources: {}
+affinity: {}
+nodeSelector: {}
+configAsCode:
+  enabled: true
+agent:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: service/jenkins-agent
+    tag: 0.3256.0
+    pullPolicy: IfNotPresent
+    debug: false
+    resourcesPreset: "none"
+    resources: {}
+service:
+  type: NodePort
+  ports:
+    http: 80
+    https: 443
+agentListenerService:
+  enabled: true
+  type: ClusterIP
+  ports:
+    agentListener: 50000
+  nodePorts:
+    agentListener: ""
+persistence:
+  size: 50Gi

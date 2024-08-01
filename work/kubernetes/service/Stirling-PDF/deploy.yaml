@@ -1,0 +1,114 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: stirling-pdf
+  namespace: lingo-service-public
+  annotations:
+    kubesphere.io/creator: admin
+    kubesphere.io/description: 强大的PDF Web在线编辑工具箱
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stirling-pdf
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: stirling-pdf
+      annotations:
+        kubesphere.io/creator: admin
+        logging.kubesphere.io/logsidecar-config: '{}'
+    spec:
+      containers:
+        - name: stirling-pdf
+          image: 'frooodle/s-pdf:latest'
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: DOCKER_ENABLE_SECURITY
+              value: 'true'
+            - name: SECURITY_ENABLE_LOGIN
+              value: 'true'
+            - name: SECURITY_INITIALLOGIN_USERNAME
+              value: admin
+            - name: SECURITY_INITIALLOGIN_PASSWORD
+              value: Admin@123
+            - name: INSTALL_BOOK_AND_ADVANCED_HTML_OPS
+              value: 'true'
+            - name: LANGS
+              value: zh_CN
+          resources: {}
+          volumeMounts:
+            - name: stirling-pdf-data
+              mountPath: /usr/share/tessdata
+              subPath: trainingData
+            - name: stirling-pdf-data
+              mountPath: /configs
+              subPath: extraConfigs
+            - name: stirling-pdf-data
+              mountPath: /logs
+              subPath: logs
+            - name: stirling-pdf-data
+              mountPath: /customFiles
+              subPath: customFiles
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  volumeClaimTemplates:
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: stirling-pdf-data
+        namespace: lingo-service-public
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: openebs-hostpath
+  serviceName: stirling-pdf-headless
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: stirling-pdf-headless
+  namespace: lingo-service-public
+  annotations:
+    kubesphere.io/creator: admin
+spec:
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: stirling-pdf
+  clusterIP: None
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: stirling-pdf
+  namespace: lingo-service-public
+  labels:
+    app: stirling-pdf
+  annotations:
+    kubesphere.io/creator: admin
+spec:
+  ports:
+    - name: http-8080
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: stirling-pdf
+  type: NodePort

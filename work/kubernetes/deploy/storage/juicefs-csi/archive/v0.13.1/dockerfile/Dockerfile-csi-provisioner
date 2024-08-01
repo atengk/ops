@@ -1,0 +1,2 @@
+FROM registry.lingo.local/kubernetes/k8scsi-csi-provisioner:v1.6.0
+ENV TZ=Asia/Shanghai

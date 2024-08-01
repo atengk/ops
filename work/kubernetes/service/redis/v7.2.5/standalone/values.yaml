@@ -1,0 +1,49 @@
+global:
+  storageClass: "openebs-hostpath"
+  redis:
+    password: "Admin@123"
+fullnameOverride: "redis"
+image:
+  debug: false
+  registry: registry.lingo.local
+  repository: service/redis
+  tag: 7.2.5
+  pullPolicy: IfNotPresent
+architecture: standalone
+auth:
+  enabled: true
+commonConfiguration: |-
+  databases 20
+  appendonly yes
+  appendfsync always
+  save ""
+  maxclients 10000
+  maxmemory 50GB
+  auto-aof-rewrite-percentage 100
+  auto-aof-rewrite-min-size 64mb
+  maxmemory-policy volatile-lru
+  io-threads 10
+  io-threads-do-reads yes
+
+master:
+  disableCommands:
+    - FLUSHDB
+    - FLUSHALL
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  containerPorts:
+    redis: 6379
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}
+  persistence:
+    size: 50Gi
+  service:
+    type: NodePort
+    ports:
+      redis: 6379
+    nodePorts:
+      redis: ""

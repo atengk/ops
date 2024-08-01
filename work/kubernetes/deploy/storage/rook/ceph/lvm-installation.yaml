@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: lvm2-installation
+  labels:
+    app: lvm2-installation
+  annotations:
+    command: &cmd OS=$(grep "ID_LIKE" /etc/os-release | cut -d '=' -f 2); if [[ "${OS}" == *"debian"* ]]; then sudo apt-get update -q -y && sudo apt-get install -q -y lvm2; elif [[ "${OS}" == *"suse"* ]]; then sudo zypper --gpg-auto-import-keys -q refresh && sudo zypper --gpg-auto-import-keys -q install -y lvm2; else sudo yum makecache -q -y && sudo yum --setopt=tsflags=noscripts install -q -y lvm2; fi && if [ $? -eq 0 ]; then echo "lvm2 install successfully"; else echo "lvm2 install failed error code $?"; fi
+spec:
+  selector:
+    matchLabels:
+      app: lvm2-installation
+  template:
+    metadata:
+      labels:
+        app: lvm2-installation
+    spec:
+      hostNetwork: true
+      hostPID: true
+      initContainers:
+      - name: lvm2-installation
+        command:
+          - nsenter
+          - --mount=/proc/1/ns/mnt
+          - --
+          - bash
+          - -c
+          - *cmd
+        image: swr.cn-north-1.myhuaweicloud.com/kongyu/alpine:3.12
+        securityContext:
+          privileged: true
+      containers:
+      - name: sleep
+        image: swr.cn-north-1.myhuaweicloud.com/kongyu/pause:3.1
+  updateStrategy:
+    type: RollingUpdate

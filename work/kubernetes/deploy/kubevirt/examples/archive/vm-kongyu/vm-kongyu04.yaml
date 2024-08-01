@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vm-kongyu04
+  namespace: kongyu-vm
+spec:
+  selector:
+    kubevirt.io/vm: vm-kongyu04
+  ports:
+  - protocol: TCP
+    port: 22
+    targetPort: 22
+    nodePort: 40204
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/vm: vm-kongyu04
+  name: vm-kongyu04
+  namespace: kongyu-vm
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-kongyu04
+      annotations:
+        "cni.projectcalico.org/ipAddrs": "[\"10.244.250.64\"]"
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: server02.lingo.local
+      domain:
+        cpu:
+          cores: 8
+        memory:
+          guest: 16Gi
+        resources:
+          overcommitGuestOverhead: true
+        devices:
+          disks:
+          - name: system
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            bridge: {}
+      terminationGracePeriodSeconds: 10
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: system
+        dataVolume:
+          name: vm-kongyu04-system
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #!/bin/sh
+            echo Admin@123 | passwd --stdin root
+  dataVolumeTemplates:
+  - metadata:
+      name: vm-kongyu04-system
+    spec:
+      pvc:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 200Gi
+        storageClassName: openebs-hostpath
+      source:
+        registry:
+          url: "docker://swr.cn-north-1.myhuaweicloud.com/kongyu/kubevirt/linux:centos-7.9-2009-x86_64-01"
+
+# kubectl get -n kongyu-vm vmi,dv,pod,svc

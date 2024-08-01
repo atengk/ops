@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: iperf3-client
+spec:
+  template:
+    spec:
+      terminationGracePeriodSeconds: 0
+      nodeSelector:
+        kubernetes.io/hostname: k8s-worker02
+      containers:
+        - name: iperf3-client
+          image: networkstatic/iperf3
+          command:
+            - iperf3
+          args:
+            - '-c'
+            - 'iperf3-server'
+      restartPolicy: Never
+

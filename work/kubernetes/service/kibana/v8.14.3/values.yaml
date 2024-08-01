@@ -1,0 +1,40 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "kibana"
+image:
+  registry: registry.lingo.local
+  repository: service/kibana
+  tag: 8.14.3
+  pullPolicy: IfNotPresent
+  debug: false
+replicaCount: 1
+plugins: []
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+affinity: {}
+nodeSelector: {}
+resourcesPreset: "none"
+resources: {}
+persistence:
+  enabled: true
+  size: 10Gi
+service:
+  port: 5601
+  type: NodePort
+  nodePort: ""
+elasticsearch:
+  hosts:
+    - elasticsearch
+  port: "9200"
+  security:
+    auth:
+      enabled: false
+      kibanaPassword: ""
+      createSystemUser: false
+    tls:
+      enabled: false
+      verificationMode: "full"
+      usePemCerts: false
+      truststorePassword: ""
+      passwordsSecret: ""

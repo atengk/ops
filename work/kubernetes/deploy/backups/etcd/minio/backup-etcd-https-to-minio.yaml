@@ -1,0 +1,66 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-etcd-https-to-minio
+  namespace: kongyu
+spec:
+  schedule: "0 0 * * *"
+  failedJobsHistoryLimit: 1
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 120
+      parallelism: 1
+      completions: 1
+      template:
+        metadata:
+          labels:
+            app: backup-etcd-https-to-minio
+        spec:
+          containers:
+          - name: backup-etcd-https-to-minio
+            image: registry.lingo.local/service/etcd:backup_to_minio_v3.5.1
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: BACKUP_SAVE_DAY ## 保存备份的天数
+              value: '30'
+            - name: BACKUPS_DIR ## 备份路径(日志, 不用管作用不大)
+              value: '/opt'
+            - name: IS_COMPRESS ## 压缩数据
+              value: 'true'
+            - name: ETCDCTL_API
+              value: '3'
+            - name: ETCDCTL_ENDPOINTS
+              value: 'https://192.168.1.12:2379' ## 导出只能选择一个节点
+            - name: ETCDCTL_CACERT
+              value: '/etc/ssl/etcd/ca.pem'
+            - name: ETCDCTL_KEY
+              value: '/etc/ssl/etcd/etcd-client-key.pem'
+            - name: ETCDCTL_CERT
+              value: '/etc/ssl/etcd/etcd-client.pem'
+            - name: MINIO_SERVER_HOST ## MinIO信息
+              value: 'http://192.168.1.101:9000'
+            - name: MINIO_SERVER_ACCESS_KEY
+              value: 'admin'
+            - name: MINIO_SERVER_SECRET_KEY
+              value: 'Admin@123'
+            - name: MINIO_SERVER_BUCKET
+              value: 'service-backups'
+            volumeMounts:
+              - name: etcd-certs-volume
+                mountPath: /etc/ssl/etcd 
+              - name: data
+                mountPath: /opt ## 备份路径
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 10
+          volumes:
+            - name: data
+              hostPath:
+                path: /data/backups/etcd/
+                type: DirectoryOrCreate
+            - name: etcd-certs-volume ## etcd证书
+              secret:
+                secretName: etcd-certs

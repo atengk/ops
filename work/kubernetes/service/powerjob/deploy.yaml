@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerjob-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: powerjob-server
+  template:
+    metadata:
+      labels:
+        app: powerjob-server
+    spec:
+      containers:
+      - name: powerjob-server
+        image: registry.lingo.local/service/powerjob-server:4.3.6
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http-server
+          containerPort: 7700
+        - name: akka
+          containerPort: 10086
+        - name: http-client
+          containerPort: 10010
+        env:
+        - name: TZ
+          value: "Asia/Shanghai"
+        - name: JVMOPTIONS
+          value: "-Xmx512m -Xms256m -Dpowerjob.network.external.address=192.168.1.10 -Dpowerjob.network.external.port.http=32773 -Dpowerjob.network.external.port.akka=32772"
+        - name: PARAMS
+          value: "--oms.mongodb.enable=false --spring.profiles.active=product --spring.datasource.core.jdbc-url=jdbc:mysql://192.168.1.10:35725/ateng_powerjob?useUnicode=true&characterEncoding=UTF-8 --spring.datasource.core.username=root --spring.datasource.core.password=Admin@123"
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerjob-server
+  labels:
+    app: powerjob-server
+spec:
+  selector:
+    app: powerjob-server
+  ports:
+    - name: http-server
+      protocol: TCP
+      port: 7700
+      targetPort: 7700
+      nodePort: 32771
+    - name: tcp-akka
+      protocol: TCP
+      port: 10086
+      targetPort: 10086
+      nodePort: 32772
+    - name: http-client
+      protocol: TCP
+      port: 10010
+      targetPort: 10010
+      nodePort: 32773
+  type: NodePort

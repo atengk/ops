@@ -1,0 +1,97 @@
+# 参考：https://cert-manager.io/docs/usage/certificate/
+# api参考：https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1alpha3.Certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: selfsigned-certificate-ca
+  namespace: default ### 站点所在名字空间
+spec:
+  # Secret names are always required.
+  secretName: selfsigned-certificate-ca-keypair ### Secret名字
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  subject:
+    organizations: # Organizations to be used on the Certificate.
+      - "阿腾集团"
+    organizationalUnits: # Organizational Units to be used on the Certificate.
+      - "软件开发部门"
+    countries: # Countries to be used on the Certificate.
+      - "CN"
+    provinces: # State/Provinces to be used on the Certificate.
+      - "重庆市"
+    localities: # Cities to be used on the Certificate.
+      - "重庆市"
+    streetAddresses: # Street addresses to be used on the Certificate.
+      - "重庆市巴南区丽都锦城"
+    postalCodes: # Postal codes to be used on the Certificate.
+      - "401320"
+    serialNumber: "17623062936" # Serial number to be used on the Certificate.
+
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: "www.kongyu.local"
+  isCA: true
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  dnsNames:
+    - nginx.kongyu.local
+    - minio.kongyu.local
+  issuerRef:
+    name: selfsigned-issuer ### 使用Issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer ### CA Issuer是Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+---
+# 参考：https://cert-manager.io/docs/usage/certificate/
+# api参考：https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1alpha3.Certificate
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: selfsigned-cluster-certificate-ca
+  namespace: default ### 站点所在名字空间
+spec:
+  # Secret names are always required.
+  secretName: selfsigned-cluster-certificate-ca-keypair ### Secret名字
+  duration: 2160h # 90d
+  renewBefore: 360h # 15d
+  subject:
+    organizations: # Organizations to be used on the Certificate.
+      - "阿腾集团"
+    organizationalUnits: # Organizational Units to be used on the Certificate.
+      - "软件开发部门"
+    countries: # Countries to be used on the Certificate.
+      - "CN"
+    provinces: # State/Provinces to be used on the Certificate.
+      - "重庆市"
+    localities: # Cities to be used on the Certificate.
+      - "重庆市"
+    streetAddresses: # Street addresses to be used on the Certificate.
+      - "重庆市巴南区丽都锦城"
+    postalCodes: # Postal codes to be used on the Certificate.
+      - "401320"
+    serialNumber: "17623062936" # Serial number to be used on the Certificate.
+
+  # The use of the common name field has been deprecated since 2000 and is
+  # discouraged from being used.
+  commonName: "www.kongyu.local"
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  dnsNames:
+    - nginx.kongyu.local
+    - minio.kongyu.local
+  issuerRef:
+    name: selfsigned-clusterissuer ### 使用Issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: ClusterIssuer ### CA Issuer是Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io

@@ -1,0 +1,63 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "cert-manager"
+logLevel: 2
+leaderElection:
+  namespace: "kube-system"
+installCRDs: true
+replicaCount: 1
+controller:
+  replicaCount: 1
+  image:
+    registry: docker.io
+    repository: bitnami/cert-manager
+    tag: 1.10.2-debian-11-r0
+    pullPolicy: IfNotPresent
+    debug: true
+  acmesolver:
+    image:
+      registry: docker.io
+      repository: bitnami/acmesolver
+      tag: 1.10.2-debian-11-r0
+      pullPolicy: IfNotPresent
+      debug: true
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}
+webhook:
+  replicaCount: 1
+  image:
+    registry: docker.io
+    repository: bitnami/cert-manager-webhook
+    tag: 1.10.2-debian-11-r0
+    pullPolicy: IfNotPresent
+    debug: true
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}
+cainjector:
+  replicaCount: 1
+  image:
+    registry: docker.io
+    repository: bitnami/cainjector
+    tag: 1.10.2-debian-11-r0
+    pullPolicy: IfNotPresent
+    debug: true
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}

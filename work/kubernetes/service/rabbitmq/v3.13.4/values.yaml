@@ -1,0 +1,82 @@
+global:
+  storageClass: "openebs-hostpath"
+image:
+  registry: registry.lingo.local
+  repository: service/rabbitmq
+  tag: 3.13.4
+  pullPolicy: IfNotPresent
+  debug: false
+fullnameOverride: "rabbitmq"
+auth:
+  username: admin
+  password: "Admin@123"
+  erlangCookie: "u8B1rlnzSckNvtkNr7kRAU4NVt8F6OtU"
+plugins: "rabbitmq_management rabbitmq_peer_discovery_k8s rabbitmq_web_stomp"
+communityPlugins: "http://miniserve.lingo.local/rabbitmq-plugins/rabbitmq_delayed_message_exchange-3.13.0.ez http://miniserve.lingo.local/rabbitmq-plugins/rabbitmq_lvc_exchange-3.12.0.ez"
+extraPlugins: "rabbitmq_auth_backend_ldap rabbitmq_lvc_exchange rabbitmq_delayed_message_exchange"
+clustering:
+  enabled: true
+  addressType: hostname
+  rebalance: false
+  forceBoot: false
+  partitionHandling: autoheal
+extraContainerPorts:
+- name: web-stomp
+  containerPort: 15674
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+extraConfiguration: |-
+  #default_vhost = {{ .Release.Namespace }}-vhost
+  #disk_free_limit.absolute = 50MB
+
+replicaCount: 3
+persistence:
+  size: 100Gi
+service:
+  type: NodePort
+  ports:
+    amqp: 5672
+    amqpTls: 5671
+    dist: 25672
+    manager: 15672
+    metrics: 9419
+    epmd: 4369
+  portNames:
+    amqp: "amqp"
+    amqpTls: "amqp-tls"
+    dist: "dist"
+    manager: "http-stats"
+    metrics: "metrics"
+    epmd: "epmd"
+  nodePorts:
+    amqp: ""
+    amqpTls: ""
+    dist: ""
+    manager: ""
+    epmd: ""
+    metrics: ""
+  extraPorts:
+  - name: web-stomp
+    port: 15674
+    targetPort: 15674
+resourcesPreset: "none"
+resources: {}
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: "1Gi"
+#   requests:
+#     cpu: "500m"
+#     memory: "512Mi"
+# ## Allowed values: `soft` or `hard`
+# #podAffinityPreset: "soft"  ## 调度到同一节点
+# podAntiAffinityPreset: "hard"  ## 调度到不同节点
+# nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
+#   type: "hard"
+#   key: "ateng.kafka.controller"
+#   values:
+#     - node
+# affinity: {}
+# nodeSelector: {}
+# terminationGracePeriodSeconds: "30"

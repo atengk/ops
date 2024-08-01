@@ -1,0 +1,94 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "etcd"
+image:
+  registry: registry.lingo.local
+  repository: service/bitnami-etcd
+  tag: 3.5.13
+  debug: false
+auth:
+  rbac:
+    create: true
+    allowNoneAuthentication: true
+    rootPassword: "Admin@123"
+  token:
+    enabled: true
+    type: jwt
+    privateKey:
+      filename: jwt-token.pem
+    signMethod: RS256
+    ttl: 10m
+  client:
+    secureTransport: false
+    useAutoTLS: true
+    enableAuthentication: false
+    certFilename: cert.pem
+    certKeyFilename: key.pem
+    caFilename: "ca.crt"
+autoCompactionMode: "periodic"
+autoCompactionRetention: "10h"
+logLevel: "warn"
+replicaCount: 3
+extraEnvVars:
+  - name: ETCD_QUOTA_BACKEND_BYTES
+    value: "8589934592"
+  - name: ETCD_MAX_REQUEST_BYTES
+    value: "10485760"
+  - name: ETCD_SNAPSHOT_COUNT
+    value: "2000"
+  - name: ETCD_MAX_TXN_OPS
+    value: "1280"
+  - name: TZ
+    value: Asia/Shanghai
+resourcesPreset: "none"
+resources: {}
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: "1Gi"
+#   requests:
+#     cpu: "500m"
+#     memory: "512Mi"
+# ## Allowed values: `soft` or `hard`
+# #podAffinityPreset: "soft"  ## 调度到同一节点
+# podAntiAffinityPreset: "hard"  ## 调度到不同节点
+# nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.etcd.data=node
+#   type: "hard"
+#   key: "ateng.etcd.data"
+#   values:
+#     - node
+# affinity: {}
+# nodeSelector: {}
+# terminationGracePeriodSeconds: "30"
+service:
+  type: NodePort
+  enabled: true
+  ports:
+    client: 2379
+    peer: 2380
+  nodePorts:
+    client: ""
+    peer: ""
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 20Gi
+startFromSnapshot:
+  enabled: false
+  existingClaim: ""
+  snapshotFilename: ""
+disasterRecovery:
+  enabled: true
+  cronjob:
+    schedule: "0 */8 * * *"
+    historyLimit: 1
+    snapshotHistoryLimit: 30
+    resources:
+      limits: {}
+      requests: {}
+    nodeSelector: {}
+    tolerations: []
+  pvc:
+    size: 200Gi
+    storageClassName: nfs-client

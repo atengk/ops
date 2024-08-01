@@ -1,0 +1,361 @@
+global:
+  storageClass: "openebs-hostpath"
+  redis:
+    password: "Admin@123"
+fullnameOverride: "harbor"
+adminPassword: "Admin@123"
+externalURL: http://harbor.kongyu.local
+proxy:
+  httpProxy: ""
+  httpsProxy: ""
+  noProxy: 127.0.0.1,localhost,.local,.internal
+  components:
+    - core
+    - jobservice
+    - trivy
+## @param logLevel The log level used for Harbor services. Allowed values are [ fatal \| error \| warn \| info \| debug \| trace ]
+logLevel: warn
+internalTLS:
+  enabled: false
+  caBundleSecret: ""
+ipFamily:
+  ipv6:
+    enabled: false
+  ipv4:
+    enabled: true
+## @param exposureType The way to expose Harbor. Allowed values are [ ingress \| proxy ]
+## Use "proxy" to use a deploy NGINX proxy in front of Harbor services
+## Use "ingress" to use an Ingress Controller as proxy
+exposureType: ingress
+service:
+  type: ClusterIP
+  ports:
+    http: 80
+    https: 443
+  nodePorts:
+    http: "30888"
+    https: "30999"
+ingress:
+  core:
+    ingressClassName: ""
+    pathType: ImplementationSpecific
+    apiVersion: ""
+    controller: default
+    hostname: harbor.kongyu.local
+    annotations:
+      ingress.kubernetes.io/ssl-redirect: 'false'
+      ingress.kubernetes.io/proxy-body-size: '0'
+      nginx.ingress.kubernetes.io/ssl-redirect: 'false'
+      nginx.ingress.kubernetes.io/proxy-body-size: '0'
+    tls: false
+    selfSigned: false
+    extraHosts: []
+    extraPaths: []
+    extraTls: []
+persistence:
+  enabled: true
+  resourcePolicy: 'keep'
+  persistentVolumeClaim:
+    registry:
+      size: 100Gi
+    jobservice:
+      size: 10Gi
+    trivy:
+      size: 10Gi
+  imageChartStorage:
+    caBundleSecret: ""
+    disableredirect: false
+    type: filesystem
+    filesystem:
+      rootdirectory: /storage
+      maxthreads: ""
+    s3:
+      region: us-west-1
+      bucket: bucketname
+      accesskey: ""
+      secretkey: ""
+      regionendpoint: ""
+      encrypt: ""
+      keyid: ""
+      secure: ""
+      skipverify: ""
+      v4auth: ""
+      chunksize: ""
+      rootdirectory: ""
+      storageClass: ""
+      sse: ""
+volumePermissions:
+  enabled: false
+  image:
+    registry: registry.lingo.local
+    repository: service/os-shell
+    tag: 11
+    pullPolicy: IfNotPresent
+nginx:
+  image:
+    registry: registry.lingo.local
+    repository: service/nginx
+    tag: 1.25.3
+    pullPolicy: IfNotPresent
+    debug: false
+  tls:
+    enabled: false
+    existingSecret: ""
+    commonName: core.harbor.domain
+  behindReverseProxy: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+portal:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-portal
+    tag: 2.10.0
+    pullPolicy: IfNotPresent
+    debug: false
+  tls:
+    existingSecret: ""
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+core:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-core
+    tag: 2.10.0
+    pullPolicy: IfNotPresent
+    debug: false
+  sessionLifetime: ""
+  uaaSecret: ""
+  secretKey: ""
+  secret: ""
+  tokenKey: ""
+  tokenCert: ""
+  secretName: ""
+  existingSecret: ""
+  existingEnvVarsSecret: ""
+  csrfKey: ""
+  tls:
+    existingSecret: ""
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+jobservice:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-jobservice
+    tag: 2.10.0
+    pullPolicy: IfNotPresent
+    debug: false
+  maxJobWorkers: 10
+  redisNamespace: harbor_job_service_namespace
+  jobLogger: file
+  secret: ""
+  existingSecret: ""
+  tls:
+    existingSecret: ""
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+registry:
+  secret: ""
+  existingSecret: ""
+  relativeurls: false
+  credentials:
+    username: 'harbor_registry_user'
+    password: 'harbor_registry_password'
+    htpasswd: 'harbor_registry_user:$2y$10$9L4Tc0DJbFFMB6RdSCunrOpTHdwhid4ktBJmLD00bYgqkkGOvll3m'
+  middleware:
+    enabled: false
+    type: cloudFront
+    cloudFront:
+      baseurl: example.cloudfront.net
+      keypairid: KEYPAIRID
+      duration: 3000s
+      ipfilteredby: none
+      privateKeySecret: 'my-secret'
+  tls:
+    existingSecret: ""
+  replicaCount: 1
+  automountServiceAccountToken: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  server:
+    image:
+      registry: registry.lingo.local
+      repository: service/harbor-registry
+      tag: 2.10.0
+      pullPolicy: IfNotPresent
+      debug: false
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    resources:
+      limits: {}
+      requests: {}
+  controller:
+    image:
+      registry: registry.lingo.local
+      repository: service/harbor-registryctl
+      tag: 2.10.0
+      pullPolicy: IfNotPresent
+      debug: false
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    resources:
+      limits: {}
+      requests: {}
+trivy:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-adapter-trivy
+    tag: 2.10.0
+    pullPolicy: IfNotPresent
+    debug: false
+  debugMode: false
+  vulnType: 'os,library'
+  severity: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+  ignoreUnfixed: false
+  insecure: false
+  gitHubToken: ""
+  skipUpdate: false
+  cacheDir: '/bitnami/harbor-adapter-trivy/.cache'
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+  resources:
+    requests: {}
+    limits: {}
+  affinity: {}
+  nodeSelector: {}
+exporter:
+  image:
+    registry: registry.lingo.local
+    repository: service/harbor-exporter
+    tag: 2.10.0
+    pullPolicy: IfNotPresent
+    debug: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  replicaCount: 1
+postgresql:
+  enabled: true
+  fullnameOverride: "postgresql"
+  image:
+    registry: registry.lingo.local
+    repository: service/postgresql
+    tag: 13.13.0
+  auth:
+    enablePostgresUser: true
+    postgresPassword: Admin@123
+  architecture: standalone
+  primary:
+    persistence:
+      size: 100Gi
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    resources:
+      limits: {}
+      requests: {}
+    affinity: {}
+    nodeSelector: {}
+    extendedConfiguration: |
+      max_connections = 1024
+      log_timezone = 'Asia/Shanghai'
+      timezone = 'Asia/Shanghai'
+    initdb:
+      scripts:
+        initial-registry.sql: |
+          CREATE DATABASE registry ENCODING 'UTF8';
+          \c registry;
+          CREATE TABLE schema_migrations(version bigint not null primary key, dirty boolean not null);
+externalDatabase:
+  host: postgresql
+  port: 5432
+  user: postgres
+  password: "Admin@123"
+  sslmode: disable
+  coreDatabase: "registry"
+redis:
+  enabled: true
+  fullnameOverride: "redis"
+  image:
+    debug: false
+    registry: registry.lingo.local
+    repository: service/redis
+    tag: 6.2.14
+    pullPolicy: IfNotPresent
+  architecture: standalone
+  auth:
+    enabled: false
+  commonConfiguration: |-
+    databases 5
+    appendonly yes
+    appendfsync always
+    save ""
+    maxclients 1024
+    maxmemory 50GB
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    maxmemory-policy volatile-lru
+    io-threads 10
+    io-threads-do-reads yes
+  
+  master:
+    disableCommands:
+      - FLUSHDB
+      - FLUSHALL
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    containerPorts:
+      redis: 6379
+    resources:
+      limits: {}
+      requests: {}
+    affinity: {}
+    nodeSelector: {}
+    persistence:
+      size: 50Gi
+    service:
+      type: ClusterIP
+      ports:
+        redis: 6379
+      nodePorts:
+        redis: ""
+externalRedis:
+  host: redis-master
+  port: 6379
+  password: "Admin@123"
+  coreDatabaseIndex: '0'
+  jobserviceDatabaseIndex: '1'
+  registryDatabaseIndex: '2'
+  trivyAdapterDatabaseIndex: '3'
+  sentinel:
+    enabled: false
+    masterSet: 'mymaster'
+    hosts: ""
+metrics:
+  enabled: false
+  path: /metrics
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    interval: ""
+    scrapeTimeout: ""
+    labels: {}
+    selector: {}
+    relabelings: []
+    metricRelabelings: []
+    honorLabels: false
+    jobLabel: ""
+

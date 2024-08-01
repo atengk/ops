@@ -1,0 +1,42 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "gitea"
+image:
+  registry: registry.lingo.local
+  repository: service/gitea
+  tag: 1.21.3
+  pullPolicy: IfNotPresent
+  debug: false
+adminUsername: root
+adminPassword: "Admin@123"
+adminEmail: 2385569970@qq.com
+appName: gitea
+runMode: prod
+exposeSSH: true
+rootURL: "http://gitea.kongyu.local"
+extraEnvVars:
+- name: TZ
+  value: "Asia/Shanghai"
+smtpHost: ""
+smtpPort: ""
+smtpUser: ""
+smtpPassword: ""
+containerPorts:
+  http: 3000
+  ssh: 2222
+persistence:
+  enabled: true
+  size: 100Gi
+service:
+  type: NodePort
+  ports:
+    http: 80
+    ssh: 22
+postgresql:
+  enabled: false
+externalDatabase:
+  host: "postgresql.kongyu"
+  port: 5432
+  user: postgres
+  database: gitea
+  password: "Admin@123"

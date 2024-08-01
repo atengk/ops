@@ -1,0 +1,45 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "mongodb"
+image:
+  registry: registry.lingo.local
+  repository: service/mongodb
+  tag: 7.0.12
+  pullPolicy: IfNotPresent
+  debug: false
+architecture: standalone
+useStatefulSet: true
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: "Admin@123"
+  usernames: [kongyu01,kongyu02]
+  passwords: [kongyu01,kongyu02]
+  databases: [kongyu01,kongyu02]
+enableIPv6: false
+directoryPerDB: false
+systemLogVerbosity: 0
+disableSystemLog: true
+disableJavascript: false
+enableJournal: true
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+replicaCount: 1
+resourcesPreset: "none"
+resources: {}
+affinity: {}
+nodeSelector: {}
+containerPorts:
+  mongodb: 27017
+service:
+  type: NodePort
+  portName: mongodb
+  ports:
+    mongodb: 27017
+  nodePorts:
+    mongodb: ""
+  externalTrafficPolicy: Cluster
+persistence:
+  enabled: true
+  size: 100Gi

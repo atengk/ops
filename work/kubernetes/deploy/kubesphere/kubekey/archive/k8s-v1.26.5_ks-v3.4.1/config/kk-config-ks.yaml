@@ -1,0 +1,307 @@
+## https://github.com/kubesphere/kubekey/blob/master/docs/config-example.md
+apiVersion: kubekey.kubesphere.io/v1alpha2
+kind: Cluster
+metadata:
+  name: k8s-cluster
+spec:
+  hosts:
+  - {name: k8s-master01, address: 192.168.1.101, internalAddress: 192.168.1.101, user: root, password: "Admin@123"}
+  - {name: k8s-worker01, address: 192.168.1.102, internalAddress: 192.168.1.102, user: root, password: "Admin@123"}
+  - {name: k8s-worker02, address: 192.168.1.103, internalAddress: 192.168.1.103, user: root, password: "Admin@123"}
+  roleGroups:
+    etcd:
+    - k8s-master01
+    control-plane: 
+    - k8s-master01
+    worker:
+    - k8s-worker0[1:2]
+    registry:
+    - k8s-master01
+  controlPlaneEndpoint:
+    internalLoadbalancer: ""
+    externalDNS: false  
+    domain: apiserver.kongyu.local
+    address: ""      
+    port: 6443
+  kubernetes:
+    version: v1.26.5
+    imageRepo: kubesphereio
+    apiserverCertExtraSans:  
+      - 192.168.8.8
+      - lb.kubespheredev.local
+    clusterName: cluster.local
+    autoRenewCerts: true
+    containerManager: containerd
+    masqueradeAll: false
+    maxPods: 200
+    podPidsLimit: 10000
+    nodeCidrMaskSize: 24
+    proxyMode: ipvs
+  etcd:
+    type: kubekey
+    dataDir: "/data/service/etcd"
+    heartbeatInterval: 250
+    electionTimeout: 5000
+    snapshotCount: 10000
+    autoCompactionRetention: 8
+    metrics: basic
+    quotaBackendBytes: 8589934592
+    maxRequestBytes: 10485760
+    maxSnapshots: 5
+    maxWals: 5
+    logLevel: info
+  network:
+    plugin: calico
+    calico:
+      ipipMode: Always
+      vxlanMode: Never
+      vethMTU: 0
+    kubePodsCIDR: 10.100.0.0/16
+    kubeServiceCIDR: 10.101.0.0/16
+    multusCNI:
+      enabled: false
+  storage:
+    openebs:
+      basePath: /data/service/openebs
+  system:
+    ntpServers:
+      - time1.cloud.tencent.com
+      - ntp.aliyun.com
+      - k8s-master01
+    timezone: "Asia/Shanghai"
+    rpms:
+      - nfs-utils
+      - net-tools
+      - bash-completion
+    #skipConfigureOS: true
+  registry:
+    type: "docker registry"
+    privateRegistry: "dockerhub.kubekey.local"
+    namespaceOverride: "kubesphereio"
+    registryMirrors: ["https://xf9m4ezh.mirror.aliyuncs.com","https://registry.cn-hangzhou.aliyuncs.com"]
+    insecureRegistries: ["registry.lingo.local","registry.kongyu.local"]
+    auths:
+      "dockerhub.kubekey.local":
+        username: ""
+        password: ""
+        skipTLSVerify: false # Allow contacting registries over HTTPS with failed TLS verification.
+        plainHTTP: false # Allow contacting registries over HTTP.
+        certsPath: "/etc/docker/certs.d/dockerhub.kubekey.local" # Use certificates at path (*.crt, *.cert, *.key) to connect to the registry.
+      "registry.lingo.local":
+        username: "admin"
+        password: "Admin@123"
+        skipTLSVerify: true # Allow contacting registries over HTTPS with failed TLS verification.
+        plainHTTP: true # Allow contacting registries over HTTP.
+  addons: []
+  dns:
+    dnsEtcHosts: |
+      192.168.1.13 registry.lingo.local
+---
+apiVersion: installer.kubesphere.io/v1alpha1
+kind: ClusterConfiguration
+metadata:
+  name: ks-installer
+  namespace: kubesphere-system
+  labels:
+    version: v3.4.1
+spec:
+  persistence:
+    storageClass: ""
+  authentication:
+    jwtSecret: ""
+  local_registry: "dockerhub.kubekey.local"
+  namespace_override: "kubesphereio"
+  authentication:
+    adminPassword: Admin@123
+    jwtSecret: ''
+    oauthOptions:
+      accessTokenMaxAge: 0h
+  # dev_tag: ""
+  etcd:
+    monitoring: false
+    endpointIps: localhost
+    port: 2379
+    tlsEnable: true
+  common:
+    core:
+      console:
+        enableMultiLogin: true
+        port: 30880
+        type: NodePort
+    # apiserver:
+    #  resources: {}
+    # controllerManager:
+    #  resources: {}
+    redis:
+      enabled: false
+      enableHA: false
+      volumeSize: 2Gi
+    openldap:
+      enabled: false
+      volumeSize: 2Gi
+    minio:
+      volumeSize: 20Gi
+    monitoring:
+      # type: external
+      endpoint: http://prometheus-operated.kubesphere-monitoring-system.svc:9090
+      GPUMonitoring:
+        enabled: false
+    gpu:
+      kinds:
+      - resourceName: "nvidia.com/gpu"
+        resourceType: "GPU"
+        default: true
+    es:
+      # master:
+      #   volumeSize: 4Gi
+      #   replicas: 1
+      #   resources: {}
+      # data:
+      #   volumeSize: 20Gi
+      #   replicas: 1
+      #   resources: {}
+      enabled: false
+      logMaxAge: 7
+      elkPrefix: logstash
+      basicAuth:
+        enabled: false
+        username: ""
+        password: ""
+      externalElasticsearchHost: ""
+      externalElasticsearchPort: ""
+    opensearch:
+      # master:
+      #   volumeSize: 4Gi
+      #   replicas: 1
+      #   resources: {}
+      # data:
+      #   volumeSize: 20Gi
+      #   replicas: 1
+      #   resources: {}
+      enabled: true
+      logMaxAge: 7
+      opensearchPrefix: whizard
+      basicAuth:
+        enabled: true
+        username: "admin"
+        password: "admin"
+      externalOpensearchHost: ""
+      externalOpensearchPort: ""
+      dashboard:
+        enabled: false
+  alerting:
+    enabled: false
+    # thanosruler:
+    #   replicas: 1
+    #   resources: {}
+  auditing:
+    enabled: false
+    # operator:
+    #   resources: {}
+    # webhook:
+    #   resources: {}
+  devops:
+    enabled: false
+    jenkinsCpuReq: 0.5
+    jenkinsCpuLim: 1
+    jenkinsMemoryReq: 4Gi
+    jenkinsMemoryLim: 4Gi
+    jenkinsVolumeSize: 16Gi
+  events:
+    enabled: false
+    # operator:
+    #   resources: {}
+    # exporter:
+    #   resources: {}
+    ruler:
+      enabled: true
+      replicas: 2
+    #   resources: {}
+  logging:
+    enabled: false
+    logsidecar:
+      enabled: true
+      replicas: 2
+      # resources: {}
+  metrics_server:
+    enabled: false
+  monitoring:
+    storageClass: ""
+    node_exporter:
+      port: 9100
+      # resources: {}
+    # kube_rbac_proxy:
+    #   resources: {}
+    # kube_state_metrics:
+    #   resources: {}
+    # prometheus:
+    #   replicas: 1
+    #   volumeSize: 20Gi
+    #   resources: {}
+    #   operator:
+    #     resources: {}
+    # alertmanager:
+    #   replicas: 1
+    #   resources: {}
+    # notification_manager:
+    #   resources: {}
+    #   operator:
+    #     resources: {}
+    #   proxy:
+    #     resources: {}
+    gpu:
+      nvidia_dcgm_exporter:
+        enabled: false
+        # resources: {}
+  multicluster:
+    clusterRole: none
+  network:
+    networkpolicy:
+      enabled: false
+    ippool:
+      type: none
+    topology:
+      type: none
+  openpitrix:
+    store:
+      enabled: false
+  servicemesh:
+    enabled: false
+    istio:
+      components:
+        ingressGateways:
+        - name: istio-ingressgateway
+          enabled: false
+        cni:
+          enabled: false
+  edgeruntime:
+    enabled: false
+    kubeedge:
+      enabled: false
+      cloudCore:
+        cloudHub:
+          advertiseAddress:
+            - ""
+        service:
+          cloudhubNodePort: "30000"
+          cloudhubQuicNodePort: "30001"
+          cloudhubHttpsNodePort: "30002"
+          cloudstreamNodePort: "30003"
+          tunnelNodePort: "30004"
+        # resources: {}
+        # hostNetWork: false
+      iptables-manager:
+        enabled: true
+        mode: "external"
+        # resources: {}
+      # edgeService:
+      #   resources: {}
+  gatekeeper:
+    enabled: false
+    # controller_manager:
+    #   resources: {}
+    # audit:
+    #   resources: {}
+  terminal:
+    timeout: 600
+

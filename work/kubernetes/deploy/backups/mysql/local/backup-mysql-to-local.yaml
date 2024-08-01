@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-mysql-to-local
+  namespace: kongyu
+spec:
+  schedule: "0 0 * * *"
+  failedJobsHistoryLimit: 1
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 120
+      parallelism: 1
+      completions: 1
+      template:
+        metadata:
+          labels:
+            app: backup-mysql-to-local
+        spec:
+          nodeSelector: ## 选择存储数据的节点
+            kubernetes.io/hostname: server00.lingo.local
+          tolerations:
+          - effect: NoSchedule
+            operator: Exists
+          containers:
+          - name: backup-mysql-to-local
+            image: registry.lingo.local/service/mysql:backup_to_local_v8
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: BACKUP_SAVE_DAY ## 保存备份的天数
+              value: '30'
+            - name: BACKUPS_DIR ## 备份路径
+              value: '/opt'
+            - name: IS_COMPRESS ## 压缩数据
+              value: 'true'
+            - name: MYSQL_HOST ## MySQL信息
+              value: '192.168.1.10'
+            - name: MYSQL_PORT
+              value: '35725'
+            - name: MYSQL_USER
+              value: 'root'
+            - name: MYSQL_PASS
+              value: 'Admin@123'
+            - name: MYSQL_DATABASE
+              value: 'kongyu'
+            - name: MYSQL_TABLES ## 为空就默认导出整个库
+              value: 'tb_account user'
+            - name: MYSQL_DUMP_OPTIONS
+              value: '--routines --events --triggers --single-transaction --flush-logs'
+            volumeMounts:
+              - name: data
+                mountPath: /opt ## 备份路径
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 10
+          volumes:
+            - name: data
+              hostPath:
+                path: /data/backups/mysql/
+                type: DirectoryOrCreate

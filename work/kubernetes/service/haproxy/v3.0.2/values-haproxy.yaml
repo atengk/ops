@@ -1,0 +1,33 @@
+fullnameOverride: "haproxy"
+service:
+  type: NodePort
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9001
+      targetPort: 9001
+image:
+  registry: registry.lingo.local
+  repository: service/haproxy
+  tag: 3.0.2
+  pullPolicy: IfNotPresent
+replicaCount: 1
+resourcesPreset: "none"
+resources: {}
+configuration: |
+  global
+    log stdout format raw local0
+    maxconn 1024
+  defaults
+    log global
+    timeout client 60s
+    timeout connect 60s
+    timeout server 60s
+  frontend fe_main
+    bind :9001
+    default_backend be_main
+  backend be_main
+    server web1 minio.lingo-service-dev:9001 check
+containerPorts:
+  - name: http
+    containerPort: 9001

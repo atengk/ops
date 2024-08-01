@@ -1,0 +1,172 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "kafka"
+image:
+  registry: registry.lingo.local
+  repository: service/kafka
+  tag: 3.7.0
+  pullPolicy: IfNotPresent
+  debug: false
+heapOpts: -Xmx1024m -Xms1024m
+listeners:
+  client:
+    containerPort: 9092
+    protocol: SASL_PLAINTEXT
+    name: CLIENT
+    sslClientAuth: "none"
+  controller:
+    name: CONTROLLER
+    containerPort: 9093
+    protocol: SASL_PLAINTEXT
+    sslClientAuth: "none"
+  interbroker:
+    containerPort: 9094
+    protocol: SASL_PLAINTEXT
+    name: INTERNAL
+    sslClientAuth: "none"
+  external:
+    containerPort: 9095
+    protocol: SASL_PLAINTEXT
+    name: EXTERNAL
+    sslClientAuth: "none"
+sasl:
+  enabledMechanisms: PLAIN,SCRAM-SHA-256,SCRAM-SHA-512
+  interBrokerMechanism: PLAIN
+  controllerMechanism: PLAIN
+  oauthbearer:
+    tokenEndpointUrl: ""
+    jwksEndpointUrl: ""
+    expectedAudience: ""
+    subClaimName: "sub"
+  interbroker:
+    user: inter_broker_user
+    password: ""
+    clientId: inter_broker_client
+    clientSecret: ""
+  controller:
+    user: controller_user
+    password: ""
+    clientId: controller_broker_client
+    clientSecret: ""
+  client:
+    users:
+      - admin
+      - user
+      - kongyu
+    passwords:
+      - "Admin@123"
+      - "123456"
+      - "kongyu"
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+controller:
+  replicaCount: 1
+  controllerOnly: true
+  minId: 0
+  zookeeperMigrationMode: false
+  heapOpts: -Xmx1024m -Xms1024m
+  automountServiceAccountToken: true
+  persistence:
+    enabled: true
+    size: 10Gi
+  resourcesPreset: "none"
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  # podAntiAffinityPreset: "hard"  ## 调度到不同节点
+  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
+  #   type: "hard"
+  #   key: "ateng.kafka.controller"
+  #   values:
+  #     - node
+  # affinity: {}
+  # nodeSelector: {}
+  # terminationGracePeriodSeconds: "30"
+broker:
+  replicaCount: 3
+  minId: 100
+  zookeeperMigrationMode: false
+  extraConfig: |
+    num.io.threads=8
+    num.network.threads=3
+    num.partitions=3
+    num.recovery.threads.per.data.dir=1
+    offsets.topic.replication.factor=3
+    default.replication.factor=3
+    transaction.state.log.replication.factor=1
+    transaction.state.log.min.isr=1
+    auto.create.topics.enable=true
+    delete.topic.enable=true
+    log.retention.hours=72
+    log.retention.bytes=1073741824
+    log.retention.check.interval.ms=300000
+    log.segment.bytes=1073741824
+    max.partition.fetch.bytes=104857600
+    max.request.size=104857600
+    message.max.bytes=104857600
+  heapOpts: -Xmx1024m -Xms1024m
+  automountServiceAccountToken: true
+  persistence:
+    enabled: true
+    size: 100Gi
+  resourcesPreset: "none"
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  # podAntiAffinityPreset: "hard"  ## 调度到不同节点
+  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.broker=node
+  #   type: "hard"
+  #   key: "ateng.kafka.broker"
+  #   values:
+  #     - node
+  # affinity: {}
+  # nodeSelector: {}
+  # terminationGracePeriodSeconds: "30"
+service:
+  type: NodePort
+  ports:
+    client: 9092
+    controller: 9093
+    interbroker: 9094
+    external: 9095
+  nodePorts:
+    client: ""
+    external: ""
+rbac:
+  create: true
+externalAccess:
+  enabled: true
+  autoDiscovery:
+    enabled: true
+    image:
+      registry: registry.lingo.local
+      repository: service/kubectl
+      tag: 1.30.2
+    resourcesPreset: "none"
+    resources: {}
+  controller:
+    forceExpose: false
+    service:
+      type: NodePort
+      ports:
+        external: 9094
+  broker:
+    service:
+      type: NodePort
+      ports:
+        external: 9094

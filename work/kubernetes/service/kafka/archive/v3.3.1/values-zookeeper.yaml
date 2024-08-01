@@ -1,0 +1,42 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "zookeeper"
+image:
+  debug: true
+  registry: registry.lingo.local
+  repository: service/zookeeper
+  tag: 3.8.0
+  pullPolicy: IfNotPresent
+auth:
+  enabled: false
+  clientUser: ""
+  clientPassword: ""
+  serverUsers: ""
+  serverPasswords: ""
+heapSize: 1024
+replicaCount: 3
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+resources:
+  limits: {}
+  requests: {}
+affinity: {}
+nodeSelector: {}
+containerPorts:
+  client: 2181
+  tls: 3181
+  follower: 2888
+  election: 3888
+service:
+  type: NodePort
+  ports:
+    client: 2181
+    tls: 3181
+    follower: 2888
+    election: 3888
+  nodePorts:
+    client: ""
+    tls: ""
+persistence:
+  size: 8Gi

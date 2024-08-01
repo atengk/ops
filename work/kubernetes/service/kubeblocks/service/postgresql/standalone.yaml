@@ -1,0 +1,34 @@
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: Cluster
+metadata:
+  name: pg-standalone
+  namespace: kongyu
+spec:
+  clusterVersionRef: postgresql-15.7.0
+  clusterDefinitionRef: postgresql
+  componentSpecs:
+  - name: postgresql
+    componentDefRef: postgresql   
+    replicas: 1
+    resources:
+      limits:
+        cpu: "4"
+        memory: 8Gi
+      requests:
+        cpu: "1"
+        memory: 1Gi       
+    env:
+      - name: TZ
+        value: Asia/Shanghai
+    services:
+      - name: postgresql
+        serviceType: NodePort
+    volumeClaimTemplates:
+      - name: data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 100Gi
+  terminationPolicy: Halt  

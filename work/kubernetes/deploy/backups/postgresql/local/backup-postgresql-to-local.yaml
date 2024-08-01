@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-postgresql-to-local
+  namespace: kongyu
+spec:
+  schedule: "0 0 * * *"
+  failedJobsHistoryLimit: 1
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      activeDeadlineSeconds: 120
+      parallelism: 1
+      completions: 1
+      template:
+        metadata:
+          labels:
+            app: backup-postgresql-to-local
+        spec:
+          nodeSelector: ## 选择存储数据的节点
+            kubernetes.io/hostname: server00.lingo.local
+          tolerations:
+          - effect: NoSchedule
+            operator: Exists
+          containers:
+          - name: backup-postgresql-to-local
+            image: registry.lingo.local/service/postgresql:backup_to_local_v16
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: BACKUP_SAVE_DAY ## 保存备份的天数
+              value: '30'
+            - name: BACKUPS_DIR ## 备份路径
+              value: '/opt'
+            - name: IS_COMPRESS ## 压缩数据
+              value: 'true'
+            - name: POSTGRESQL_HOST ## PostgreSQL信息
+              value: '192.168.1.10'
+            - name: POSTGRESQL_PORT
+              value: '32297'
+            - name: POSTGRESQL_USER
+              value: 'postgres'
+            - name: POSTGRESQL_PASS
+              value: 'Lingo@local_postgresql_5432'
+            - name: POSTGRESQL_DATABASE
+              value: 'kongyu'
+            - name: POSTGRESQL_SCHEMA
+              value: 'public'
+            - name: POSTGRESQL_TABLES ## 为空就默认导出整个库
+              value: 'my_location my_user'
+            - name: POSTGRESQL_DUMP_OPTIONS
+              value: '--inserts --no-owner --no-privileges'
+            volumeMounts:
+              - name: data
+                mountPath: /opt ## 备份路径
+          restartPolicy: Never
+          terminationGracePeriodSeconds: 10
+          volumes:
+            - name: data
+              hostPath:
+                path: /data/backups/postgresql/
+                type: DirectoryOrCreate

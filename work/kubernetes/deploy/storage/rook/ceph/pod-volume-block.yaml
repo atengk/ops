@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: busybox-test-block
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Block
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-test-block
+  namespace: default
+spec:
+  terminationGracePeriodSeconds: 0
+  containers:
+  - name: busybox
+    image: swr.cn-north-1.myhuaweicloud.com/kongyu/busybox:vlatest
+    imagePullPolicy: IfNotPresent
+    command:
+       - sh
+       - -c
+       - 'while true; do dd if=/dev/zero of="/dev/block01" bs=1M count=100; sleep 30; done'
+    volumeDevices:
+    - devicePath: /dev/block01
+      name: block-volume
+  volumes:
+  - name: block-volume
+    persistentVolumeClaim:
+      claimName: busybox-test-block
+---

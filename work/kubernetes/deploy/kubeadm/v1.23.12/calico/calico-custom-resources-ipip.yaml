@@ -1,0 +1,27 @@
+kind: Installation
+apiVersion: operator.tigera.io/v1
+metadata:
+  name: default
+spec:
+  calicoNetwork:
+    ipPools:
+    - blockSize: 24
+      ## 需要和kubeadm初始化时的podCIDR保持一致
+      cidr: 10.244.0.0/16
+      ## 将跨子网启用IPIP (Always, CrossSubnet, Never)
+      ## https://projectcalico.docs.tigera.io/networking/vxlan-ipip#configure-default-ip-pools-at-install-time
+      encapsulation: IPIPCrossSubnet
+      natOutgoing: Enabled
+      nodeSelector: all()
+    nodeAddressAutodetectionV4:
+      ## https://docs.tigera.io/calico/latest/reference/installation/api#operator.tigera.io/v1.NodeAddressAutodetection
+      ## 开启基于匹配接口的IP自动检测功能给定的正则表达式
+      #interface: "en.*|em.*|eth.*"
+      ## CanReach根据节点上的哪个源地址到达指定的IP或域，实现IP自动检测
+      canReach: "192.168.1.1"
+---
+apiVersion: operator.tigera.io/v1
+kind: APIServer 
+metadata: 
+  name: default 
+spec: {}

@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: busybox-test
+  namespace: default
+  labels:
+    app.kubernetes.io/name: busybox-test
+spec:
+  replicas: 3
+  serviceName: "none"
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: busybox-test
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: busybox-test
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+        - name: busybox
+          image: swr.cn-north-1.myhuaweicloud.com/kongyu/busybox:vlatest
+          imagePullPolicy: "IfNotPresent"
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - 'while true; do echo $(date) | tee -a /data/date.txt; sleep 1; done'
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "10Gi"
+        storageClassName: rook-nfs-share1
+

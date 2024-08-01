@@ -1,0 +1,133 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "opensearch"
+clusterName: opensearch
+containerPorts:
+  restAPI: 9200
+  transport: 9300
+plugins: ""
+snapshotRepoPath: ""
+extraConfig:
+  http:
+    cors:
+      enabled: true
+      allow-origin: "*"
+      allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      allow-credentials: true
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+image:
+  registry: registry.lingo.local
+  repository: service/opensearch
+  tag: "1.3.18"
+  pullPolicy: IfNotPresent
+  debug: false
+security:
+  enabled: false
+  adminPassword: ""
+  logstashPassword: ""
+service:
+  type: NodePort
+  ports:
+    restAPI: 9200
+    transport: 9300
+  nodePorts:
+    restAPI: ""
+    transport: ""
+master:
+  masterOnly: false
+  replicaCount: 2
+  extraRoles: []
+  persistence:
+    enabled: true
+    size: 100Gi
+  resourcesPreset: "none"
+  resources: {}
+  heapSize: 2048m
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "hard"  ## 调度到不同节点
+  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
+  #   type: "hard"
+  #   key: "ateng.kafka.controller"
+  #   values:
+  #     - node
+  # affinity: {}
+  # nodeSelector: {}
+  # terminationGracePeriodSeconds: "30"
+data:
+  replicaCount: 0
+  extraRoles: []
+  resourcesPreset: "none"
+  resources: {}
+  heapSize: 2048m
+  affinity: {}
+  nodeSelector: {}
+  persistence:
+    enabled: true
+    size: 100Gi
+coordinating:
+  replicaCount: 0
+  extraRoles: []
+  resourcesPreset: "none"
+  resources: {}
+  heapSize: 1024m
+  affinity: {}
+  nodeSelector: {}
+  persistence:
+    enabled: true
+    size: 10Gi
+ingest:
+  enabled: false
+  replicaCount: 0
+  extraRoles: []
+  containerPorts:
+    restAPI: 9200
+    transport: 9300
+  resourcesPreset: "none"
+  resources: {}
+  heapSize: 1024m
+  affinity: {}
+  nodeSelector: {}
+  service:
+    enabled: true
+    type: ClusterIP
+    ports:
+      restAPI: 9200
+      transport: 9300
+    nodePorts:
+      restAPI: ""
+      transport: ""
+dashboards:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: service/opensearch-dashboards
+    tag: "1.3.14"
+    pullPolicy: IfNotPresent
+    debug: false
+  service:
+    type: NodePort
+    ports:
+      http: 5601
+    nodePorts:
+      http: ""
+  resourcesPreset: "none"
+  resources: {}
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  heapSize: 1024m
+  persistence:
+    enabled: true
+    size: 10Gi

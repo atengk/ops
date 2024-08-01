@@ -1,0 +1,91 @@
+global:
+  storageClass: "openebs-hostpath"
+  redis:
+    password: "Admin@123"
+fullnameOverride: "redis"
+image:
+  debug: false
+  registry: registry.lingo.local
+  repository: service/redis
+  tag: 7.2.5
+  pullPolicy: IfNotPresent
+architecture: replication
+auth:
+  enabled: true
+  sentinel: true
+commonConfiguration: |-
+  databases 20
+  appendonly yes
+  appendfsync always
+  save ""
+  maxclients 10000
+  maxmemory 50GB
+  auto-aof-rewrite-percentage 100
+  auto-aof-rewrite-min-size 64mb
+  maxmemory-policy volatile-lru
+  io-threads 10
+  io-threads-do-reads yes
+
+replica:
+  replicaCount: 3
+  disableCommands:
+    - FLUSHDB
+    - FLUSHALL
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  containerPorts:
+    redis: 6379
+  resourcesPreset: "none"
+  resources: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  # podAntiAffinityPreset: "hard"  ## 调度到不同节点
+  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
+  #   type: "hard"
+  #   key: "ateng.kafka.controller"
+  #   values:
+  #     - node
+  # affinity: {}
+  # nodeSelector: {}
+  # terminationGracePeriodSeconds: "30"
+  persistence:
+    size: 50Gi
+sentinel:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: service/redis-sentinel
+    tag: 7.2.5
+    pullPolicy: IfNotPresent
+    debug: false
+  masterSet: mymaster
+  quorum: 2
+  getMasterTimeout: 90
+  automateClusterRecovery: false
+  redisShutdownWaitFailover: true
+  downAfterMilliseconds: 60000
+  failoverTimeout: 18000
+  parallelSyncs: 1
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  service:
+    type: ClusterIP
+    ports:
+      redis: 6379
+      sentinel: 26379
+  persistence:
+    enabled: true
+    size: 10Gi

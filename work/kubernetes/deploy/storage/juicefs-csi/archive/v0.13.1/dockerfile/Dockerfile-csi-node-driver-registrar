@@ -1,0 +1,2 @@
+FROM registry.lingo.local/kubernetes/k8scsi-csi-node-driver-registrar:v2.1.0
+ENV TZ=Asia/Shanghai

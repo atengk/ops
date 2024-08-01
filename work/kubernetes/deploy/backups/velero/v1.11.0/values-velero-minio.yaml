@@ -1,0 +1,113 @@
+## velero镜像
+image:
+  repository: registry.lingo.local/kubernetes/velero
+  tag: v1.14.0
+  pullPolicy: IfNotPresent
+
+## 供应商的插件(MinIO兼容AWS)
+initContainers:
+   - name: velero-plugin-for-aws
+     image: registry.lingo.local/kubernetes/velero-plugin-for-aws:v1.10.0
+     imagePullPolicy: IfNotPresent
+     volumeMounts:
+       - mountPath: /target
+         name: plugins
+
+## 指定Velero部署的资源请求/限制
+resources:
+  limits: {}
+  requests: {}
+  #requests:
+  #  cpu: 500m
+  #  memory: 128Mi
+  #limits:
+  #  cpu: 1000m
+  #  memory: 512Mi
+
+kubectl:
+  image:
+    repository: registry.lingo.local/kubernetes/kubectl
+    tag: 1.30.3
+
+## 升级或者删除时更新CRD
+upgradeCRDs: true
+cleanUpCRDs: true
+
+configuration:
+  # Parameters for the `default` BackupStorageLocation. See
+  # https://velero.io/docs/v1.6/api-types/backupstoragelocation/
+  backupStorageLocation:
+    ## 备份存储位置名称(BackupStorageLocation)
+  - name: minio
+    ## 备份存储位置供应商
+    provider: aws
+    ## 供应商存储桶名
+    bucket: k8s-velero
+    ## 存储路径路径名称
+    prefix: velero-101
+    ## 备份存储位置是否为默认(BackupStorageLocation)
+    default: true
+    ## 备份存储位置权限
+    accessMode: ReadWrite
+    ## 供应商的region和s3Url
+    config:
+      region: minio
+      s3ForcePathStyle: true
+      s3Url: http://192.168.1.12:9000
+
+  # Parameters for the `default` VolumeSnapshotLocation. See
+  # https://velero.io/docs/v1.6/api-types/volumesnapshotlocation/
+  volumeSnapshotLocation:
+    ## 快照的卷快照位置名称(VolumeSnapshotLocation)
+  - name: minio
+    ## 备份存储位置供应商
+    provider: aws
+    ## ## 供应商的region和s3Url
+    config:
+      region: minio
+
+  # additional key/value pairs to be used as environment variables such as "AWS_CLUSTER_NAME: 'yourcluster.domain.tld'"
+  extraEnvVars: {"TZ":"Asia/Shanghai"}
+
+credentials:
+  ## 供应商的AK SK
+  useSecret: true
+  name: minio
+  ## [AWS] https://github.com/vmware-tanzu/velero-plugin-for-aws/blob/main/README.md
+  secretContents:
+    cloud: |
+      [default]
+      aws_access_key_id=admin
+      aws_secret_access_key=Lingo@local_minio_9000
+
+## 启动BackupStorageLocation
+backupsEnabled: true
+## 启动VolumeSnapshotLocation
+snapshotsEnabled: true
+
+## 部署restic
+deployNodeAgent: true
+## 指定restic部署的资源请求/限制
+nodeAgent:
+  podVolumePath: /var/lib/kubelet/pods
+  # Resource requests/limits to specify for the Restic daemonset deployment. Optional.
+  # https://velero.io/docs/v1.6/customize-installation/#customize-resource-requests-and-limits
+  resources:
+    limits: {}
+    requests: {}
+    #requests:
+    #  cpu: 500m
+    #  memory: 512Mi
+    #limits:
+    #  cpu: 1000m
+    #  memory: 1024Mi
+  extraEnvVars: {"TZ":"Asia/Shanghai"}
+
+# Velero ConfigMaps.
+configMaps:
+  fs-restore-action-config:
+    labels:
+      velero.io/plugin-config: ""
+      velero.io/pod-volume-restore: RestoreItemAction
+    data:
+      image: registry.lingo.local/kubernetes/velero/velero-restore-helper:v1.14.0

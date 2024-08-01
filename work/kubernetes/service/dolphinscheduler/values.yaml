@@ -1,0 +1,668 @@
+timezone: "Asia/Shanghai"
+
+# Used to detect whether dolphinscheduler dependent services such as database are ready
+initImage:
+  pullPolicy: "IfNotPresent"
+  busybox: "registry.lingo.local/service/busybox:1.30.1"
+
+image:
+  registry: "registry.lingo.local/service"
+  tag: "3.2.0"
+  pullPolicy: "IfNotPresent"
+  pullSecret: ""
+  master: dolphinscheduler-master
+  worker: dolphinscheduler-worker
+  api: dolphinscheduler-api
+  alert: dolphinscheduler-alert-server
+  tools: dolphinscheduler-tools
+
+## If not exists external database, by default, Dolphinscheduler's database will use it.
+postgresql:
+  enabled: false
+  postgresqlUsername: "root"
+  postgresqlPassword: "root"
+  postgresqlDatabase: "dolphinscheduler"
+  driverClassName: "org.postgresql.Driver"
+  params: "characterEncoding=utf8"
+  persistence:
+    enabled: false
+    size: "20Gi"
+    storageClass: "-"
+
+mysql:
+  enabled: false
+  driverClassName: "com.mysql.cj.jdbc.Driver"
+  auth:
+    username: "ds"
+    password: "ds"
+    database: "dolphinscheduler"
+    params: "characterEncoding=utf8"
+  primary:
+    persistence:
+      enabled: false
+      size: "20Gi"
+      storageClass: "-"
+
+minio:
+  enabled: false
+  auth:
+    rootUser: minioadmin
+    rootPassword: minioadmin
+  persistence:
+    enabled: false
+  defaultBuckets: "dolphinscheduler"
+
+## If exists external database, and set postgresql.enable value to false.
+## external database will be used, otherwise Dolphinscheduler's database will be used.
+externalDatabase:
+  enabled: true
+  type: "postgresql"
+  host: "postgresql"
+  port: "5432"
+  username: "dolphinscheduler"
+  password: "dolphinscheduler"
+  database: "dolphinscheduler"
+  params: "characterEncoding=utf8"
+  driverClassName: "org.postgresql.Driver"
+
+## If not exists external registry, the zookeeper registry will be used by default.
+zookeeper:
+  enabled: false
+  service:
+    port: 2181
+  fourlwCommandsWhitelist: "srvr,ruok,wchs,cons"
+  persistence:
+    enabled: false
+    size: "20Gi"
+    storageClass: "-"
+
+etcd:
+  enabled: false
+  endpoints: ""
+  namespace: "dolphinscheduler"
+  user: ""
+  passWord: ""
+  authority: ""
+  # Please create a new folder: deploy/kubernetes/dolphinscheduler/etcd-certs
+  ssl:
+    enabled: false
+    certFile: "etcd-certs/ca.crt"
+    keyCertChainFile: "etcd-certs/client.crt"
+    keyFile: "etcd-certs/client.pem"
+
+## If exists external registry and set zookeeper.enable value to false, the external registry will be used.
+externalRegistry:
+  registryPluginName: "zookeeper"
+  registryServers: "zookeeper:2181"
+
+security:
+  authentication:
+    type: PASSWORD
+    ldap:
+      urls: ldap://ldap.forumsys.com:389/
+      basedn: dc=example,dc=com
+      username: cn=read-only-admin,dc=example,dc=com
+      password: password
+      user:
+        admin: read-only-admin
+        identityattribute: uid
+        emailattribute: mail
+        notexistaction: CREATE
+      ssl:
+        enable: false
+        # do not change this value
+        truststore: "/opt/ldapkeystore.jks"
+        # if you use macOS, please run `base64 -b 0 -i /path/to/your.jks`
+        # if you use Linux, please run `base64 -w 0 /path/to/your.jks`
+        # if you use Windows, please run `certutil -f -encode /path/to/your.jks`
+        # Then copy the base64 content to below field in one line
+        jksbase64content: ""
+        truststorepassword: ""
+
+conf:
+  # auto restart, if true, all components will be restarted automatically after the common configuration is updated. if false, you need to restart the components manually. default is false
+  auto: false
+  # common configuration
+  common:
+    # user data local directory path, please make sure the directory exists and have read write permissions
+    data.basedir.path: /tmp/dolphinscheduler
+
+    # resource storage type: HDFS, S3, OSS, GCS, ABS, NONE
+    resource.storage.type: S3
+
+    # resource store on HDFS/S3 path, resource file will store to this base path, self configuration, please make sure the directory exists on hdfs and have read write permissions. "/dolphinscheduler" is recommended
+    resource.storage.upload.base.path: /dolphinscheduler
+
+    # The AWS access key. if resource.storage.type=S3 or use EMR-Task, This configuration is required
+    resource.aws.access.key.id: admin
+
+    # The AWS secret access key. if resource.storage.type=S3 or use EMR-Task, This configuration is required
+    resource.aws.secret.access.key: Admin@123
+
+    # The AWS Region to use. if resource.storage.type=S3 or use EMR-Task, This configuration is required
+    resource.aws.region: ca-central-1
+
+    # The name of the bucket. You need to create them by yourself. Otherwise, the system cannot start. All buckets in Amazon S3 share a single namespace; ensure the bucket is given a unique name.
+    resource.aws.s3.bucket.name: dolphinscheduler
+
+    # You need to set this parameter when private cloud s3. If S3 uses public cloud, you only need to set resource.aws.region or set to the endpoint of a public cloud such as S3.cn-north-1.amazonaws.com.cn
+    resource.aws.s3.endpoint: http://minio:9000
+
+    # alibaba cloud access key id, required if you set resource.storage.type=OSS
+    resource.alibaba.cloud.access.key.id: <your-access-key-id>
+
+    # alibaba cloud access key secret, required if you set resource.storage.type=OSS
+    resource.alibaba.cloud.access.key.secret: <your-access-key-secret>
+
+    # alibaba cloud region, required if you set resource.storage.type=OSS
+    resource.alibaba.cloud.region: cn-hangzhou
+
+    # oss bucket name, required if you set resource.storage.type=OSS
+    resource.alibaba.cloud.oss.bucket.name: dolphinscheduler
+
+    # oss bucket endpoint, required if you set resource.storage.type=OSS
+    resource.alibaba.cloud.oss.endpoint: https://oss-cn-hangzhou.aliyuncs.com
+
+    # azure storage account name, required if you set resource.storage.type=ABS
+    resource.azure.client.id: minioadmin
+
+    # azure storage account key, required if you set resource.storage.type=ABS
+    resource.azure.client.secret: minioadmin
+
+    # azure storage subId, required if you set resource.storage.type=ABS
+    resource.azure.subId: minioadmin
+
+    # azure storage tenantId, required if you set resource.storage.type=ABS
+    resource.azure.tenant.id: minioadmin
+
+    # if resource.storage.type=HDFS, the user must have the permission to create directories under the HDFS root path
+    resource.hdfs.root.user: hdfs
+
+    # if resource.storage.type=S3, the value like: s3a://dolphinscheduler; if resource.storage.type=HDFS and namenode HA is enabled, you need to copy core-site.xml and hdfs-site.xml to conf dir
+    resource.hdfs.fs.defaultFS: hdfs://mycluster:8020
+
+    # whether to startup kerberos
+    hadoop.security.authentication.startup.state: false
+
+    # java.security.krb5.conf path
+    java.security.krb5.conf.path: /opt/krb5.conf
+
+    # login user from keytab username
+    login.user.keytab.username: hdfs-mycluster@ESZ.COM
+
+    # login user from keytab path
+    login.user.keytab.path: /opt/hdfs.headless.keytab
+
+    # kerberos expire time, the unit is hour
+    kerberos.expire.time: 2
+
+    # resourcemanager port, the default value is 8088 if not specified
+    resource.manager.httpaddress.port: 8088
+
+    # if resourcemanager HA is enabled, please set the HA IPs; if resourcemanager is single, keep this value empty
+    yarn.resourcemanager.ha.rm.ids: 192.168.xx.xx,192.168.xx.xx
+
+    # if resourcemanager HA is enabled or not use resourcemanager, please keep the default value; If resourcemanager is single, you only need to replace ds1 to actual resourcemanager hostname
+    yarn.application.status.address: http://ds1:%s/ws/v1/cluster/apps/%s
+
+    # job history status url when application number threshold is reached(default 10000, maybe it was set to 1000)
+    yarn.job.history.status.address: http://ds1:19888/ws/v1/history/mapreduce/jobs/%s
+
+    # datasource encryption enable
+    datasource.encryption.enable: false
+
+    # datasource encryption salt
+    datasource.encryption.salt: '!@#$%^&*'
+
+    # data quality option
+    data-quality.jar.name: dolphinscheduler-data-quality-dev-SNAPSHOT.jar
+
+    # Whether hive SQL is executed in the same session
+    support.hive.oneSession: false
+
+    # use sudo or not, if set true, executing user is tenant user and deploy user needs sudo permissions; if set false, executing user is the deploy user and doesn't need sudo permissions
+    sudo.enable: true
+
+    # development state
+    development.state: false
+
+    # rpc port
+    alert.rpc.port: 50052
+
+    # set path of conda.sh
+    conda.path: /opt/anaconda3/etc/profile.d/conda.sh
+
+    # Task resource limit state
+    task.resource.limit.state: false
+
+    # mlflow task plugin preset repository
+    ml.mlflow.preset_repository: https://github.com/apache/dolphinscheduler-mlflow
+
+    # mlflow task plugin preset repository version
+    ml.mlflow.preset_repository_version: "main"
+
+    # way to collect applicationId: log, aop
+    appId.collect: log
+
+common:
+  ## Configmap
+  configmap:
+    DOLPHINSCHEDULER_OPTS: ""
+    DATA_BASEDIR_PATH: "/tmp/dolphinscheduler"
+    RESOURCE_UPLOAD_PATH: "/dolphinscheduler"
+
+    # dolphinscheduler env
+    HADOOP_HOME: "/opt/soft/hadoop"
+    HADOOP_CONF_DIR: "/opt/soft/hadoop/etc/hadoop"
+    SPARK_HOME: "/opt/soft/spark"
+    PYTHON_LAUNCHER: "/usr/bin/python/bin/python3"
+    JAVA_HOME: "/opt/java/openjdk"
+    HIVE_HOME: "/opt/soft/hive"
+    FLINK_HOME: "/opt/soft/flink"
+    DATAX_LAUNCHER: "/opt/soft/datax/bin/datax.py"
+  ## Shared storage persistence mounted into api, master and worker, such as Hadoop, Spark, Flink and DataX binary package
+  sharedStoragePersistence:
+    enabled: true
+    mountPath: "/opt/soft"
+    accessModes:
+    - "ReadWriteMany"
+    ## storageClassName must support the access mode: ReadWriteMany
+    storageClassName: "nfs-client"
+    storage: "20Gi"
+  ## If RESOURCE_STORAGE_TYPE is HDFS and FS_DEFAULT_FS is file:///, fsFileResourcePersistence should be enabled for resource storage
+  fsFileResourcePersistence:
+    enabled: true
+    accessModes:
+    - "ReadWriteMany"
+    ## storageClassName must support the access mode: ReadWriteMany
+    storageClassName: "nfs-client"
+    storage: "20Gi"
+
+master:
+  ## Enable or disable the Master component
+  enabled: true
+  ## PodManagementPolicy controls how pods are created during initial scale up, when replacing pods on nodes, or when scaling down.
+  podManagementPolicy: "Parallel"
+  ## Replicas is the desired number of replicas of the given Template.
+  replicas: "3"
+  ## You can use annotations to attach arbitrary non-identifying metadata to objects.
+  ## Clients such as tools and libraries can retrieve this metadata.
+  annotations: {}
+  ## Affinity is a group of affinity scheduling rules. If specified, the pod's scheduling constraints.
+  ## More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#affinity-v1-core
+  affinity: {}
+  ## NodeSelector is a selector which must be true for the pod to fit on a node.
+  ## Selector which must match a node's labels for the pod to be scheduled on that node.
+  ## More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  nodeSelector: {}
+  ## Tolerations are appended (excluding duplicates) to pods running with this RuntimeClass during admission,
+  ## effectively unioning the set of nodes tolerated by the pod and the RuntimeClass.
+  tolerations: []
+  ## Compute Resources required by this container. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container
+  resources: {}
+  # resources:
+  #   limits:
+  #     memory: "8Gi"
+  #     cpu: "4"
+  #   requests:
+  #     memory: "2Gi"
+  #     cpu: "500m"
+  ## Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: "30"
+    periodSeconds: "30"
+    timeoutSeconds: "5"
+    failureThreshold: "3"
+    successThreshold: "1"
+  ## Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: "30"
+    periodSeconds: "30"
+    timeoutSeconds: "5"
+    failureThreshold: "3"
+    successThreshold: "1"
+  ## PersistentVolumeClaim represents a reference to a PersistentVolumeClaim in the same namespace.
+  ## The StatefulSet controller is responsible for mapping network identities to claims in a way that maintains the identity of a pod.
+  ## Every claim in this list must have at least one matching (by name) volumeMount in one container in the template.
+  ## A claim in this list takes precedence over any volumes in the template, with the same name.
+  persistentVolumeClaim:
+    enabled: true
+    accessModes:
+    - "ReadWriteOnce"
+    storageClassName: "openebs-hostpath"
+    storage: "20Gi"
+  env:
+    JAVA_OPTS: "-Xms1g -Xmx1g -Xmn512m"
+    MASTER_EXEC_THREADS: "100"
+    MASTER_EXEC_TASK_NUM: "20"
+    MASTER_DISPATCH_TASK_NUM: "3"
+    MASTER_HOST_SELECTOR: "LowerWeight"
+    MASTER_HEARTBEAT_INTERVAL: "10s"
+    MASTER_HEARTBEAT_ERROR_THRESHOLD: "5"
+    MASTER_TASK_COMMIT_RETRYTIMES: "5"
+    MASTER_TASK_COMMIT_INTERVAL: "1s"
+    MASTER_STATE_WHEEL_INTERVAL: "5s"
+    MASTER_MAX_CPU_LOAD_AVG: "1"
+    MASTER_RESERVED_MEMORY: "0.3"
+    MASTER_FAILOVER_INTERVAL: "10m"
+    MASTER_KILL_APPLICATION_WHEN_HANDLE_FAILOVER: "true"
+  service:
+    # annotations may need to be set when want to scrapy metrics by prometheus but not install prometheus operator
+    annotations: {}
+    # serviceMonitor for prometheus operator
+    serviceMonitor:
+      # -- Enable or disable master serviceMonitor
+      enabled: false
+      # -- @param serviceMonitor.interval interval at which metrics should be scraped
+      interval: 15s
+      # -- @param serviceMonitor.path path of the metrics endpoint
+      path: /actuator/prometheus
+      # -- @param serviceMonitor.labels ServiceMonitor extra labels
+      labels: {}
+      # -- @param serviceMonitor.annotations ServiceMonitor annotations
+      annotations: {}
+
+worker:
+  ## Enable or disable the Worker component
+  enabled: true
+  ## PodManagementPolicy controls how pods are created during initial scale up, when replacing pods on nodes, or when scaling down.
+  podManagementPolicy: "Parallel"
+  ## Replicas is the desired number of replicas of the given Template.
+  replicas: "3"
+  ## You can use annotations to attach arbitrary non-identifying metadata to objects.
+  ## Clients such as tools and libraries can retrieve this metadata.
+  annotations: {}
+  ## Affinity is a group of affinity scheduling rules. If specified, the pod's scheduling constraints.
+  ## More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#affinity-v1-core
+  affinity: {}
+  ## NodeSelector is a selector which must be true for the pod to fit on a node.
+  ## Selector which must match a node's labels for the pod to be scheduled on that node.
+  ## More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  nodeSelector: {}
+  ## Tolerations are appended (excluding duplicates) to pods running with this RuntimeClass during admission,
+  ## effectively unioning the set of nodes tolerated by the pod and the RuntimeClass.
+  tolerations: []
+  ## Compute Resources required by this container. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container
+  resources: {}
+  # resources:
+  #   limits:
+  #     memory: "8Gi"
+  #     cpu: "4"
+  #   requests:
+  #     memory: "2Gi"
+  #     cpu: "500m"
+  ## Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: "30"
+    periodSeconds: "30"
+    timeoutSeconds: "5"
+    failureThreshold: "3"
+    successThreshold: "1"
+  ## Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: "30"
+    periodSeconds: "30"
+    timeoutSeconds: "5"
+    failureThreshold: "3"
+    successThreshold: "1"
+  ## PersistentVolumeClaim represents a reference to a PersistentVolumeClaim in the same namespace.
+  ## The StatefulSet controller is responsible for mapping network identities to claims in a way that maintains the identity of a pod.
+  ## Every claim in this list must have at least one matching (by name) volumeMount in one container in the template.
+  ## A claim in this list takes precedence over any volumes in the template, with the same name.
+  persistentVolumeClaim:
+    enabled: true
+    ## dolphinscheduler data volume
+    dataPersistentVolume:
+      enabled: true
+      accessModes:
+      - "ReadWriteOnce"
+      storageClassName: "openebs-hostpath"
+      storage: "20Gi"
+    ## dolphinscheduler logs volume
+    logsPersistentVolume:
+      enabled: true
+      accessModes:
+      - "ReadWriteOnce"
+      storageClassName: "openebs-hostpath"
+      storage: "20Gi"
+  env:
+    WORKER_MAX_CPU_LOAD_AVG: "1"
+    WORKER_RESERVED_MEMORY: "0.3"
+    WORKER_EXEC_THREADS: "100"
+    WORKER_HEARTBEAT_INTERVAL: "10s"
+    WORKER_HEART_ERROR_THRESHOLD: "5"
+    WORKER_HOST_WEIGHT: "100"
+  keda:
+    enabled: false
+    namespaceLabels: { }
+
+    # How often KEDA polls the DolphinScheduler DB to report new scale requests to the HPA
+    pollingInterval: 5
+
+    # How many seconds KEDA will wait before scaling to zero.
+    # Note that HPA has a separate cooldown period for scale-downs
+    cooldownPeriod: 30
+
+    # Minimum number of workers created by keda
+    minReplicaCount: 0
+
+    # Maximum number of workers created by keda
+    maxReplicaCount: 3
+
+    # Specify HPA related options
+    advanced: { }
+    # horizontalPodAutoscalerConfig:
+    #   behavior:
+    #     scaleDown:
+    #       stabilizationWindowSeconds: 300
+    #       policies:
+    #         - type: Percent
+    #           value: 100
+    #           periodSeconds: 15
+  service:
+    # annotations may need to be set when want to scrapy metrics by prometheus but not install prometheus operator
+    annotations: {}
+    # serviceMonitor for prometheus operator
+    serviceMonitor:
+      # -- Enable or disable worker serviceMonitor
+      enabled: false
+      # -- @param serviceMonitor.interval interval at which metrics should be scraped
+      interval: 15s
+      # -- @param serviceMonitor.path path of the metrics endpoint
+      path: /actuator/prometheus
+      # -- @param serviceMonitor.labels ServiceMonitor extra labels
+      labels: {}
+      # -- @param serviceMonitor.annotations ServiceMonitor annotations
+      annotations: {}
+
+
+alert:
+  ## Enable or disable the Alert-Server component
+  enabled: true
+  ## Number of desired pods. This is a pointer to distinguish between explicit zero and not specified. Defaults to 1.
+  replicas: 1
+  ## The deployment strategy to use to replace existing pods with new ones.
+  strategy:
+    type: "RollingUpdate"
+    rollingUpdate:
+      maxSurge: "25%"
+      maxUnavailable: "25%"
+  ## You can use annotations to attach arbitrary non-identifying metadata to objects.
+  ## Clients such as tools and libraries can retrieve this metadata.
+  annotations: {}
+  ## Affinity is a group of affinity scheduling rules. If specified, the pod's scheduling constraints.
+  ## More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#affinity-v1-core
+  affinity: {}
+  ## NodeSelector is a selector which must be true for the pod to fit on a node.
+  ## Selector which must match a node's labels for the pod to be scheduled on that node.
+  ## More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  nodeSelector: {}
+  ## Tolerations are appended (excluding duplicates) to pods running with this RuntimeClass during admission,
+  ## effectively unioning the set of nodes tolerated by the pod and the RuntimeClass.
+  tolerations: []
+  ## Compute Resources required by this container. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container
+  resources: {}
+  # resources:
+  #   limits:
+  #     memory: "2Gi"
+  #     cpu: "1"
+  #   requests:
+  #     memory: "1Gi"
+  #     cpu: "500m"
+  ## Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: "30"
+    periodSeconds: "30"
+    timeoutSeconds: "5"
+    failureThreshold: "3"
+    successThreshold: "1"
+  ## Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: "30"
+    periodSeconds: "30"
+    timeoutSeconds: "5"
+    failureThreshold: "3"
+    successThreshold: "1"
+  ## PersistentVolumeClaim represents a reference to a PersistentVolumeClaim in the same namespace.
+  ## More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims
+  persistentVolumeClaim:
+    enabled: true
+    accessModes:
+    - "ReadWriteOnce"
+    storageClassName: "openebs-hostpath"
+    storage: "20Gi"
+  env:
+    JAVA_OPTS: "-Xms512m -Xmx512m -Xmn256m"
+  service:
+    # annotations may need to be set when want to scrapy metrics by prometheus but not install prometheus operator
+    annotations: {}
+    # serviceMonitor for prometheus operator
+    serviceMonitor:
+      # -- Enable or disable alert-server serviceMonitor
+      enabled: false
+      # -- @param serviceMonitor.interval interval at which metrics should be scraped
+      interval: 15s
+      # -- @param serviceMonitor.path path of the metrics endpoint
+      path: /actuator/prometheus
+      # -- @param serviceMonitor.labels ServiceMonitor extra labels
+      labels: {}
+      # -- @param serviceMonitor.annotations ServiceMonitor annotations
+      annotations: {}
+
+
+api:
+  ## Enable or disable the API-Server component
+  enabled: true
+  ## Number of desired pods. This is a pointer to distinguish between explicit zero and not specified. Defaults to 1.
+  replicas: "1"
+  ## The deployment strategy to use to replace existing pods with new ones.
+  strategy:
+    type: "RollingUpdate"
+    rollingUpdate:
+      maxSurge: "25%"
+      maxUnavailable: "25%"
+  ## You can use annotations to attach arbitrary non-identifying metadata to objects.
+  ## Clients such as tools and libraries can retrieve this metadata.
+  annotations: {}
+  ## Affinity is a group of affinity scheduling rules. If specified, the pod's scheduling constraints.
+  ## More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#affinity-v1-core
+  affinity: {}
+  ## NodeSelector is a selector which must be true for the pod to fit on a node.
+  ## Selector which must match a node's labels for the pod to be scheduled on that node.
+  ## More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  nodeSelector: {}
+  ## Tolerations are appended (excluding duplicates) to pods running with this RuntimeClass during admission,
+  ## effectively unioning the set of nodes tolerated by the pod and the RuntimeClass.
+  tolerations: []
+  ## Compute Resources required by this container. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container
+  resources: {}
+  # resources:
+  #   limits:
+  #     memory: "2Gi"
+  #     cpu: "1"
+  #   requests:
+  #     memory: "1Gi"
+  #     cpu: "500m"
+  ## Periodic probe of container liveness. Container will be restarted if the probe fails. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: "30"
+    periodSeconds: "30"
+    timeoutSeconds: "5"
+    failureThreshold: "3"
+    successThreshold: "1"
+  ## Periodic probe of container service readiness. Container will be removed from service endpoints if the probe fails. Cannot be updated.
+  ## More info: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle#container-probes
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: "30"
+    periodSeconds: "30"
+    timeoutSeconds: "5"
+    failureThreshold: "3"
+    successThreshold: "1"
+  ## PersistentVolumeClaim represents a reference to a PersistentVolumeClaim in the same namespace.
+  ## More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims
+  persistentVolumeClaim:
+    enabled: true
+    accessModes:
+    - "ReadWriteOnce"
+    storageClassName: "openebs-hostpath"
+    storage: "20Gi"
+  service:
+    ## type determines how the Service is exposed. Defaults to ClusterIP. Valid options are ExternalName, ClusterIP, NodePort, and LoadBalancer
+    type: "NodePort"
+    ## clusterIP is the IP address of the service and is usually assigned randomly by the master
+    clusterIP: ""
+    ## nodePort is the port on each node on which this api service is exposed when type=NodePort
+    nodePort: ""
+    ## pythonNodePort is the port on each node on which this python api service is exposed when type=NodePort
+    pythonNodePort: ""
+    ## externalIPs is a list of IP addresses for which nodes in the cluster will also accept traffic for this service
+    externalIPs: []
+    ## externalName is the external reference that kubedns or equivalent will return as a CNAME record for this service, requires Type to be ExternalName
+    externalName: ""
+    ## loadBalancerIP when service.type is LoadBalancer. LoadBalancer will get created with the IP specified in this field
+    loadBalancerIP: ""
+    ## annotations may need to be set when service.type is LoadBalancer
+    ## service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:EXAMPLE_CERT
+    annotations: {}
+    # serviceMonitor for prometheus operator
+    serviceMonitor:
+      # -- Enable or disable api-server serviceMonitor
+      enabled: false
+      # -- @param serviceMonitor.interval interval at which metrics should be scraped
+      interval: 15s
+      # -- @param serviceMonitor.path path of the metrics endpoint
+      path: /dolphinscheduler/actuator/prometheus
+      # -- @param serviceMonitor.labels ServiceMonitor extra labels
+      labels: {}
+      # -- @param serviceMonitor.annotations ServiceMonitor annotations
+      annotations: {}
+  env:
+    JAVA_OPTS: "-Xms512m -Xmx512m -Xmn256m"
+
+ingress:
+  enabled: false
+  host: "dolphinscheduler.org"
+  path: "/dolphinscheduler"
+  annotations: {}
+  tls:
+    enabled: false
+    secretName: "dolphinscheduler-tls"

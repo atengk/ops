@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  # Corresponding to the user's secretName
+  name: mysql-user-password
+data:
+  # The key corresponding to the user's secretKey
+  # Admin@123
+  superUser: QWRtaW5AMTIz
+  normalUser: QWRtaW5AMTIz
+---
+apiVersion: mysql.radondb.com/v1alpha1
+kind: MysqlUser
+metadata:
+  name: super-user
+spec:
+  ## MySQL user name.
+  user: super_user
+  withGrantOption: true
+  tlsOptions: 
+    type: NONE
+  hosts: 
+    - "%"
+  permissions:
+    - database: "*"
+      tables:
+        - "*"
+      privileges:
+        - ALL
+  ## Specify the cluster where the user is located.
+  userOwner:
+    clusterName: cluster
+    nameSpace: kongyu
+  ## Specify the secret object for user.
+  secretSelector:
+    secretName: mysql-user-password
+    secretKey: superUser
+---
+apiVersion: mysql.radondb.com/v1alpha1
+kind: MysqlUser
+metadata:
+  name: normal-user
+spec:
+  ## MySQL user name.
+  user: normal_user
+  withGrantOption: false
+  tlsOptions: 
+    type: NONE
+  hosts: 
+    - "%"
+  permissions:
+    - database: "*"
+      tables:
+        - "*"
+      privileges:
+        - USAGE
+  ## Specify the cluster where the user is located.
+  userOwner:
+    clusterName: cluster
+    nameSpace: kongyu
+  ## Specify the secret object for user.
+  secretSelector:
+    secretName: mysql-user-password
+    secretKey: normalUser

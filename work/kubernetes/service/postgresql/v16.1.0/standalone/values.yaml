@@ -1,0 +1,43 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "postgresql"
+image:
+  registry: registry.lingo.local
+  repository: service/postgresql
+  tag: 16.1.0
+  pullPolicy: IfNotPresent
+  debug: false
+auth:
+  postgresPassword: "Admin@123"
+  username: "kongyu"
+  password: "kongyu"
+  database: "kongyu"
+architecture: standalone
+containerPorts:
+  postgresql: 5432
+primary:
+  name: primary
+  extendedConfiguration: |-
+    max_connections = 10240
+    shared_buffers = 4GB
+    work_mem = 64MB
+    max_parallel_workers_per_gather = 4
+    max_parallel_maintenance_workers = 2
+    max_parallel_workers = 8
+    wal_level = 'logical'
+    log_timezone = 'Asia/Shanghai'
+    timezone = 'Asia/Shanghai'
+  service:
+    type: NodePort
+    ports:
+      postgresql: 5432
+  persistence:
+    size: 100Gi
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}

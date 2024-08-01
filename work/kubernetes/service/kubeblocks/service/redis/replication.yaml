@@ -1,0 +1,61 @@
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: Cluster
+metadata:
+  name: redis-replica
+  namespace: kongyu
+spec:
+  terminationPolicy: Halt
+  affinity:
+    podAntiAffinity: Preferred
+    topologyKeys:
+      - kubernetes.io/hostname
+    tenancy: SharedNode
+  clusterDefinitionRef: redis
+  topology: replication
+  componentSpecs:
+  - name: redis
+    replicas: 2
+    componentDef: redis-7
+    serviceVersion: 7.2.4
+    switchPolicy:
+      type: Noop
+    resources:
+      limits:
+        cpu: "4"
+        memory: 8Gi
+      requests:
+        cpu: "1"
+        memory: 1Gi       
+    env:
+      - name: TZ
+        value: Asia/Shanghai
+    services:
+      - name: redis
+        serviceType: NodePort
+    volumeClaimTemplates:
+      - name: data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
+  - name: redis-sentinel
+    replicas: 3
+    componentDef: redis-sentinel-7
+    serviceVersion: 7.2.4
+    resources:
+      limits:
+        cpu: "4"
+        memory: 214748364800m
+      requests:
+        cpu: "1"
+        memory: 214748364800m
+    volumeClaimTemplates:
+      - name: data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi

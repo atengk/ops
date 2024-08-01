@@ -1,0 +1,21 @@
+---
+apiVersion: kubevirt.io/v1
+kind: KubeVirt
+metadata:
+  name: kubevirt
+  namespace: kubevirt
+spec:
+  certificateRotateStrategy: {}
+  configuration:
+    developerConfiguration:
+      # CPU虚拟化20倍
+      cpuAllocationRatio: 20
+      # 内存虚拟化1.5倍
+      memoryOvercommit: 150
+      featureGates:
+      - HardDisk
+      - DataVolumes
+      - LiveMigration
+  customizeComponents: {}
+  imagePullPolicy: IfNotPresent
+  workloadUpdateStrategy: {}

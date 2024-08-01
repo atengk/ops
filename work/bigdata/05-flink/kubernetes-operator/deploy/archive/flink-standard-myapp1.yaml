@@ -1,0 +1,90 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: flink-standard-myapp
+  namespace: flink
+spec:
+  image: registry.lingo.local/service/flink:1.18
+  flinkVersion: v1_18
+  flinkConfiguration:
+    taskmanager.numberOfTaskSlots: "2"
+    state.backend: rocksdb
+    state.savepoints.dir: file:///flink-data/savepoints
+    state.checkpoints.dir: file:///flink-data/checkpoints
+    execution.checkpointing.interval: 30s
+    execution.checkpointing.externalized-checkpoint-retention: DELETE_ON_CANCELLATION
+    high-availability.type: kubernetes
+    high-availability.storageDir: file:///flink-data/ha
+  serviceAccount: flink
+  jobManager:
+    replicas: 1
+    resource:
+      memory: "2048m"
+      cpu: 1
+    podTemplate:
+      spec:
+        initContainers:
+          # Sample init container for fetching remote artifacts
+          - name: busybox
+            image: registry.lingo.local/service/busybox:1.36.1
+            volumeMounts:
+              - mountPath: /opt/flink/downloads
+                name: downloads
+            command:
+            - /bin/sh
+            - -c
+            - "wget -O /opt/flink/downloads/flink-spring-1.0.jar \
+              http://192.168.1.12:9001/test/flink/flink-spring-1.0.jar"
+        containers:
+          - name: flink-main-container
+            volumeMounts:
+            - mountPath: /flink-data
+              name: flink-volume
+            env:
+              - name: TZ
+                value: Asia/Shanghai
+  taskManager:
+    replicas: 3
+    resource:
+      memory: "2048m"
+      cpu: 1
+  job:
+    jarURI: local:///opt/flink/downloads/flink-spring-1.0.jar
+    args:
+      - --class=local.kongyu.flink.task.sql.DatagenToKafka
+      - --method=run 
+    parallelism: 4
+    upgradeMode: savepoint
+    state: running
+    savepointTriggerNonce: 0
+  podTemplate:
+    spec:
+      containers:
+        - name: flink-main-container
+          volumeMounts:
+            - mountPath: /flink-data
+              name: flink-volume
+            - mountPath: /opt/flink/downloads
+              name: downloads
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+      volumes:
+        - name: flink-volume
+          persistentVolumeClaim:
+            claimName: flink-standard-myapp
+        - name: downloads
+          emptyDir: { }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flink-standard-myapp
+  namespace: flink
+spec:
+  storageClassName: nfs-client
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

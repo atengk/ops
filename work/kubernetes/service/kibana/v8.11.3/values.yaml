@@ -1,0 +1,43 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "kibana"
+image:
+  registry: registry.lingo.local
+  repository: service/kibana
+  tag: 8.11.3
+  pullPolicy: IfNotPresent
+  debug: false
+replicaCount: 1
+plugins: []
+#plugins:
+#  - http://miniserve.lingo.local/elasticsearch-plugins/v8.11.3/enhanced-table-1.13.5_8.11.3.zip
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+affinity: {}
+nodeSelector: {}
+resources:
+  limits: {}
+  requests: {}
+persistence:
+  enabled: true
+  size: 10Gi
+service:
+  port: 5601
+  type: NodePort
+  nodePort: ""
+elasticsearch:
+  hosts:
+    - elasticsearch
+  port: "9200"
+  security:
+    auth:
+      enabled: false
+      kibanaPassword: ""
+      createSystemUser: false
+    tls:
+      enabled: false
+      verificationMode: "full"
+      usePemCerts: false
+      truststorePassword: ""
+      passwordsSecret: ""

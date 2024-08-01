@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vm-lingo-win10
+  namespace: lingo-vm
+spec:
+  selector:
+    kubevirt.io/vm: vm-lingo-win10
+  ports:
+  - protocol: TCP
+    port: 3389
+    targetPort: 3389
+    nodePort: 40104
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/vm: vm-lingo-win10
+  name: vm-lingo-win10
+  namespace: lingo-vm
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-lingo-win10
+      annotations:
+        "cni.projectcalico.org/ipAddrs": "[\"10.244.250.54\"]"
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: server03.lingo.local
+      domain:
+        cpu:
+          cores: 12
+          #model: host-passthrough
+        memory:
+          guest: 24Gi
+        resources:
+          overcommitGuestOverhead: true
+          #requests:
+          #  memory: 24Gi
+        #machine:
+        #  type: q35
+        devices:
+          disks:
+          - name: system
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            bridge: {}
+            #model: e1000
+            #masquerade: {}
+            #ports:
+            # - name: rdp
+            #   port: 3389
+      terminationGracePeriodSeconds: 10
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: system
+        dataVolume:
+          name: vm-lingo-win10-system
+  dataVolumeTemplates:
+  - metadata:
+      name: vm-lingo-win10-system
+    spec:
+      pvc:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 500Gi
+        storageClassName: openebs-hostpath
+      source:
+        registry:
+          url: "docker://swr.cn-north-1.myhuaweicloud.com/kongyu/kubevirt/windows:windows_10_business_21h2_2022_x64-01"
+
+# kubectl get -n lingo-vm vmi,dv,pod,svc

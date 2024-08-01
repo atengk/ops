@@ -1,0 +1,147 @@
+image:
+  repository: registry.lingo.local/kubernetes/juicefs-csi-driver
+  tag: "v0.23.1"
+  pullPolicy: "IfNotPresent"
+dashboardImage:
+  repository: registry.lingo.local/kubernetes/juicefs-csi-dashboard
+  tag: "v0.23.1"
+  pullPolicy: "IfNotPresent"
+sidecars:
+  livenessProbeImage:
+    repository: registry.lingo.local/kubernetes/csi-livenessprobe
+    tag: "v1.1.0"
+    pullPolicy: "IfNotPresent"
+  nodeDriverRegistrarImage:
+    repository: registry.lingo.local/kubernetes/csi-node-driver-registrar
+    tag: "v2.1.0"
+    pullPolicy: "IfNotPresent"
+  csiProvisionerImage:
+    repository: registry.lingo.local/kubernetes/csi-provisioner
+    tag: "v1.6.0"
+    pullPolicy: "IfNotPresent"
+  csiResizerImage:
+    repository: registry.lingo.local/kubernetes/csi-resizer
+    tag: "v1.0.1"
+    pullPolicy: "IfNotPresent"
+imagePullSecrets: []
+mountMode: mountpod
+kubeletDir: /var/lib/kubelet
+jfsMountDir: /data/service/juicefs/volume
+jfsConfigDir: /data/service/juicefs/config
+immutable: false
+dnsPolicy: ClusterFirstWithHostNet
+controller:
+  enabled: true
+  leaderElection:
+    enabled: true
+  provisioner: false
+  replicas: 3
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 512Mi
+  terminationGracePeriodSeconds: 30
+  affinity: {}
+  nodeSelector: {}
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+  service:
+    port: 9909
+    type: ClusterIP
+  priorityClassName: system-cluster-critical
+  envs:
+    - name: TZ
+      value: "Asia/Shanghai"
+node:
+  enabled: true
+  hostNetwork: false
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 512Mi
+  storageClassShareMount: false
+  mountPodNonPreempting: false
+  terminationGracePeriodSeconds: 30
+  affinity: {}
+  nodeSelector: {}
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+  priorityClassName: system-node-critical
+  envs:
+    - name: TZ
+      value: "Asia/Shanghai"
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 50%
+  ifPollingKubelet: true
+dashboard:
+  enabled: true
+  replicas: 1
+  leaderElection:
+    enabled: false
+  hostNetwork: false
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 200Mi
+  affinity: {}
+  nodeSelector: {}
+  tolerations:
+    - key: CriticalAddonsOnly
+      operator: Exists
+  service:
+    port: 8088
+    type: NodePort
+  priorityClassName: system-node-critical
+  envs:
+    - name: TZ
+      value: "Asia/Shanghai"
+storageClasses:
+- name: "juicefs-sc"
+  enabled: true
+  reclaimPolicy: Delete
+  allowVolumeExpansion: true
+  # annotations:
+  #   storageclass.kubernetes.io/is-default-class: "true"
+  backend:
+    name: "juicefs-minio"
+    # 提前手动创建数据库、密码中的特殊字符不需要进行 url 编码
+    metaurl: "mysql://root:Admin@123@(192.168.1.10:26487)/juicefs"
+    storage: "minio"
+    bucket: "http://192.168.1.12:9000/kongyu-juicefs-csi"
+    token: ""
+    accessKey: "admin"
+    secretKey: "Lingo@local_minio_9000"
+    envs: "{TZ: Asia/Shanghai}"
+    configs: ""
+    trashDays: "1"
+    formatOptions: ""
+  mountOptions:
+    - debug
+    - enable-xattr
+    - max-uploads=50
+    - cache-size=2048
+    - cache-dir=/var/foo
+    - allow_other
+  pathPattern: ""
+  cachePVC: ""
+  mountPod:
+    resources:
+      limits:
+        cpu: 5000m
+        memory: 5Gi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+    image: "registry.lingo.local/kubernetes/juicefs-mount:ce-v1.1.0"

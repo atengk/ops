@@ -1,0 +1,13 @@
+apiVersion: mysql.radondb.com/v1beta1
+kind: Backup
+metadata:
+  name: backup-mysql
+spec:
+  backupops:
+    s3:
+      secretName: mysql-backup-secret
+  clusterName: cluster
+  method: xtrabackup
+  schedule:
+    cronExpression: "*/2 * * * *"
+    type: s3

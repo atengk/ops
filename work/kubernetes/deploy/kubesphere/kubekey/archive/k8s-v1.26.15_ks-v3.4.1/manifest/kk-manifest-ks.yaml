@@ -1,0 +1,92 @@
+# cat kk-manifest-ks.yaml
+apiVersion: kubekey.kubesphere.io/v1alpha2
+kind: Manifest
+metadata:
+  name: k8s-cluster
+spec:
+  arches:
+  - amd64
+  operatingSystems:
+  - arch: amd64
+    type: linux
+    id: centos
+    version: "7"
+    osImage: CentOS Linux 7 (Core)
+    repository:
+      iso:
+        localPath: /tmp/centos7-rpms-amd64.iso
+        #url: https://github.com/kubesphere/kubekey/releases/download/v3.1.1/centos7-rpms-amd64.iso
+  kubernetesDistributions:
+  - type: kubernetes
+    version: v1.26.15
+  components:
+    helm:
+      version: v3.14.3
+    cni:
+      version: v1.2.0
+    etcd:
+      version: v3.5.13
+    containerRuntimes:
+    - type: docker
+      version: 24.0.9
+    - type: containerd
+      version: 1.7.13
+    calicoctl:
+      version: v3.27.3
+    crictl:
+      version: v1.29.0
+    docker-registry:
+      version: "2"
+    #harbor:
+    #  version: v2.10.1
+    docker-compose:
+      version: v2.26.1
+  images:
+  ## k8s
+  - docker.io/cilium/cilium:v1.15.3
+  - docker.io/cilium/operator-generic:v1.15.3
+  - docker.io/flannel/flannel-cni-plugin:v1.1.2
+  - docker.io/flannel/flannel:v0.21.3
+  - docker.io/kubesphere/kata-deploy:stable
+  - docker.io/kubeovn/kube-ovn:v1.10.10
+  - docker.io/plndr/kube-vip:v0.7.2
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/cni:v3.27.3
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/coredns:1.9.3
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/haproxy:2.9.6-alpine
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/hybridnet:v0.8.6
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/k8s-dns-node-cache:1.22.20
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-apiserver:v1.26.15
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-controller-manager:v1.26.15
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-controllers:v3.27.3
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-proxy:v1.26.15
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-scheduler:v1.26.15
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/linux-utils:3.3.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/multus-cni:v3.8
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/node-feature-discovery:v0.10.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/node:v3.27.3
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/pause:3.9
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/pod2daemon-flexvol:v3.27.3
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/provisioner-localpv:3.3.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/typha:v3.27.3
+  ## ks
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/ks-installer:v3.4.1
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/snapshot-controller:v4.0.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/ks-apiserver:v3.4.1
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/ks-console:v3.4.1
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/ks-controller-manager:v3.4.1
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-rbac-proxy:v0.11.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/kube-state-metrics:v2.6.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/kubectl:v1.22.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/notification-manager-operator:v2.3.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/notification-manager:v2.3.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/notification-tenant-sidecar:v3.2.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/prometheus-config-reloader:v0.55.1
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/prometheus-operator:v0.55.1
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/redis:5.0.14-alpine
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/defaultbackend-amd64:1.4
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/alertmanager:v0.23.0
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/node-exporter:v1.3.1
+  - registry.cn-beijing.aliyuncs.com/kubesphereio/prometheus:v2.39.1
+  registry:
+    auths: {}
+

@@ -1,0 +1,78 @@
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: Cluster
+metadata:
+  name: kafka-cluster
+  namespace: kongyu
+spec:
+  terminationPolicy: Halt
+  affinity:
+    podAntiAffinity: Preferred
+    topologyKeys:
+      - kubernetes.io/hostname
+    tenancy: SharedNode
+  clusterDefinitionRef: kafka
+  clusterVersionRef: kafka-3.3.2
+  componentSpecs:
+  - name: kafka-controller
+    componentDefRef: controller
+    monitor: false
+    replicas: 1
+    resources:
+      limits:
+        cpu: "4"
+        memory: 8Gi
+      requests:
+        cpu: "1"
+        memory: 1Gi       
+    env:
+      - name: TZ
+        value: Asia/Shanghai
+    services:
+      - name: kafka-controller
+        serviceType: NodePort
+    volumeClaimTemplates:
+      - name: data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
+      - name: metadata
+        spec:
+          storageClassName:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
+  - name: kafka-broker
+    componentDefRef: kafka-broker
+    monitor: false
+    replicas: 3
+    resources:
+      limits:
+        cpu: "4"
+        memory: 8Gi
+      requests:
+        cpu: "1"
+        memory: 1Gi       
+    env:
+      - name: TZ
+        value: Asia/Shanghai
+    volumeClaimTemplates:
+      - name: data
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
+      - name: metadata
+        spec:
+          storageClassName:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi

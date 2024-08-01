@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vm-openeuler
+  namespace: default
+spec:
+  selector:
+    kubevirt.io/vm: vm-openeuler
+  ports:
+  - protocol: TCP
+    port: 22
+    targetPort: 22
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    kubevirt.io/vm: vm-openeuler
+  name: vm-openeuler
+  namespace: default
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-openeuler
+    spec:
+      #nodeSelector:
+      #  kubernetes.io/hostname: k8s-worker-node2
+      domain:
+        cpu:
+          cores: 2
+          model: host-passthrough
+        memory:
+          guest: 4Gi
+        resources:
+          overcommitGuestOverhead: true
+        devices:
+          disks:
+          - name: containerdisk
+            disk:
+              bus: virtio
+          - name: emptydisk
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            bridge: {}
+      terminationGracePeriodSeconds: 30
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: containerdisk
+        containerDisk:
+          image: swr.cn-north-1.myhuaweicloud.com/kongyu/kubevirt/linux:openeuler-24.03-lts-x86_64
+      - name: emptydisk
+        emptyDisk:
+          capacity: 20Gi
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #!/bin/sh
+            echo Admin@123 | passwd --stdin root 
+            sed -i "s#PasswordAuthentication.*#PasswordAuthentication yes#g" /etc/ssh/sshd_config.d/50-cloud-init.conf
+            systemctl restart sshd

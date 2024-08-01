@@ -1,0 +1,95 @@
+apiVersion: mysql.radondb.com/v1alpha1
+kind: MysqlCluster
+metadata:
+  name: cluster
+spec:
+  replicas: 3
+  mysqlVersion: "8.0"
+  # the backupSecretName specify the secret file name which store S3 information,
+  # if you want S3 backup or restore, please create backup_secret.yaml, uncomment below and fill secret name:
+  # backupSecretName: 
+  
+  # if you want create mysqlcluster from S3, uncomment and fill the directory in S3 bucket below:
+  # restoreFrom: 
+  
+  mysqlOpts:
+    image: registry.lingo.local/service/percona-server-mysql:8.0.36
+    user: kongyu
+    password: Admin@123
+    database: kongyu
+    ## tokudb is not supported in mysql8.
+    # initTokuDB: false
+
+    # A simple map between string and string.
+    # Such as:
+    #    mysqlConf:
+    #      expire_logs_days: "7"
+    mysqlConf:
+      expire_logs_days: "7"
+      max_allowed_packet: 100M
+      character_set_server: utf8mb4
+      collation_server: utf8mb4_general_ci
+      init_connect: "SET NAMES utf8mb4"
+      default_time_zone: "+8:00"
+      lower_case_table_names: "1"
+      max_connections: "10240"
+      max_connect_errors: "1024"
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+
+  xenonOpts:
+    image: registry.lingo.local/service/xenon:v3.0.0
+    admitDefeatHearbeatCount: 5
+    electionTimeout: 10000
+
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 256Mi
+
+  metricsOpts:
+    enabled: false
+    image: registry.lingo.local/service/mysqld-exporter:v0.15.1
+
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+  podPolicy:
+    imagePullPolicy: IfNotPresent
+    sidecarImage: registry.lingo.local/service/mysql80-sidecar:v3.0.0
+    busyboxImage: registry.lingo.local/service/busybox:1.36.1
+
+    slowLogTail: false
+    auditLogTail: false
+
+    labels: {}
+    annotations: {}
+    affinity: {}
+    priorityClassName: ""
+    tolerations: []
+    schedulerName: ""
+    # extraResources defines quotas for containers other than mysql or xenon.
+    extraResources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+
+  persistence:
+    enabled: true
+    accessModes:
+    - ReadWriteOnce
+    storageClass: "openebs-hostpath"
+    size: 200Gi

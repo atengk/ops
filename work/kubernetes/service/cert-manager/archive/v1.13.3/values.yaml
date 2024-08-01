@@ -1,0 +1,104 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "cert-manager"
+logLevel: 2
+leaderElection:
+  namespace: "kube-system"
+installCRDs: true
+replicaCount: 1
+controller:
+  replicaCount: 1
+  image:
+    registry: registry.lingo.local
+    repository: service/cert-manager
+    tag: 1.13.3
+    pullPolicy: IfNotPresent
+    debug: false
+  acmesolver:
+    image:
+      registry: registry.lingo.local
+      repository: service/acmesolver
+      tag: 1.13.3
+      pullPolicy: IfNotPresent
+      debug: false
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}
+  containerPort: 9402
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
+    automountServiceAccountToken: true
+webhook:
+  replicaCount: 1
+  image:
+    registry: registry.lingo.local
+    repository: service/cert-manager-webhook
+    tag: 1.13.3
+    pullPolicy: IfNotPresent
+    debug: false
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}
+  containerPort: 10250
+  httpsPort: 443
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
+    automountServiceAccountToken: true
+  hostNetwork: false
+cainjector:
+  replicaCount: 1
+  image:
+    registry: registry.lingo.local
+    repository: service/cainjector
+    tag: 1.13.3
+    pullPolicy: IfNotPresent
+    debug: false
+  resources:
+    limits: {}
+    requests: {}
+  affinity: {}
+  nodeSelector: {}
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
+    automountServiceAccountToken: true
+metrics:
+  enabled: true
+  podAnnotations:
+    prometheus.io/path: "/metrics"
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.controller.containerPort }}"
+  serviceMonitor:
+    path: /metrics
+    targetPort: 9402
+    enabled: false
+    namespace: ""
+    jobLabel: ""
+    interval: 60s
+    scrapeTimeout: 30s
+    relabelings: []
+    metricRelabelings: []
+    selector: {}
+    labels: {}
+    additionalLabels: {}
+    honorLabels: false
+rbac:
+  create: true

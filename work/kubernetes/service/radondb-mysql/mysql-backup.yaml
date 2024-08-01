@@ -1,0 +1,11 @@
+apiVersion: mysql.radondb.com/v1alpha1
+kind: Backup
+metadata:
+  name: mysql-backup
+spec:
+  # Add fields here
+  image: registry.lingo.local/service/mysql80-sidecar:v3.0.0
+  # hostname if empty, use the leader as hostname
+  hostName: cluster-mysql-0
+  clusterName: cluster
+  # nfsServerAddress: ""

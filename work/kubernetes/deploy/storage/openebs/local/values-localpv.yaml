@@ -1,0 +1,29 @@
+openebsNDM:
+  enabled: false
+localpv:
+  name: localpv-provisioner
+  enabled: true
+  image:
+    registry:
+    repository: openebs/provisioner-localpv
+    tag: 3.1.0
+    pullPolicy: IfNotPresent
+  replicas: 1
+  enableLeaderElection: true
+  basePath: "/data/kubernetes/storage/openebs/local"
+fullnameOverride: "localpv-provisioner"
+hostpathClass:
+  name: openebs-hostpath
+  enabled: true
+  reclaimPolicy: Delete
+  isDefaultClass: false
+  basePath: "/data/kubernetes/storage/openebs/local"
+helperPod:
+  image:
+    registry: ""
+    repository: openebs/linux-utils
+    pullPolicy: IfNotPresent
+    tag: 3.1.0
+analytics:
+  enabled: true
+  pingInterval: "24h"

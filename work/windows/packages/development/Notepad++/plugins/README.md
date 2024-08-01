@@ -1,0 +1,1 @@
+解压到Notepad++的plugins目录下

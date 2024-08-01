@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentinel-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sentinel-dashboard
+  template:
+    metadata:
+      labels:
+        app: sentinel-dashboard
+    spec:
+      containers:
+      - name: sentinel-dashboard
+        image: registry.lingo.local/service/sentinel-dashboard:1.8.7
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: dashboard
+          containerPort: 8858
+        - name: transport
+          containerPort: 8719
+        env:
+        - name: TZ
+          value: "Asia/Shanghai"
+        livenessProbe:
+          tcpSocket:
+            port: 8719
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 8719
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-dashboard
+  labels:
+    app: sentinel-dashboard
+spec:
+  selector:
+    app: sentinel-dashboard
+  ports:
+    - name: dashboard
+      protocol: TCP
+      port: 8858
+      targetPort: 8858
+  type: NodePort
+

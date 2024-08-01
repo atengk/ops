@@ -1,0 +1,82 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "kafka"
+image:
+  debug: true
+  registry: registry.lingo.local
+  repository: service/kafka
+  tag: 3.3.1
+  pullPolicy: IfNotPresent
+heapOpts: -Xmx1024m -Xms1024m
+deleteTopicEnable: true
+autoCreateTopicsEnable: true
+logFlushIntervalMessages: _10000
+logFlushIntervalMs: 1000
+logRetentionBytes: _1073741824
+logRetentionCheckIntervalMs: 300000
+logRetentionHours: 168
+logSegmentBytes: _1073741824
+maxMessageBytes: _1000012
+defaultReplicationFactor: 3
+offsetsTopicReplicationFactor: 3
+transactionStateLogReplicationFactor: 1
+transactionStateLogMinIsr: 1
+numIoThreads: 8
+numNetworkThreads: 3
+numPartitions: 3
+numRecoveryThreadsPerDataDir: 1
+socketReceiveBufferBytes: 102400
+socketRequestMaxBytes: _104857600
+socketSendBufferBytes: 102400
+
+replicaCount: 3
+minBrokerId: 0
+
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+resources:
+  limits: {}
+  requests: {}
+affinity: {}
+nodeSelector: {}
+containerPorts:
+  client: 9092
+  internal: 9093
+  external: 9094
+service:
+  type: NodePort
+  ports:
+    client: 9092
+    internal: 9093
+    external: 9094
+  nodePorts:
+    client: ""
+    external: ""
+persistence:
+  size: 8Gi
+zookeeper:
+  enabled: false
+externalZookeeper:
+  servers:
+    - zookeeper-0.zookeeper-headless
+    - zookeeper-1.zookeeper-headless
+    - zookeeper-2.zookeeper-headless
+externalAccess:
+  enabled: true
+  autoDiscovery:
+    enabled: true
+    image:
+      registry: registry.lingo.local
+      repository: service/kubectl
+      tag: 1.23.12
+  service:
+    type: NodePort
+    ports:
+      external: 9094
+    nodePorts:
+      - 39091
+      - 39092
+      - 39093
+rbac:
+  create: true

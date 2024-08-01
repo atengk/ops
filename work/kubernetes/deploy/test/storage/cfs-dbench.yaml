@@ -1,0 +1,45 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cfs-dbench
+spec:
+  template:
+    spec:
+      terminationGracePeriodSeconds: 10
+      nodeSelector:
+        kubernetes.io/hostname: k8s-worker02
+      containers:
+      - name: cfs-dbench
+        image: ndrpnt/dbench:1.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: DBENCH_MOUNTPOINT
+            value: /data
+          - name: DBENCH_QUICK
+            value: "no"
+          - name: FIO_SIZE
+            value: 10G
+          - name: FIO_OFFSET_INCREMENT
+            value: 256M
+          - name: FIO_DIRECT
+            value: "1"
+        volumeMounts:
+        - name: cfs-vol
+          mountPath: /data
+      restartPolicy: Never
+      volumes:
+      - name: cfs-vol
+        persistentVolumeClaim:
+          claimName: cfs-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cfs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: kadalu.kadalu-replica3

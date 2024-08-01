@@ -1,0 +1,17 @@
+fullnameOverride: "nfs-server-provisioner"
+replicaCount: 1
+image:
+  repository: registry.lingo.local/kubernetes/nfs-server-provisioner
+  tag: v3.0.0
+  pullPolicy: IfNotPresent
+persistence:
+  hostpath: /data/kubernetes/storage/nfs-server
+storageClass:
+  create: true
+  defaultClass: false
+  name: nfs-server
+  allowVolumeExpansion: false
+  ## ReclaimPolicy field of the class, which can be either Delete or Retain
+  reclaimPolicy: Delete
+nodeSelector:
+   app: nfs-server-provisioner

@@ -1,0 +1,46 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: iperf3-server
+  namespace: default
+  labels:
+    app: iperf3-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iperf3-server
+  template:
+    metadata:
+      labels:
+        app: iperf3-server
+    spec:
+      containers:
+        - name: iperf3
+          image: networkstatic/iperf3
+          command:
+            - iperf3
+          args:
+            - '-s'
+          imagePullPolicy: IfNotPresent
+      terminationGracePeriodSeconds: 10
+      nodeSelector:
+        kubernetes.io/hostname: k8s-worker03
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: iperf3-server
+  namespace: default
+  labels:
+    app: iperf3-server
+spec:
+  ports:
+    - name: tpc-5201
+      protocol: TCP
+      port: 5201
+      targetPort: 5201
+      nodePort: 11475
+  selector:
+    app: iperf3-server
+  type: NodePort

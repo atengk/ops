@@ -1,0 +1,77 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: ScheduledSparkApplication
+metadata:
+  name: spark-pi-scheduled
+  namespace: spark-operator
+spec:
+  #schedule: "@every 1m"
+  ## 2分钟运行一次
+  schedule: "*/2 * * * *"
+  concurrencyPolicy: Allow
+  template:
+    type: Scala
+    mode: cluster
+    image: "registry.lingo.local/service/spark:3.5.0"
+    imagePullPolicy: Always
+    mainClass: org.apache.spark.examples.SparkPi
+    arguments:
+      - "10000"
+    #mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.5.0.jar"
+    mainApplicationFile: "http://192.168.1.12:9000/test/flink/spark-examples_2.12-3.5.0.jar"
+    sparkVersion: "3.5.0"
+    sparkUIOptions:
+      serviceType: NodePort
+    dynamicAllocation:
+      enabled: true
+      initialExecutors: 1
+      maxExecutors: 2
+      minExecutors: 1
+    restartPolicy:
+      type: Never
+    #volumes:
+    #  - name: "test-volume"
+    #    persistentVolumeClaim:
+    #      claimName: spark-tmp
+    driver:
+      cores: 2
+      coreLimit: "2"
+      coreRequest: "1"
+      memory: "2g"
+      env:
+        - name: TZ
+          value: Asia/Shanghai      
+      labels:
+        version: 3.5.0
+        app.kubernetes.io/name: spark-standard-myapp
+        app.kubernetes.io/component: driver
+      serviceAccount: spark-operator-spark
+      #volumeMounts:
+      #  - name: "test-volume"
+      #    mountPath: "/tmp"
+    executor:
+      cores: 2
+      coreLimit: "2"
+      coreRequest: "1"
+      memory: "4g"
+      instances: 1
+      env:
+        - name: TZ
+          value: Asia/Shanghai      
+      labels:
+        version: 3.5.0
+        app.kubernetes.io/name: spark-standard-myapp
+        app.kubernetes.io/component: executor
+      #volumeMounts:
+      #  - name: "test-volume"
+      #    mountPath: "/tmp"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: spark-standard-myapp
+                    app.kubernetes.io/component: executor
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+   
