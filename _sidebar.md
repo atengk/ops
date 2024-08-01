@@ -22,6 +22,8 @@
         - Harbor
             - [http](/work/kubernetes/service/harbor/v2.11.0/http/)
             - [ingress-http](/work/kubernetes/service/harbor/v2.11.0/ingress-http/)
-
-​				
+    
+    - backups
+        - velero
+            - [安装备份和恢复Velero](/work/kubernetes/deploy/backups/velero/v1.11.0/)
 
