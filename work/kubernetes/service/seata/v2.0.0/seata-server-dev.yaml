@@ -1,0 +1,202 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: seata-server
+  labels:
+    app.kubernetes.io/name: seata-server
+spec:
+  type: NodePort
+  ports:
+    - port: 38091
+      protocol: TCP
+      name: http
+      nodePort: 38091
+    - port: 7091
+      protocol: TCP
+      name: netty
+      nodePort: 37091
+  selector:
+    app.kubernetes.io/name: seata-server
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seata-server
+  labels:
+    app.kubernetes.io/name: seata-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: seata-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: seata-server
+    spec:
+      terminationGracePeriodSeconds: 30
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: nacos
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+      containers:
+        - name: seata-server
+          image: registry.lingo.local/service/seata-server:2.0.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SEATA_IP
+              value: 192.168.1.10
+            - name: SEATA_PORT
+              value: '38091'
+          ports:
+            - name: http
+              containerPort: 38091
+              protocol: TCP
+            - name: netty
+              containerPort: 7091
+              protocol: TCP
+          volumeMounts:
+            - name: seata-config
+              mountPath: /seata-server/resources/application.yml
+              subPath: 'application.yml'
+          livenessProbe:
+            tcpSocket:
+              port: 7091
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 7091
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+      volumes:
+        - name: seata-config
+          configMap:
+            name: seata-server-config
+            items:
+              - key: application.yml
+                path: application.yml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seata-server-config
+data:
+  application.yml: |
+    server:
+      port: 7091
+     
+    spring:
+      application:
+        name: seata-server
+     
+    logging:
+      config: classpath:logback-spring.xml
+      file:
+        path: ${log.home:${user.home}/logs/seata}
+      #extend:
+      #  logstash-appender:
+      #    destination: 127.0.0.1:4560
+      #  kafka-appender:
+      #    bootstrap-servers: 127.0.0.1:9092
+      #    topic: logback_to_logstash
+     
+    console:
+      user:
+        username: seata
+        password: seata
+    seata:
+      config:
+        # support: nacos, consul, apollo, zk, etcd3
+        type: nacos
+        nacos:
+          server-addr: 192.168.1.10:30848
+          namespace: f0e7680e-46fd-449b-abf1-2fccb86967c9
+          group: seata
+          username: nacos
+          password: Admin@123
+          context-path:
+          data-id: seataServer.properties
+      registry:
+        # support: nacos, eureka, redis, zk, consul, etcd3, sofa
+        type: nacos
+        nacos:
+          application: seata-server
+          server-addr: 192.168.1.10:30848
+          namespace: f0e7680e-46fd-449b-abf1-2fccb86967c9
+          cluster: default
+          group: seata
+          username: nacos
+          password: Admin@123
+          context-path:
+      server:
+        service-port: 8091 #If not configured, the default is '${server.port} + 1000'
+        max-commit-retry-timeout: -1
+        max-rollback-retry-timeout: -1
+        rollback-retry-timeout-unlock-enable: false
+        enable-check-auth: true
+        enable-parallel-request-handle: true
+        enable-parallel-handle-branch: false
+        retry-dead-threshold: 130000
+        xaer-nota-retry-timeout: 60000
+        enableParallelRequestHandle: true
+        recovery:
+          committing-retry-period: 1000
+          async-committing-retry-period: 1000
+          rollbacking-retry-period: 1000
+          timeout-retry-period: 1000
+        undo:
+          log-save-days: 7
+          log-delete-period: 86400000
+        session:
+          branch-async-queue-size: 5000 #branch async remove queue size
+          enable-branch-async-remove: false #enable to asynchronous remove branchSession
+      store:
+        # support: file 、 db 、 redis 、 raft
+        mode: db
+        db:
+          datasource: druid
+          db-type: mysql
+          driver-class-name: com.mysql.jdbc.Driver
+          url: jdbc:mysql://192.168.1.10:35725/seata?rewriteBatchedStatements=true
+          user: root
+          password: Admin@123
+          min-conn: 10
+          max-conn: 100
+          global-table: global_table
+          branch-table: branch_table
+          lock-table: lock_table
+          distributed-lock-table: distributed_lock
+          query-limit: 1000
+          max-wait: 5000
+      metrics:
+        enabled: false
+        registry-type: compact
+        exporter-list: prometheus
+        exporter-prometheus-port: 9898
+      transport:
+        rpc-tc-request-timeout: 15000
+        enable-tc-server-batch-send-response: false
+        shutdown:
+          wait: 3
+        thread-factory:
+          boss-thread-prefix: NettyBoss
+          worker-thread-prefix: NettyServerNIOWorker
+          boss-thread-size: 1
+      security:
+        secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+        tokenValidityInMilliseconds: 1800000
+        ignore:
+          urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/metadata/v1/**
