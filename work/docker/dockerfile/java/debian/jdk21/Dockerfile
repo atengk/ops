@@ -24,7 +24,7 @@ ENV TZ=Asia/Shanghai
 # 安装软件
 RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.cloud.tencent.com#g" /etc/apt/sources.list.d/debian.sources && \
     apt-get update && \
-    apt-get install -y locales && \
+    apt-get install -y locales curl && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
