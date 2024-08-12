@@ -8,11 +8,17 @@
 
 ## 安装软件包
 
+下载软件包
+
+```
+wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.2-linux-glibc2.28-x86_64.tar.xz
+```
+
 解压软件包
 
 ```
 tar -xvf mysql-8.4.2-linux-glibc2.28-x86_64.tar.xz -C /usr/local/software
-ln -s mysql-8.4.2-linux-glibc2.28-x86_64 /usr/local/software/mysql
+ln -s /usr/local/software/mysql-8.4.2-linux-glibc2.28-x86_64 /usr/local/software/mysql
 ```
 
 ## 基础配置
@@ -60,11 +66,14 @@ init_connect='SET NAMES utf8mb4'
 slow_query_log=1
 slow_query_log_file=/data/service/mysql/logs/slow_query.log
 long_query_time=10.0
-default_time_zone = "+8:00"
-lower_case_table_names = 0
-max_connections = 1024
-max_connect_errors = 1024
-skip-log-bin
+default_time_zone="+8:00"
+lower_case_table_names=0
+max_connections=1024
+max_connect_errors=1024
+server-id=1
+log-bin=mysql-bin
+max_binlog_size=1024M
+binlog_expire_logs_seconds=2592000
 [client]
 port=3306
 socket=/usr/local/software/mysql/mysql.sock
@@ -129,25 +138,18 @@ create user root@'%' identified by 'Admin@123';
 grant all privileges on *.* to root@'%' with grant option;
 ```
 
-创建普通用户
-
-```
-## 创建数据库
-create database kongyu;
-## 创建用户
-create user kongyu@'%' identified by 'kongyu';
-grant all privileges on kongyu.* to kongyu@'%' with grant option;
-create user kongyu@'localhost' identified by 'kongyu';
-grant all privileges on kongyu.* to kongyu@'localhost' with grant option;
-```
-
 
 
 # 配置主从
 
 确保你有两台服务器或两台虚拟机，一台作为主服务器（Master），一台作为从服务器（Slave）。安装好MySQL 8并进行基本的配置。
 
-### 编辑MySQL配置文件
+| IP                     | Server |
+| ---------------------- | ------ |
+| 192.168.1.112 server01 | 主服务 |
+| 192.168.1.113 server02 | 从服务 |
+
+## 编辑MySQL配置文件
 
 > `server-id`是MySQL实例的唯一标识符，必须确保在集群中唯一。`log-bin`用于启用二进制日志记录，这是主从复制所需的。
 
@@ -158,10 +160,6 @@ $ vi +25 $MYSQL_HOME/my.cnf
 [mysqld]
 ...
 server-id=1
-log-bin=mysql-bin
-max_binlog_size=1024M
-binlog_expire_logs_seconds=2592000
-binlog-ignore-db=mysql,information_schema,performance_schema,sys
 ```
 
 从服务器修改server-id
@@ -179,7 +177,7 @@ server-id=2
 sudo systemctl restart mysqld
 ```
 
-### 创建复制用户
+## 创建复制用户
 
 登录到MySQL主服务器并创建一个用于复制的用户。
 
@@ -190,7 +188,7 @@ GRANT REPLICATION SLAVE ON *.* TO 'replica'@'%';
 FLUSH PRIVILEGES;
 ```
 
-### 锁定数据库并获取二进制日志坐标
+## 锁定数据库并获取二进制日志坐标
 
 登录到MySQL主服务器并锁定数据库以确保数据一致性，并获取二进制日志的坐标。
 
@@ -202,19 +200,19 @@ SHOW BINARY LOGS;
 
 记下输出的最新的`Log_name`和`File_size`值。这将在配置从服务器时使用。
 
-### 配置复制
+## 配置复制
 
 登录到MySQL从服务器，并配置复制。
 
 ```sql
 $ mysql -uroot -pAdmin@123
 CHANGE REPLICATION SOURCE TO
-SOURCE_HOST='10.14.2.142',
+SOURCE_HOST='server01',
 SOURCE_PORT=3306,
-SOURCE_USER='root',
+SOURCE_USER='replica',
 SOURCE_PASSWORD='Admin@123',
-SOURCE_LOG_FILE='mysql-bin.000002',
-SOURCE_LOG_POS=1750,
+SOURCE_LOG_FILE='mysql-bin.000003',
+SOURCE_LOG_POS=865,
 GET_SOURCE_PUBLIC_KEY=1;
 ```
 
@@ -224,7 +222,7 @@ GET_SOURCE_PUBLIC_KEY=1;
 START REPLICA;
 ```
 
-### 验证复制
+## 验证复制
 
 在从服务器上检查复制状态：
 
@@ -240,7 +238,7 @@ SHOW REPLICA STATUS\G;
 SHOW REPLICAS;
 ```
 
-### 解锁主服务器
+## 解锁主服务器
 
 在主服务器上解锁数据库：
 
@@ -250,7 +248,110 @@ UNLOCK TABLES;
 
 
 
+# 配置主主
+
+确保已经配置好主从了，主主就是在从节点也开启bin-log，然后主节点和从节点互相同步
+
+| IP                     | Server           |
+| ---------------------- | ---------------- |
+| 192.168.1.112 server01 | 主服务           |
+| 192.168.1.113 server02 | 从服务 => 主服务 |
+
+## 创建复制用户
+
+登录到MySQL从服务器并创建一个用于复制的用户。
+
+```sql
+$ mysql -uroot -pAdmin@123
+CREATE USER 'replica'@'%' IDENTIFIED BY 'Admin@123';
+GRANT REPLICATION SLAVE ON *.* TO 'replica'@'%';
+FLUSH PRIVILEGES;
+```
+
+## 锁定数据库并获取二进制日志坐标
+
+登录到MySQL从服务器并锁定数据库以确保数据一致性，并获取二进制日志的坐标。
+
+```sql
+$ mysql -uroot -pAdmin@123
+FLUSH TABLES WITH READ LOCK;
+SHOW BINARY LOGS;
+```
+
+记下输出的最新的`Log_name`和`File_size`值。这将在配置从服务器时使用。
+
+## 配置复制
+
+登录到MySQL主服务器，并配置复制。
+
+```sql
+$ mysql -uroot -pAdmin@123
+CHANGE REPLICATION SOURCE TO
+SOURCE_HOST='server02',
+SOURCE_PORT=3306,
+SOURCE_USER='replica',
+SOURCE_PASSWORD='Admin@123',
+SOURCE_LOG_FILE='mysql-bin.000003',
+SOURCE_LOG_POS=879,
+GET_SOURCE_PUBLIC_KEY=1;
+```
+
+启动复制进程：
+
+```
+START REPLICA;
+```
+
+## 验证复制
+
+在主服务器上检查复制状态：
+
+```sql
+SHOW REPLICA STATUS\G;
+```
+
+确保`Slave_IO_Running`和`Slave_SQL_Running`都显示为`Yes`。如果有任何错误，可以根据错误信息进行排查。
+
+在从服务器上查看复制节点：
+
+```
+SHOW REPLICAS;
+```
+
+## 解锁从服务器
+
+在从服务器上解锁数据库：
+
+```
+UNLOCK TABLES;
+```
+
+## 负载均衡连接
+
+使用 jdbc 的自动重试机制
+
+```
+jdbc:mysql:loadbalance://192.168.1.112:3306,192.168.1.113:3306/kongyu
+```
+
+
+
 # 创建数据
+
+创建数据库
+
+```sql
+create database kongyu;
+```
+
+创建用户
+
+```sql
+create user kongyu@'%' identified by 'kongyu';
+grant all privileges on kongyu.* to kongyu@'%' with grant option;
+create user kongyu@'localhost' identified by 'kongyu';
+grant all privileges on kongyu.* to kongyu@'localhost' with grant option;
+```
 
 创建用户表
 
