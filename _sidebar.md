@@ -1,11 +1,37 @@
 - Linux Service
+    - 基础配置
+        - [基础配置](work/service/00-basic/)
     - MySQL
         - [MySQL v8.0.39](/work/service/mysql/v8.0.39/)
-        - [MySQL v8.4.2](/work/service/mysql/v8.4.2-lts/)
+        - [MySQL v8.4.2](/work/service/mysql/make/)
+        - [编译安装](/work/service/mysql/v8.4.2-lts/)
+        - [OpenEuler编译安装](/work/service/mysql/v8.4.2-lts/README_OpenEuler.md)
+        - [OpenEuler dnf安装](/work/service/mysql/openeuler/v8.0.37/)
+    - MariaDB Galera
+        - [MariaDB v11.4.2](/work/service/mariadb/v11.4.2/)
     - Redis
+        - [Redis v6.2.14](/work/service/redis/v6.2.14/)
         - [Redis v7.2.5](/work/service/redis/v7.2.5/)
     - PostgreSQL
-        - [PostgreSQL v7.2.5](/work/service/postgresql/README_OpenEuler.md)
+        - [编译安装PostgreSQL](/work/service/postgresql/)
+        - [编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
+        - [OpenEuler编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
+        - [OpenEuler安装PostgreSQL](/work/service/postgresql/openeuler/v15.6/)
+    - Nginx
+        - [Nginx v1.23.4](/work/service/nginx/v1.23.4/)
+        - [配置HTTPS证书](/work/service/nginx/v1.23.4/tls/)
+    - MinIO
+        - [MinIO v20240717](/work/service/minio/v20240717/)
+    - JuiceFS
+        - [JuiceFS v1.1.1](/work/service/juicefs/v1.1.1/)
+    - ETCD
+        - [ETCD v3.5.1](/work/service/etcd/v3.5.1/)
+    - ElasticSearch
+        - [standalone](/work/service/elastic/elasticsearch/standalone/)
+        - [cluster](/work/service/elastic/elasticsearch/cluster/)
+    - TLS证书
+        - [cfssl](/work/service/tls/tls-cfssl/)
+        - [openssl](/work/service/tls/tls-openssl/)
 
 - Kubernetes
     - deploy
@@ -22,8 +48,20 @@
         - Harbor
             - [http](/work/kubernetes/service/harbor/v2.11.0/http/)
             - [ingress-http](/work/kubernetes/service/harbor/v2.11.0/ingress-http/)
-    
     - backups
         - velero
             - [安装备份和恢复Velero](/work/kubernetes/deploy/backups/velero/v1.11.0/)
+
+- 大数据
+    - 基础配置
+        - [基础配置](work/bigdata/00-basic/)
+    - JDK
+        - [OpenJDK](/work/bigdata/01-jdk/README_OpenJDK.md)
+        - [OracleJDK](/work/bigdata/01-jdk/)
+    - Zookeeper
+        - [集群](work/bigdata/02-zookeeper/)
+    - Hadoop
+        - [单机](work/bigdata/03-hadoop/standalone/)
+        - [集群](work/bigdata/03-hadoop/cluster/)
+        - [高可用集群](work/bigdata/03-hadoop/cluster-ha/)
 
