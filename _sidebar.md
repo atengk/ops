@@ -3,9 +3,9 @@
         - [基础配置](work/service/00-basic/)
     - MySQL
         - [MySQL v8.0.39](/work/service/mysql/v8.0.39/)
-        - [MySQL v8.4.2](/work/service/mysql/make/)
-        - [编译安装](/work/service/mysql/v8.4.2-lts/)
-        - [OpenEuler编译安装](/work/service/mysql/v8.4.2-lts/README_OpenEuler.md)
+        - [MySQL v8.4.2](/work/service/mysql/v8.4.2-lts/)
+        - [编译安装](/work/service/mysql/make/)
+        - [OpenEuler编译安装](/work/service/mysql/make/README_OpenEuler.md)
         - [OpenEuler dnf安装](/work/service/mysql/openeuler/v8.0.37/)
     - MariaDB Galera
         - [MariaDB v11.4.2](/work/service/mariadb/v11.4.2/)
@@ -38,9 +38,32 @@
         - kubekey
             - [离线安装KubeSphere](/work/kubernetes/deploy/kubesphere/kubekey/kubeshpere-v3.4.1/)
             - [在线安装KubeSphere](/work/kubernetes/deploy/kubesphere/kubekey/kubeshpere-v3.4.1/online/)
+        - kubeadm
+            - [k8s v1.23.12](/work/kubernetes/deploy/kubeadm/v1.23.12/)
         - harbor
             - [安装Harbor镜像仓库](/work/kubernetes/deploy/harbor/)
+        - kubevirt
+            - [kubevirt v1.3.0](/work/kubernetes/deploy/kubevirt/deploy/v1.3.0/)
+    - storage
+        - openebs
+            - [local](/work/kubernetes/deploy/storage/openebs/local/)
+        - nfs
+            - [nfs-client](/work/kubernetes/deploy/storage/nfs/nfs-client/)
+            - [nfs-server](/work/kubernetes/deploy/storage/nfs/nfs-server/)
+        - juicefs-csi
+            - [juicefs-csi](/work/kubernetes/deploy/storage/juicefs-csi/v0.24.4/)
+        - rook
+            - [ceph](/work/kubernetes/deploy/storage/rook/ceph/)
+            - [nfs](/work/kubernetes/deploy/storage/rook/nfs/)
+        - longhorn
+            - [longhorn](/work/kubernetes/deploy/storage/longhorn/v1.4.0/)
+        - kadalu
+            - [kadalu](/work/kubernetes/deploy/storage/kadalu/v1.0.0/)
     - service
+        - redis
+            - [redis v6.2.14](/work/kubernetes/service/redis/v6.2.14/)
+            - [redis v7.2.5](/work/kubernetes/service/redis/v7.2.5/)
+            - [升级](/work/kubernetes/service/redis/upgrade.md)
         - Mariadb Galera
             - [Galera v11.1.3](/work/kubernetes/service/mariadb/v11.1.3/)
             - [Galera v11.3.2](/work/kubernetes/service/mariadb/v11.3.2/)
@@ -51,6 +74,18 @@
     - backups
         - velero
             - [安装备份和恢复Velero](/work/kubernetes/deploy/backups/velero/v1.11.0/)
+        - etcd
+            - [备份到本地](/work/kubernetes/deploy/backups/etcd/local/)
+            - [备份到MinIO](/work/kubernetes/deploy/backups/etcd/minio/)
+        - mysql
+            - [备份到本地](/work/kubernetes/deploy/backups/mysql/local/)
+            - [备份到MinIO](/work/kubernetes/deploy/backups/mysql/minio/)
+        - postgresql
+            - [备份到本地](/work/kubernetes/deploy/backups/postgresql/local/)
+            - [备份到MinIO](/work/kubernetes/deploy/backups/postgresql/minio/)
+    - test
+        - [存储测试](/work/kubernetes/deploy/test/storage/)
+        - [网络测试](/work/kubernetes/deploy/test/network/)
 
 - 大数据
     - 基础配置
@@ -64,4 +99,46 @@
         - [单机](work/bigdata/03-hadoop/standalone/)
         - [集群](work/bigdata/03-hadoop/cluster/)
         - [高可用集群](work/bigdata/03-hadoop/cluster-ha/)
+    - Kafka
+        - [单机](work/bigdata/03-kafka/standalone/)
+        - [集群](work/bigdata/03-kafka/cluster/)
+        - [高可用集群](work/bigdata/03-kafka/cluster-ha/)
+    - HBase
+        - [单机](work/bigdata/04-hbase/standalone/)
+        - [集群](work/bigdata/04-hbase/cluster/)
+        - [高可用集群](work/bigdata/04-hbase/cluster-ha/)
+    - Hive
+        - [单机](work/bigdata/04-hive/standalone/)
+        - [集群](work/bigdata/04-hive/cluster/)
+        - [高可用集群](work/bigdata/04-hive/cluster-ha/)
+        - [集成TEZ](work/bigdata/04-hive/tez/)
+        - [运维](work/bigdata/04-hive/OPS.md)
+    - Spark
+        - [单机](work/bigdata/05-spark/standalone/)
+        - [集群](work/bigdata/05-spark/cluster/)
+        - [高可用集群](work/bigdata/05-spark/cluster-ha/)
+        - [YARN](work/bigdata/05-spark/yarn)
+        - [Kubernetes Operator](work/bigdata/05-spark/kubernetes-operator/)
+        - [Kubernetes](work/bigdata/05-spark/kubernetes/)
+        - [集成Hive](work/bigdata/05-spark/hive/)
+        - [运维](work/bigdata/05-spark/OPS.md)
+    - Flink
+        - [单机](work/bigdata/05-flink/standalone/)
+        - [集群](work/bigdata/05-flink/cluster/)
+        - [高可用集群](work/bigdata/05-flink/cluster-ha/)
+        - [YARN](work/bigdata/05-flink/yarn)
+        - [Kubernetes Operator](work/bigdata/05-flink/kubernetes-operator/)
+        - [Kubernetes](work/bigdata/05-flink/k8s/)
+        - [Flink CDC](work/bigdata/05-flink/cdc/)
+        - [运维](work/bigdata/05-flink/OPS.md)
+    - Doris
+        - [单机](work/bigdata/05-doris/standalone/)
+        - [集群](work/bigdata/05-doris/cluster/)
+        - [高可用集群](work/bigdata/05-doris/cluster-ha/)
+        - [运维](work/bigdata/05-doris/OPS.md)
+    - Iceberg
+        - [iceberg表格式](work/bigdata/06-iceberg/)
+    - Dolphinscheduler
+        - [单机](work/bigdata/06-dolphinscheduler/standalone/)
+        - [集群](work/bigdata/06-dolphinscheduler/cluster/)
 

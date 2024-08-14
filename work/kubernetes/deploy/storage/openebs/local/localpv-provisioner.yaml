@@ -170,7 +170,7 @@ spec:
         - name: OPENEBS_IO_ENABLE_ANALYTICS
           value: "true"
         - name: OPENEBS_IO_BASE_PATH
-          value: "/data/openebs/local"
+          value: "/data/service/openebs/local"
         - name: OPENEBS_IO_HELPER_IMAGE
           value: "registry.lingo.local/kubernetes/openebs-linux-utils:3.0.0"
         - name: OPENEBS_IO_INSTALLER_TYPE
