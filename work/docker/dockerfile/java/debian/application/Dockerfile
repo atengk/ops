@@ -10,7 +10,7 @@ COPY --chown=1001:1001 ${JAR_FILE} ${JAR_FILE}
 COPY --chown=1001:1001 docker-entrypoint.sh docker-entrypoint.sh
 
 # 设置环境变量
-ENV JAVA_OPTS="-server -Xms128m -Xmx1024m" \
+ENV JAVA_OPTS="-Xms128m -Xmx1024m" \
     JAR_FILE=${JAR_FILE}
 
 # 设置暴露的端口号
