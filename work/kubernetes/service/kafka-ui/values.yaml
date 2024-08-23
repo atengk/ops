@@ -1,0 +1,26 @@
+replicaCount: 1
+image:
+  registry: registry.lingo.local
+  repository: service/kafka-ui
+  pullPolicy: IfNotPresent
+  tag: "v0.7.2"
+yamlApplicationConfig:
+  kafka:
+    clusters:
+      - name: local-kafka
+        bootstrapServers: kafka-0.kafka-headless.lingo-service-bigdata:9092
+service:
+  type: NodePort
+  port: 80
+  # nodePort:
+resources:
+  {}
+  # limits:
+  #   cpu: 200m
+  #   memory: 512Mi
+  # requests:
+  #   cpu: 200m
+  #   memory: 256Mi
+env:
+  - name: TZ
+    value: Asia/Shanghai
