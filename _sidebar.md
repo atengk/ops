@@ -17,6 +17,7 @@
         - [编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
         - [OpenEuler编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
         - [OpenEuler安装PostgreSQL](/work/service/postgresql/openeuler/v15.6/)
+        - [其他](/work/service/postgresql/README_Test.md)
     - Nginx
         - [Nginx v1.23.4](/work/service/nginx/v1.23.4/)
         - [配置HTTPS证书](/work/service/nginx/v1.23.4/tls/)
