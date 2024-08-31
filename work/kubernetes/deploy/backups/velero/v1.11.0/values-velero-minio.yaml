@@ -44,7 +44,7 @@ configuration:
     ## 供应商存储桶名
     bucket: k8s-velero
     ## 存储路径路径名称
-    prefix: velero-101
+    prefix: velero
     ## 备份存储位置是否为默认(BackupStorageLocation)
     default: true
     ## 备份存储位置权限
