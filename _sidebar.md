@@ -20,6 +20,7 @@
         - [其他](/work/service/postgresql/README_Test.md)
     - Nginx
         - [Nginx v1.23.4](/work/service/nginx/v1.23.4/)
+        - [Nginx v1.26.2](/work/service/nginx/v1.26.2/)
         - [配置HTTPS证书](/work/service/nginx/v1.23.4/tls/)
     - MinIO
         - [MinIO v20240717](/work/service/minio/v20240717/)
@@ -37,8 +38,9 @@
 - Kubernetes
     - deploy
         - kubekey
-            - [离线安装KubeSphere](/work/kubernetes/deploy/kubesphere/kubekey/kubeshpere-v3.4.1/)
-            - [在线安装KubeSphere](/work/kubernetes/deploy/kubesphere/kubekey/kubeshpere-v3.4.1/online/)
+            - [kubekey v3.1.5](/work/kubernetes/deploy/kubekey/v3.1.5/)
+        - kubesphere
+            - [kubesphere v3.4.1](/work/kubernetes/deploy/kubesphere/v3.4.1/)
         - kubeadm
             - [k8s v1.23.12](/work/kubernetes/deploy/kubeadm/v1.23.12/)
         - harbor
