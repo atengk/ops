@@ -44,7 +44,8 @@
         - kubeadm
             - [k8s v1.23.12](/work/kubernetes/deploy/kubeadm/v1.23.12/)
         - harbor
-            - [安装Harbor镜像仓库](/work/kubernetes/deploy/harbor/)
+            - [安装Harbor镜像仓库](/work/kubernetes/deploy/harbor/v2.11.1/)
+            - [安装Registry镜像仓库](/work/kubernetes/deploy/harbor/registry/)
         - kubevirt
             - [kubevirt v1.3.0](/work/kubernetes/deploy/kubevirt/deploy/v1.3.0/)
     - storage
