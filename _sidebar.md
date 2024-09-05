@@ -1,7 +1,8 @@
 - Linux Service
     - 基础配置
         - [基础配置](work/service/00-basic/)
-    - [NFS](work/service/nfs/)
+    - 共享存储
+        - [NFS](work/service/nfs/)
     - MySQL
         - [MySQL v8.0.39](/work/service/mysql/v8.0.39/)
         - [MySQL v8.4.2](/work/service/mysql/v8.4.2-lts/)
