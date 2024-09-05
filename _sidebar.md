@@ -1,6 +1,7 @@
 - Linux Service
     - 基础配置
         - [基础配置](work/service/00-basic/)
+    - [NFS](work/service/nfs/)
     - MySQL
         - [MySQL v8.0.39](/work/service/mysql/v8.0.39/)
         - [MySQL v8.4.2](/work/service/mysql/v8.4.2-lts/)
@@ -50,7 +51,8 @@
             - [kubevirt v1.3.0](/work/kubernetes/deploy/kubevirt/deploy/v1.3.0/)
     - storage
         - openebs
-            - [local](/work/kubernetes/deploy/storage/openebs/local/)
+            - [localpv](/work/kubernetes/deploy/storage/openebs/localpv-provisioner/v4.1.0/)
+            - [nfs](/work/kubernetes/deploy/storage/openebs/nfs-provisioner/v0.11.0/)
         - nfs
             - [nfs-client](/work/kubernetes/deploy/storage/nfs/nfs-client/)
             - [nfs-server](/work/kubernetes/deploy/storage/nfs/nfs-server/)
