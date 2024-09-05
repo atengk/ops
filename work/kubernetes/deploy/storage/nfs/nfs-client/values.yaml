@@ -1,0 +1,22 @@
+replicaCount: 1
+strategyType: Recreate
+image:
+  repository: registry.lingo.local/kubernetes/nfs-subdir-external-provisioner
+  tag: v4.0.2
+  pullPolicy: IfNotPresent
+nfs:
+  server: 192.168.1.12
+  path: /data/service/nfs/kubernetes/storageclass/ateng-server
+  mountOptions:
+storageClass:
+  create: true
+  defaultClass: false
+  name: nfs-client
+  allowVolumeExpansion: false
+  ## ReclaimPolicy field of the class, which can be either Delete or Retain
+  reclaimPolicy: Delete
+  archiveOnDelete: false
+  # Set access mode - ReadWriteOnce, ReadOnlyMany or ReadWriteMany
+  accessModes: ReadWriteOnce
+  # Set volume bindinng mode - Immediate or WaitForFirstConsumer
+  volumeBindingMode: Immediate

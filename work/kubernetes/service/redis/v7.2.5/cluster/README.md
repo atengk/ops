@@ -1,6 +1,20 @@
-# 开发环境
+# 安装Redis Cluster
+
+## 开发环境
 
 > 使用LoadBalancer将集群暴露到集群外部访问
+
+查看版本
+
+```
+helm search repo bitnami/redis-cluster -l
+```
+
+下载chart
+
+```
+helm pull bitnami/redis-cluster --version 10.2.5
+```
 
 修改配置
 
@@ -8,6 +22,13 @@
 
 ```
 cat values-dev.yaml
+```
+
+创建标签，运行在标签节点上
+
+```
+kubectl label nodes server02.lingo.local kubernetes.service/redis="true"
+kubectl label nodes server03.lingo.local kubernetes.service/redis="true"
 ```
 
 创建服务
@@ -38,9 +59,21 @@ kubectl delete -n kongyu pvc -l app.kubernetes.io/instance=redis
 
 
 
-# 生产环境
+## 生产环境
 
 > 只能在k8s集群内部访问
+
+查看版本
+
+```
+helm search repo bitnami/redis-cluster -l
+```
+
+下载chart
+
+```
+helm pull bitnami/redis-cluster --version 10.2.5
+```
 
 修改配置
 
@@ -48,6 +81,13 @@ kubectl delete -n kongyu pvc -l app.kubernetes.io/instance=redis
 
 ```
 cat values-prod.yaml
+```
+
+创建标签，运行在标签节点上
+
+```
+kubectl label nodes server02.lingo.local kubernetes.service/redis="true"
+kubectl label nodes server03.lingo.local kubernetes.service/redis="true"
 ```
 
 创建服务

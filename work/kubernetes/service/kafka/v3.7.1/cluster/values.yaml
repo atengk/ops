@@ -44,6 +44,8 @@ controller:
     size: 10Gi
   resourcesPreset: "none"
   resources: {}
+  affinity: {}
+  nodeSelector: {}
   # resources:
   #   limits:
   #     cpu: "1"
@@ -53,15 +55,12 @@ controller:
   #     memory: "512Mi"
   # ## Allowed values: `soft` or `hard`
   # #podAffinityPreset: "soft"  ## 调度到同一节点
-  # podAntiAffinityPreset: "hard"  ## 调度到不同节点
-  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
-  #   type: "hard"
-  #   key: "ateng.kafka.controller"
-  #   values:
-  #     - node
-  # affinity: {}
-  # nodeSelector: {}
-  # terminationGracePeriodSeconds: "30"
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/kafka="true"
+    type: "soft"
+    key: "kubernetes.service/kafka"
+    values:
+      - "true"
 broker:
   replicaCount: 3
   minId: 100
@@ -91,6 +90,8 @@ broker:
     size: 100Gi
   resourcesPreset: "none"
   resources: {}
+  affinity: {}
+  nodeSelector: {}
   # resources:
   #   limits:
   #     cpu: "1"
@@ -100,15 +101,12 @@ broker:
   #     memory: "512Mi"
   # ## Allowed values: `soft` or `hard`
   # #podAffinityPreset: "soft"  ## 调度到同一节点
-  # podAntiAffinityPreset: "hard"  ## 调度到不同节点
-  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.broker=node
-  #   type: "hard"
-  #   key: "ateng.kafka.broker"
-  #   values:
-  #     - node
-  # affinity: {}
-  # nodeSelector: {}
-  # terminationGracePeriodSeconds: "30"
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/kafka="true"
+    type: "soft"
+    key: "kubernetes.service/kafka"
+    values:
+      - "true"
 service:
   type: NodePort
   ports:

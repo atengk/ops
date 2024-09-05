@@ -25,6 +25,21 @@ resourcesPreset: "none"
 resources: {}
 affinity: {}
 nodeSelector: {}
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: "1Gi"
+#   requests:
+#     cpu: "500m"
+#     memory: "512Mi"
+# ## Allowed values: `soft` or `hard`
+# #podAffinityPreset: "soft"  ## 调度到同一节点
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/minio="true"
+  type: "soft"
+  key: "kubernetes.service/minio"
+  values:
+    - "true"
 containerPorts:
   api: 9000
   console: 9001

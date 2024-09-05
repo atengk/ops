@@ -1,0 +1,29 @@
+fullnameOverride: "openebs-kernel-nfs"
+nfsProvisioner:
+  name: nfs-provisioner
+  image:
+    registry: registry.lingo.local/
+    repository: kubernetes/provisioner-nfs
+    tag: 0.11.0
+    pullPolicy: IfNotPresent
+  enableLeaderElection: "true"
+  enableGarbageCollection: true
+  nfsServerAlpineImage:
+    registry: registry.lingo.local/
+    repository: kubernetes/nfs-server-alpine
+    tag: 0.11.0
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+nfsStorageClass:
+  name: openebs-kernel-nfs
+  enabled: true
+  reclaimPolicy: Delete
+  nfsServerType: kernel
+  isDefaultClass: false
+  backendStorageClass: ""
+nfsServer:
+  useClusterIP: "true"
+  imagePullSecret: ""
+analytics:
+  enabled: "false"

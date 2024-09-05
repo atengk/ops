@@ -1,0 +1,19 @@
+replicaCount: 1
+image:
+  repository: registry.lingo.local/kubernetes/nfs-provisioner
+  tag: v4.0.8
+  pullPolicy: IfNotPresent
+persistence:
+  enabled: true
+  storageClass: "openebs-hostpath"
+  accessMode: ReadWriteOnce
+  size: 100Gi
+storageClass:
+  create: true
+  defaultClass: false
+  name: nfs-server
+  allowVolumeExpansion: false
+  ## ReclaimPolicy field of the class, which can be either Delete or Retain
+  reclaimPolicy: Delete
+nodeSelector:
+  kubernetes.service/nfs: "true"

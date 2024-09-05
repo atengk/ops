@@ -20,6 +20,12 @@ helm pull bitnami/minio --version 14.6.19
 cat values.yaml
 ```
 
+创建标签，运行在标签节点上
+
+```
+kubectl label nodes server02.lingo.local kubernetes.service/minio="true"
+```
+
 创建服务
 
 ```shell

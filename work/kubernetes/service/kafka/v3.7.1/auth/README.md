@@ -20,6 +20,12 @@ helm pull bitnami/kafka --version 29.3.7
 cat values.yaml
 ```
 
+创建标签，运行在标签节点上
+
+```
+kubectl label nodes server02.lingo.local kubernetes.service/kafka="true"
+```
+
 创建服务
 
 ```

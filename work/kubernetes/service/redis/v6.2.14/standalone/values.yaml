@@ -34,11 +34,16 @@ master:
       value: Asia/Shanghai
   containerPorts:
     redis: 6379
-  resources:
-    limits: {}
-    requests: {}
+  resourcesPreset: "none"
+  resources: {}
   affinity: {}
   nodeSelector: {}
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/redis="true"
+    type: "soft"
+    key: "kubernetes.service/redis"
+    values:
+      - "true"
   persistence:
     size: 50Gi
   service:

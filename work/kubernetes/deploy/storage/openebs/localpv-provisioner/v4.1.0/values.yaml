@@ -1,0 +1,27 @@
+localpv:
+  name: localpv-provisioner
+  enabled: true
+  image:
+    registry: registry.lingo.local/
+    repository: kubernetes/provisioner-localpv
+    tag: 4.1.0
+    pullPolicy: IfNotPresent
+  replicas: 1
+  enableLeaderElection: true
+  basePath: "/var/openebs/local"
+fullnameOverride: "openebs-hostpath"
+hostpathClass:
+  name: openebs-hostpath
+  enabled: true
+  reclaimPolicy: Delete
+  isDefaultClass: false
+  basePath: "/data/service/openebs-hostpath"
+helperPod:
+  image:
+    registry: registry.lingo.local/
+    repository: kubernetes/linux-utils
+    pullPolicy: IfNotPresent
+    tag: 4.1.0
+analytics:
+  enabled: false
+  pingInterval: "24h"

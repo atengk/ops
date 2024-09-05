@@ -42,7 +42,7 @@ chmod +x kubesphere-delete.sh
 
 ### 推送镜像到仓库
 
-将下载的镜像推送到镜像仓库中，可以参考安装registry或者harbor仓库
+将下载的镜像推送到镜像仓库中，可以参考安装[registry](https://kongyu666.github.io/work/#/work/kubernetes/deploy/harbor/registry/)或者[harbor](https://kongyu666.github.io/work/#/work/kubernetes/deploy/harbor/v2.11.1/)仓库
 
 ```shell
 images_dir="./kubesphere-images" # 下载的镜像文件目录

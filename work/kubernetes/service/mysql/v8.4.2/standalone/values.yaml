@@ -65,6 +65,12 @@ primary:
   resources: {}
   affinity: {}
   nodeSelector: {}
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/mysql="true"
+    type: "soft"
+    key: "kubernetes.service/mysql"
+    values:
+      - "true"
   livenessProbe:
     enabled: true
     initialDelaySeconds: 5

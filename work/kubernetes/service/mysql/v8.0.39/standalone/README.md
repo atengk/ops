@@ -20,6 +20,12 @@ helm pull bitnami/mysql --version 10.3.0
 cat values.yaml
 ```
 
+创建标签，运行在标签节点上
+
+```
+kubectl label nodes server02.lingo.local kubernetes.service/mysql="true"
+```
+
 创建服务
 
 ```shell

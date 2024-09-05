@@ -61,6 +61,14 @@ primary:
       value: "Asia/Shanghai"
   resourcesPreset: "none"
   resources: {}
+  affinity: {}
+  nodeSelector: {}
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/mysql="true"
+    type: "soft"
+    key: "kubernetes.service/mysql"
+    values:
+      - "true"
   livenessProbe:
     enabled: true
     initialDelaySeconds: 5
@@ -139,6 +147,8 @@ secondary:
       value: "Asia/Shanghai"
   resourcesPreset: "none"
   resources: {}
+  affinity: {}
+  nodeSelector: {}
   # resources:
   #   limits:
   #     cpu: "1"
@@ -148,15 +158,12 @@ secondary:
   #     memory: "512Mi"
   # ## Allowed values: `soft` or `hard`
   # #podAffinityPreset: "soft"  ## 调度到同一节点
-  # podAntiAffinityPreset: "hard"  ## 调度到不同节点
-  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.mysql.data=node
-  #   type: "hard"
-  #   key: "ateng.mysql.data"
-  #   values:
-  #     - node
-  # affinity: {}
-  # nodeSelector: {}
-  # terminationGracePeriodSeconds: "30"
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/mysql="true"
+    type: "soft"
+    key: "kubernetes.service/mysql"
+    values:
+      - "true"
   livenessProbe:
     enabled: true
     initialDelaySeconds: 5
