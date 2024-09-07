@@ -98,8 +98,9 @@
     - 基础配置
         - [基础配置](work/bigdata/00-basic/)
     - JDK
-        - [OpenJDK](/work/bigdata/01-jdk/README_OpenJDK.md)
-        - [OracleJDK](/work/bigdata/01-jdk/)
+        - [OpenJDK8](/work/bigdata/01-jdk/jdk8/README_OpenJDK.md)
+        - [OpenJDK17](/work/bigdata/01-jdk/jdk17/)
+        - [OpenJDK21](/work/bigdata/01-jdk/jdk21/)
     - Zookeeper
         - [集群](work/bigdata/02-zookeeper/)
     - Hadoop
