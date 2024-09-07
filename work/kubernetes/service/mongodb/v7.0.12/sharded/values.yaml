@@ -1,9 +1,9 @@
 global:
   storageClass: "openebs-hostpath"
-fullnameOverride: "mongodb"
+fullnameOverride: "mongodb-sharded"
 image:
   registry: registry.lingo.local
-  repository: service/mongodb-sharded
+  repository: service/mongodb-sharded-sharded
   tag: 7.0.12
   pullPolicy: IfNotPresent
   debug: false
@@ -13,18 +13,18 @@ auth:
   rootPassword: "Admin@123"
 shards: 3
 common:
-  mongodbEnableNumactl: false
+  mongodb-shardedEnableNumactl: false
   useHostnames: true
-  mongodbEnableIPv6: false
-  mongodbDirectoryPerDB: false
-  mongodbSystemLogVerbosity: 0
-  mongodbDisableSystemLog: false
-  mongodbMaxWaitTimeout: 120
+  mongodb-shardedEnableIPv6: false
+  mongodb-shardedDirectoryPerDB: false
+  mongodb-shardedSystemLogVerbosity: 0
+  mongodb-shardedDisableSystemLog: false
+  mongodb-shardedMaxWaitTimeout: 120
   extraEnvVars:
     - name: TZ
       value: Asia/Shanghai
   containerPorts:
-    mongodb: 27017
+    mongodb-sharded: 27017
   serviceAccount:
     create: true
     automountServiceAccountToken: true
@@ -32,9 +32,9 @@ service:
   name: ""
   type: NodePort
   ports:
-    mongodb: 27017
+    mongodb-sharded: 27017
   nodePorts:
-    mongodb: ""
+    mongodb-sharded: ""
 configsvr:
   replicas: 1
   persistence:
@@ -55,6 +55,8 @@ shardsvr:
     replicas: 3
   resourcesPreset: "none"
   resources: {}
+  affinity: {}
+  nodeSelector: {}
   # resources:
   #   limits:
   #     cpu: "1"
@@ -64,15 +66,12 @@ shardsvr:
   #     memory: "512Mi"
   # ## Allowed values: `soft` or `hard`
   # #podAffinityPreset: "soft"  ## 调度到同一节点
-  # podAntiAffinityPreset: "hard"  ## 调度到不同节点
-  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.mongo.data=node
-  #   type: "hard"
-  #   key: "ateng.mongo.data"
-  #   values:
-  #     - node
-  # affinity: {}
-  # nodeSelector: {}
-  # terminationGracePeriodSeconds: "30"
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/mongodb-sharded="true"
+    type: "soft"
+    key: "kubernetes.service/mongodb-sharded"
+    values:
+      - "true"
   persistence:
     size: 100Gi
   arbiter:

@@ -62,6 +62,8 @@ service:
     targetPort: 15674
 resourcesPreset: "none"
 resources: {}
+affinity: {}
+nodeSelector: {}
 # resources:
 #   limits:
 #     cpu: "1"
@@ -71,12 +73,9 @@ resources: {}
 #     memory: "512Mi"
 # ## Allowed values: `soft` or `hard`
 # #podAffinityPreset: "soft"  ## 调度到同一节点
-# podAntiAffinityPreset: "hard"  ## 调度到不同节点
-# nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
-#   type: "hard"
-#   key: "ateng.kafka.controller"
-#   values:
-#     - node
-# affinity: {}
-# nodeSelector: {}
-# terminationGracePeriodSeconds: "30"
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/rabbitmq="true"
+  type: "soft"
+  key: "kubernetes.service/rabbitmq"
+  values:
+    - "true"

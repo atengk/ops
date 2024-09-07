@@ -47,10 +47,10 @@ master:
     enabled: true
     size: 100Gi
   heapSize: 1024m
-  affinity: {}
-  nodeSelector: {}
   resourcesPreset: "none"
   resources: {}
+  affinity: {}
+  nodeSelector: {}
   # resources:
   #   limits:
   #     cpu: "1"
@@ -60,26 +60,24 @@ master:
   #     memory: "512Mi"
   # ## Allowed values: `soft` or `hard`
   # #podAffinityPreset: "soft"  ## 调度到同一节点
-  podAntiAffinityPreset: "hard"  ## 调度到不同节点
-  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
-  #   type: "hard"
-  #   key: "ateng.kafka.controller"
-  #   values:
-  #     - node
-  # affinity: {}
-  # nodeSelector: {}
-  # terminationGracePeriodSeconds: "30"
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/opensearch="true"
+    type: "soft"
+    key: "kubernetes.service/opensearch"
+    values:
+      - "true"
 data:
   replicaCount: 2
   extraRoles: []
   heapSize: 2048m
-  affinity: {}
-  nodeSelector: {}
   persistence:
     enabled: true
     size: 100Gi
+  heapSize: 2048m
   resourcesPreset: "none"
   resources: {}
+  affinity: {}
+  nodeSelector: {}
   # resources:
   #   limits:
   #     cpu: "1"
@@ -89,26 +87,23 @@ data:
   #     memory: "512Mi"
   # ## Allowed values: `soft` or `hard`
   # #podAffinityPreset: "soft"  ## 调度到同一节点
-  podAntiAffinityPreset: "hard"  ## 调度到不同节点
-  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
-  #   type: "hard"
-  #   key: "ateng.kafka.controller"
-  #   values:
-  #     - node
-  # affinity: {}
-  # nodeSelector: {}
-  # terminationGracePeriodSeconds: "30"
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/opensearch="true"
+    type: "soft"
+    key: "kubernetes.service/opensearch"
+    values:
+      - "true"
 coordinating:
   replicaCount: 1
   extraRoles: []
-  heapSize: 1024m
-  affinity: {}
-  nodeSelector: {}
   persistence:
     enabled: true
     size: 10Gi
+  heapSize: 2048m
   resourcesPreset: "none"
   resources: {}
+  affinity: {}
+  nodeSelector: {}
   # resources:
   #   limits:
   #     cpu: "1"
@@ -118,15 +113,12 @@ coordinating:
   #     memory: "512Mi"
   # ## Allowed values: `soft` or `hard`
   # #podAffinityPreset: "soft"  ## 调度到同一节点
-  podAntiAffinityPreset: "hard"  ## 调度到不同节点
-  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
-  #   type: "hard"
-  #   key: "ateng.kafka.controller"
-  #   values:
-  #     - node
-  # affinity: {}
-  # nodeSelector: {}
-  # terminationGracePeriodSeconds: "30"
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/opensearch="true"
+    type: "soft"
+    key: "kubernetes.service/opensearch"
+    values:
+      - "true"
 ingest:
   enabled: false
   replicaCount: 2
@@ -134,11 +126,6 @@ ingest:
   containerPorts:
     restAPI: 9200
     transport: 9300
-  resourcesPreset: "none"
-  resources: {}
-  heapSize: 1024m
-  affinity: {}
-  nodeSelector: {}
   service:
     enabled: true
     type: ClusterIP
@@ -148,8 +135,11 @@ ingest:
     nodePorts:
       restAPI: ""
       transport: ""
+  heapSize: 2048m
   resourcesPreset: "none"
   resources: {}
+  affinity: {}
+  nodeSelector: {}
   # resources:
   #   limits:
   #     cpu: "1"
@@ -159,15 +149,12 @@ ingest:
   #     memory: "512Mi"
   # ## Allowed values: `soft` or `hard`
   # #podAffinityPreset: "soft"  ## 调度到同一节点
-  podAntiAffinityPreset: "hard"  ## 调度到不同节点
-  # nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.kafka.controller=node
-  #   type: "hard"
-  #   key: "ateng.kafka.controller"
-  #   values:
-  #     - node
-  # affinity: {}
-  # nodeSelector: {}
-  # terminationGracePeriodSeconds: "30"
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/opensearch="true"
+    type: "soft"
+    key: "kubernetes.service/opensearch"
+    values:
+      - "true"
 dashboards:
   enabled: true
   image:

@@ -22,6 +22,13 @@ helm pull bitnami/elasticsearch --version 21.3.1
 cat values.yaml
 ```
 
+创建标签，运行在标签节点上
+
+```
+kubectl label nodes server02.lingo.local kubernetes.service/elasticsearch="true"
+kubectl label nodes server03.lingo.local kubernetes.service/elasticsearch="true"
+```
+
 创建服务
 
 ```shell

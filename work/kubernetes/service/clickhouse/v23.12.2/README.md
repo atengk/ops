@@ -8,6 +8,13 @@
 cat values.yaml
 ```
 
+创建标签，运行在标签节点上
+
+```
+kubectl label nodes server02.lingo.local kubernetes.service/clickhouse="true"
+kubectl label nodes server03.lingo.local kubernetes.service/clickhouse="true"
+```
+
 创建服务
 
 ```shell

@@ -26,7 +26,6 @@ feSpec:
       sys_log_level = WARN
       # NORMAL, BRIEF, ASYNC
       sys_log_mode = BRIEF
-      enable_fqdn_mode = true
       # 在Doris执行SQL select password('Admin@123') 获取加密密码
       initial_root_password = *7BB96B4D3E986612D96E53E62DBE9A38AAA40A5A
       qe_max_connection = 10240
