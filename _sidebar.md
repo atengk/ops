@@ -139,9 +139,14 @@
         - [Flink CDC](work/bigdata/05-flink/cdc/)
         - [运维](work/bigdata/05-flink/OPS.md)
     - Doris
-        - [单机](work/bigdata/05-doris/standalone/)
-        - [集群](work/bigdata/05-doris/cluster/)
-        - [高可用集群](work/bigdata/05-doris/cluster-ha/)
+        - Doris v2.1.5
+            - [单机](work/bigdata/05-doris/v2.1.4/standalone/)
+            - [集群](work/bigdata/05-doris/v2.1.4/cluster/)
+            - [高可用集群](work/bigdata/05-doris/v2.1.4/cluster-ha/)
+        - Doris v3.0.1
+            - [单机](work/bigdata/05-doris/v3.0.1/standalone/)
+            - [集群](work/bigdata/05-doris/v3.0.1/cluster/)
+            - [高可用集群](work/bigdata/05-doris/v3.0.1/cluster-ha/)
         - [运维](work/bigdata/05-doris/OPS.md)
     - Iceberg
         - [iceberg表格式](work/bigdata/06-iceberg/)

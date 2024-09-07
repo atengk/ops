@@ -1,0 +1,26 @@
+fullnameOverride: "nfs-client-provisioner"
+replicaCount: 1
+strategyType: Recreate
+image:
+  repository: registry.lingo.local/kubernetes/nfs-client-provisioner
+  tag: v4.0.2
+  pullPolicy: IfNotPresent
+nfs:
+  server: 192.168.1.103
+  path: /data/nfs/kubernetes/sc
+  mountOptions:
+  volumeName: nfs-client
+  # Reclaim policy for the main nfs volume
+  reclaimPolicy: Retain
+storageClass:
+  create: true
+  defaultClass: false
+  name: nfs-client
+  allowVolumeExpansion: false
+  reclaimPolicy: Delete
+  archiveOnDelete: false
+  # Set access mode - ReadWriteOnce, ReadOnlyMany or ReadWriteMany
+  accessModes: ReadWriteOnce
+leaderElection:
+  enabled: true
+
