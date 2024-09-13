@@ -11,7 +11,7 @@
 ## 开始
 
 - [运维相关](https://github.com/kongyu666/work/tree/main/work/)
-- [Java开发相关](https://github.com/kongyu666/java-dev)
+- [Java开发相关](https://github.com/kongyu666/Ateng-Java)
 - [SpringBoot脚手架](https://github.com/kongyu666/Ateng-Boot)
 - [SpringCloud脚手架](https://github.com/kongyu666/Ateng-Cloud)
 - [Flink开发](https://github.com/kongyu666/Ateng-Flink)
