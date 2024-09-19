@@ -14,7 +14,7 @@ ENV JAVA_OPTS="-Xms128m -Xmx1024m" \
     JAR_FILE=${JAR_FILE}
 
 # 设置暴露的端口号
-EXPOSE 12157
+EXPOSE 8888
 
 # 执行命令
 ENTRYPOINT ["./docker-entrypoint.sh"]

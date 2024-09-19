@@ -9,7 +9,7 @@ docker build -t registry.lingo.local/service/app:springboot2-demo-openjdk21-debi
 ## 测试镜像
 
 ```shell
-docker run --rm registry.lingo.local/service/app:springboot2-demo-openjdk21-debian
+docker run --rm -p 8888:8888 registry.lingo.local/service/app:springboot2-demo-openjdk21-debian
 ```
 
 
