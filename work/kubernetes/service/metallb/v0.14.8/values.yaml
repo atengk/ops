@@ -1,0 +1,30 @@
+fullnameOverride: "metallb"
+controller:
+  image:
+    registry: registry.lingo.local
+    repository: service/metallb-controller
+    tag: "0.14.8"
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    pullPolicy: IfNotPresent
+  extraEnvVars:
+    - name: TZ
+      value: "Asia/Shanghai"
+  resourcesPreset: "none"
+  resources: {}
+ 
+speaker:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: service/metallb-speaker
+    tag: "0.14.8"
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    pullPolicy: IfNotPresent
+  extraEnvVars:
+    - name: TZ
+      value: "Asia/Shanghai"
+  resourcesPreset: "none"
+  resources: {}
+  tolerations:
+    - effect: NoSchedule
+      operator: Exists

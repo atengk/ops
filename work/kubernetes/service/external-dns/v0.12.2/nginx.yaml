@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: kongyu
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: test.nginx.kongyu.local
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  type: LoadBalancer
+  selector:
+    app: nginx
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: kongyu
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - image: nginx
+          name: nginx
+          ports:
+            - containerPort: 80
+              name: http
+
