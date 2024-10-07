@@ -19,7 +19,7 @@ nmcli device
 接下来，为 `eth0` 配置静态 IP、网关和 DNS 信息：
 
 ```bash
-nmcli connection add type ethernet ifname eth0 con-name static-ip ipv4.addresses 192.168.1.100/24 ipv4.gateway 192.168.1.1 ipv4.dns "8.8.8.8 8.8.4.4" ipv4.method manual
+nmcli connection add type ethernet ifname eth0 con-name eth0 ipv4.addresses 192.168.1.100/24 ipv4.gateway 192.168.1.1 ipv4.dns "8.8.8.8 8.8.4.4" ipv4.method manual
 ```
 
 其中：
@@ -30,7 +30,7 @@ nmcli connection add type ethernet ifname eth0 con-name static-ip ipv4.addresses
 
 ##### 1.3 启用静态 IP 配置
 ```bash
-nmcli connection up static-ip
+nmcli connection up eth0
 ```
 
 ---
@@ -41,39 +41,45 @@ nmcli connection up static-ip
 使用以下命令为 `eth0` 添加 DHCP 连接：
 
 ```bash
-nmcli connection add type ethernet ifname eth0 con-name dhcp-connection ipv4.method auto
+nmcli connection add type ethernet ifname eth0 con-name eth0 ipv4.method auto
 ```
 
 `auto` 表示通过 DHCP 自动获取 IP 地址。
 
 ##### 2.2 启用 DHCP 连接
 ```bash
-nmcli connection up dhcp-connection
+nmcli connection up eth0
 ```
 
 ---
 
 #### 3. 修改现有的静态 IP 配置
 
+**3.0 修改配置方法为手动**
+
+```
+nmcli connection modify eth0 ipv4.method manual
+```
+
 ##### 3.1 修改已存在的静态 IP 地址
-假设当前连接名称为 `static-ip`，修改 IP 地址如下：
+假设当前连接名称为 `eth0`，修改 IP 地址如下：
 ```bash
-nmcli connection modify static-ip ipv4.addresses 192.168.1.101/24
+nmcli connection modify eth0 ipv4.addresses 192.168.1.101/24
 ```
 
 ##### 3.2 修改网关地址
 ```bash
-nmcli connection modify static-ip ipv4.gateway 192.168.1.254
+nmcli connection modify eth0 ipv4.gateway 192.168.1.254
 ```
 
 ##### 3.3 修改 DNS 服务器
 ```bash
-nmcli connection modify static-ip ipv4.dns "1.1.1.1 1.0.0.1"
+nmcli connection modify eth0 ipv4.dns "1.1.1.1 1.0.0.1"
 ```
 
 ##### 3.4 应用修改
 ```bash
-nmcli connection up static-ip
+nmcli connection up eth0
 ```
 
 ---
@@ -81,15 +87,15 @@ nmcli connection up static-ip
 #### 4. 删除网络配置
 
 ##### 4.1 删除指定的连接
-例如，删除名为 `static-ip` 的连接：
+例如，删除名为 `eth0` 的连接：
 
 ```bash
-nmcli connection delete static-ip
+nmcli connection delete eth0
 ```
 
 ##### 4.2 删除 DHCP 连接
 ```bash
-nmcli connection delete dhcp-connection
+nmcli connection delete eth0
 ```
 
 ##### 4.3 删除所有连接

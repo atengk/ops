@@ -44,6 +44,6 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: http
+                name: nginx
                 port:
                   number: 80
