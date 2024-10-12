@@ -2,6 +2,7 @@
     - 服务器配置
         - [基础配置](/work/service/00-basic/)
         - [网络配置](/work/service/network/)
+        - [升级OpenSSH](/work/service/openssh/v9.9/)
     - 存储服务
         - [网络文件共享 NFS](work/service/nfs/)
         - [对象存储服务 MinIO](/work/service/minio/v20240717/)
@@ -30,6 +31,7 @@
         - ElasticSearch
             - [standalone](/work/service/elastic/elasticsearch/standalone/)
             - [cluster](/work/service/elastic/elasticsearch/cluster/)
+        - [CoreDNS](/work/service/coredns/)
     - Web服务
         - Nginx
             - [Nginx v1.23.4](/work/service/nginx/v1.23.4/)
@@ -39,22 +41,17 @@
             - [cfssl](/work/service/tls/tls-cfssl/)
             - [openssl](/work/service/tls/tls-openssl/)
     - 内网远程访问
-        - FRP
-            - [内网穿透FRP](/work/service/frp/)
+        - [内网穿透FRP](/work/service/frp/)
 - Kubernetes
-    - deploy
-        - kubekey
-            - [kubekey v3.1.5](/work/kubernetes/deploy/kubekey/v3.1.5/)
-        - kubesphere
-            - [kubesphere v3.4.1](/work/kubernetes/deploy/kubesphere/v3.4.1/)
-        - kubeadm
-            - [k8s v1.23.12](/work/kubernetes/deploy/kubeadm/v1.23.12/)
-        - harbor
-            - [安装Harbor镜像仓库](/work/kubernetes/deploy/harbor/v2.11.1/)
-            - [安装Registry镜像仓库](/work/kubernetes/deploy/harbor/registry/)
-        - kubevirt
-            - [kubevirt v1.3.0](/work/kubernetes/deploy/kubevirt/deploy/v1.3.0/)
-    - storage
+    - 基础设施安装
+        - [kubekey](/work/kubernetes/deploy/kubekey/v3.1.5/)
+        - [kubesphere](/work/kubernetes/deploy/kubesphere/v3.4.1/)
+        - [kubeadm](/work/kubernetes/deploy/kubeadm/v1.23.12/)
+        - [kubevirt](/work/kubernetes/deploy/kubevirt/deploy/v1.3.0/)
+    - 镜像仓库
+        - [Harbor](/work/kubernetes/deploy/harbor/v2.11.1/)
+        - [Registry](/work/kubernetes/deploy/harbor/registry/)
+    - 存储服务
         - openebs
             - [localpv](/work/kubernetes/deploy/storage/openebs/localpv-provisioner/v4.1.0/)
             - [nfs](/work/kubernetes/deploy/storage/openebs/nfs-provisioner/v0.11.0/)
@@ -70,19 +67,46 @@
             - [longhorn](/work/kubernetes/deploy/storage/longhorn/v1.4.0/)
         - kadalu
             - [kadalu](/work/kubernetes/deploy/storage/kadalu/v1.0.0/)
-    - service
-        - redis
-            - [redis v6.2.14](/work/kubernetes/service/redis/v6.2.14/)
-            - [redis v7.2.5](/work/kubernetes/service/redis/v7.2.5/)
-            - [升级](/work/kubernetes/service/redis/upgrade.md)
-        - Mariadb Galera
-            - [Galera v11.1.3](/work/kubernetes/service/mariadb/v11.1.3/)
-            - [Galera v11.3.2](/work/kubernetes/service/mariadb/v11.3.2/)
-            - [升级](/work/kubernetes/service/mariadb/upgrade.md)
+    - 中间件服务
+        - 数据库
+            - Redis
+                - [单机模式](/work/kubernetes/service/redis/v7.2.5/standalone/)
+                - [主从模式](/work/kubernetes/service/redis/v7.2.5/replication/)
+                - [哨兵模式](/work/kubernetes/service/redis/v7.2.5/sentinel/)
+                - [集群模式](/work/kubernetes/service/redis/v7.2.5/cluster/)
+            - Mariadb Galera
+                - [Galera集群](/work/kubernetes/service/mariadb/v11.3.2/)
+            - PostgreSQL
+                - [单机模式](/work/kubernetes/service/postgresql/v16.3.0/standalone/)
+                - [主从模式](/work/kubernetes/service/postgresql/v16.3.0/replication/)
+                - [集群模式](/work/kubernetes/service/postgresql/v16.3.0/ha/)
+            - MongoDB
+                - [单机模式](/work/kubernetes/service/mongodb/v7.0.12/standalone/)
+                - [主从模式](/work/kubernetes/service/mongodb/v7.0.12/replicaset/)
+                - [集群模式](/work/kubernetes/service/mongodb/v7.0.12/sharded/)
+            - MySQL
+                - [单机模式](/work/kubernetes/service/mysql/v8.4.2/standalone/)
+                - [主从模式](/work/kubernetes/service/mysql/v8.4.2/replication/)
+                - [配置metrics](/work/kubernetes/service/mysql/v8.4.2/metrics/)
+            - Doris
+                - [单机模式](/work/kubernetes/service/doris/v2.1.5/standalone/)
+                - [集群模式](/work/kubernetes/service/doris/v2.1.5/cluster/)
+                - [集群模式All](/work/kubernetes/service/doris/v2.1.5/cluster-all/)
+            - Clickhouse
+                - [集群模式](/work/kubernetes/service/clickhouse/v23.12.2/)
+        - 消息队列
+            - RabbitMQ
+                - [集群模式](/work/kubernetes/service/rabbitmq/v3.13.4/)
+            - Kafka
+                - [单机模式](/work/kubernetes/service/kafka/v3.8.0/standalone/)
+                - [集群模式](/work/kubernetes/service/kafka/v3.8.0/cluster/)
+                - [认证模式](/work/kubernetes/service/kafka/v3.8.0/auth/)
+            - Kafka UI
+                - [Kafka可视化](/work/kubernetes/service/kafka-ui/)
         - Harbor
             - [http](/work/kubernetes/service/harbor/v2.11.0/http/)
             - [ingress-http](/work/kubernetes/service/harbor/v2.11.0/ingress-http/)
-    - backups
+    - 备份服务
         - velero
             - [安装备份和恢复Velero](/work/kubernetes/deploy/backups/velero/v1.11.0/)
         - etcd
@@ -94,7 +118,7 @@
         - postgresql
             - [备份到本地](/work/kubernetes/deploy/backups/postgresql/local/)
             - [备份到MinIO](/work/kubernetes/deploy/backups/postgresql/minio/)
-    - test
+    - 服务测试
         - [存储测试](/work/kubernetes/deploy/test/storage/)
         - [网络测试](/work/kubernetes/deploy/test/network/)
 - 大数据
