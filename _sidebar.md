@@ -1,42 +1,46 @@
 - Linux Service
-    - 基础配置
-        - [基础配置](work/service/00-basic/)
-    - 共享存储
-        - [NFS](work/service/nfs/)
-    - MySQL
-        - [MySQL v8.0.39](/work/service/mysql/v8.0.39/)
-        - [MySQL v8.4.2](/work/service/mysql/v8.4.2-lts/)
-        - [编译安装](/work/service/mysql/make/)
-        - [OpenEuler编译安装](/work/service/mysql/make/README_OpenEuler.md)
-        - [OpenEuler dnf安装](/work/service/mysql/openeuler/v8.0.37/)
-    - MariaDB Galera
-        - [MariaDB v11.4.2](/work/service/mariadb/v11.4.2/)
-    - Redis
-        - [Redis v6.2.14](/work/service/redis/v6.2.14/)
-        - [Redis v7.2.5](/work/service/redis/v7.2.5/)
-    - PostgreSQL
-        - [编译安装PostgreSQL](/work/service/postgresql/)
-        - [编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
-        - [OpenEuler编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
-        - [OpenEuler安装PostgreSQL](/work/service/postgresql/openeuler/v15.6/)
-        - [其他](/work/service/postgresql/README_Test.md)
-    - Nginx
-        - [Nginx v1.23.4](/work/service/nginx/v1.23.4/)
-        - [Nginx v1.26.2](/work/service/nginx/v1.26.2/)
-        - [配置HTTPS证书](/work/service/nginx/v1.23.4/tls/)
-    - MinIO
-        - [MinIO v20240717](/work/service/minio/v20240717/)
-    - JuiceFS
-        - [JuiceFS v1.1.1](/work/service/juicefs/v1.1.1/)
-    - ETCD
-        - [ETCD v3.5.1](/work/service/etcd/v3.5.1/)
-    - ElasticSearch
-        - [standalone](/work/service/elastic/elasticsearch/standalone/)
-        - [cluster](/work/service/elastic/elasticsearch/cluster/)
-    - TLS证书
-        - [cfssl](/work/service/tls/tls-cfssl/)
-        - [openssl](/work/service/tls/tls-openssl/)
-
+    - 服务器配置
+        - [基础配置](/work/service/00-basic/)
+        - [网络配置](/work/service/network/)
+    - 存储服务
+        - [网络文件共享 NFS](work/service/nfs/)
+        - [对象存储服务 MinIO](/work/service/minio/v20240717/)
+        - [分布式存储 JuiceFS](/work/service/juicefs/v1.1.1/)
+        - [备份工具 Restic](/work/service/restic/)
+    - 数据库
+        - MySQL
+            - [MySQL v8.0.39](/work/service/mysql/v8.0.39/)
+            - [MySQL v8.4.2](/work/service/mysql/v8.4.2-lts/)
+            - [编译安装](/work/service/mysql/make/)
+            - [OpenEuler编译安装](/work/service/mysql/make/README_OpenEuler.md)
+            - [OpenEuler dnf安装](/work/service/mysql/openeuler/v8.0.37/)
+        - MariaDB Galera
+            - [MariaDB v11.4.2](/work/service/mariadb/v11.4.2/)
+        - Redis
+            - [Redis v6.2.14](/work/service/redis/v6.2.14/)
+            - [Redis v7.2.5](/work/service/redis/v7.2.5/)
+        - PostgreSQL
+            - [编译安装PostgreSQL](/work/service/postgresql/)
+            - [编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
+            - [OpenEuler编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
+            - [OpenEuler安装PostgreSQL](/work/service/postgresql/openeuler/v15.6/)
+            - [其他](/work/service/postgresql/README_Test.md)
+        - ETCD
+            - [ETCD v3.5.1](/work/service/etcd/v3.5.1/)
+        - ElasticSearch
+            - [standalone](/work/service/elastic/elasticsearch/standalone/)
+            - [cluster](/work/service/elastic/elasticsearch/cluster/)
+    - Web服务
+        - Nginx
+            - [Nginx v1.23.4](/work/service/nginx/v1.23.4/)
+            - [Nginx v1.26.2](/work/service/nginx/v1.26.2/)
+            - [配置HTTPS证书](/work/service/nginx/v1.23.4/tls/)
+        - TLS证书
+            - [cfssl](/work/service/tls/tls-cfssl/)
+            - [openssl](/work/service/tls/tls-openssl/)
+    - 内网远程访问
+        - FRP
+            - [内网穿透FRP](/work/service/frp/)
 - Kubernetes
     - deploy
         - kubekey
@@ -93,7 +97,6 @@
     - test
         - [存储测试](/work/kubernetes/deploy/test/storage/)
         - [网络测试](/work/kubernetes/deploy/test/network/)
-
 - 大数据
     - 基础配置
         - [基础配置](work/bigdata/00-basic/)
