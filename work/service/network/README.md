@@ -77,7 +77,51 @@ nmcli connection modify eth0 ipv4.gateway 192.168.1.254
 nmcli connection modify eth0 ipv4.dns "1.1.1.1 1.0.0.1"
 ```
 
-##### 3.4 应用修改
+##### 3.4 设置路由度量值
+
+> 在双网口双网关的配置中，**度量值**起到了决定哪条路由优先的作用，**网关**负责实际的路由转发。这种配置可以用于主备链路切换、负载均衡或提高网络冗余性。
+
+要为某个网络连接设置 IPv4 的度量值，可以使用如下命令：
+
+```
+nmcli connection modify <连接名称> ipv4.route-metric <度量值>
+```
+
+例如，设置 `eth0` 的 IPv4 路由度量值为 100：
+
+> 度量值越小，优先级越高
+
+```
+nmcli connection modify eth0 ipv4.route-metric 100
+```
+
+##### 3.5 添加网口的静态路由
+
+使用 `nmcli` 添加静态路由时，使用 `nmcli connection modify` 命令，并指定路由的目标、下一跳网关以及度量值。下面是一个示例命令：
+
+```
+nmcli connection modify <连接名称> +ipv4.routes "目标地址/子网掩码 网关 [度量值]"
+```
+
+例如，如果你想通过 eth0 接口添加一个到 192.168.1.0/24 的静态路由，网关为 192.168.1.1，度量值为 100，可以执行：
+
+```
+nmcli connection modify eth0 +ipv4.routes "192.168.1.0/24 192.168.1.1 100"
+```
+
+配置完路由后查看
+
+```
+[root@localhost ~]# ip route
+default via 183.64.162.1 dev enp2s0 proto static metric 100
+default via 192.168.161.126 dev enp0s31f6 proto static metric 101
+183.64.162.0/25 dev enp2s0 proto kernel scope link src 183.64.162.93 metric 100
+192.168.0.0/16 via 192.168.161.126 dev enp0s31f6 proto static metric 99
+192.168.161.0/25 dev enp0s31f6 proto kernel scope link src 192.168.161.101 metric 101
+```
+
+##### 3.6 应用修改
+
 ```bash
 nmcli connection up eth0
 ```
@@ -93,12 +137,7 @@ nmcli connection up eth0
 nmcli connection delete eth0
 ```
 
-##### 4.2 删除 DHCP 连接
-```bash
-nmcli connection delete eth0
-```
-
-##### 4.3 删除所有连接
+##### 4.2 删除所有连接
 ```bash
 nmcli connection delete $(nmcli -t -f NAME connection show)
 ```
