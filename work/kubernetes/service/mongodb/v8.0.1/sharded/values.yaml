@@ -1,10 +1,10 @@
 global:
-  storageClass: "openebs-hostpath"
+  defaultStorageClass: ""
 fullnameOverride: "mongodb"
 image:
   registry: registry.lingo.local
   repository: service/mongodb-sharded
-  tag: 7.0.12
+  tag: "8.0.1"
   pullPolicy: IfNotPresent
   debug: false
 auth:

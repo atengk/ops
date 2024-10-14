@@ -38,7 +38,7 @@ helm install postgresql -n kongyu -f values.yaml postgresql-16.0.1.tgz
 
 ```
 kubectl get -n kongyu pod,svc,pvc -l app.kubernetes.io/instance=postgresql
-kubectl logs -f -n kongyu postgresql-primary-0
+kubectl logs -f -n kongyu postgresql-0
 ```
 
 **使用服务**
@@ -52,10 +52,7 @@ kubectl run postgresql-client --rm --tty -i --restart='Never' --image  registry.
 内部网络访问
 
 ```
-# 读写节点
-psql --host postgresql-primary.kongyu -U postgres -d postgres -p 5432
-# 只读节点
-psql --host postgresql-read.kongyu -U postgres -d postgres -p 5432
+psql --host postgresql.kongyu -U postgres -d postgres -p 5432
 ```
 
 集群网络访问
@@ -63,10 +60,7 @@ psql --host postgresql-read.kongyu -U postgres -d postgres -p 5432
 > 使用集群+NodePort访问
 
 ```
-# 读写节点
-psql --host 192.168.1.10 -U postgres -d postgres -p 9387
-# 只读节点
-psql --host 192.168.1.10 -U postgres -d postgres -p 37526
+psql --host 192.168.1.10 -U postgres -d postgres -p 21177
 ```
 
 使用SQL
