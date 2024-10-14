@@ -82,8 +82,8 @@
                 - [集群模式](/work/kubernetes/service/postgresql/v16.3.0/ha/)
             - MongoDB
                 - [单机模式](/work/kubernetes/service/mongodb/v7.0.12/standalone/)
-                - [主从模式](/work/kubernetes/service/mongodb/v7.0.12/replicaset/)
-                - [集群模式](/work/kubernetes/service/mongodb/v7.0.12/sharded/)
+                - [副本集群模式](/work/kubernetes/service/mongodb/v7.0.12/replicaset/)
+                - [分配集群模式](/work/kubernetes/service/mongodb/v7.0.12/sharded/)
             - MySQL
                 - [单机模式](/work/kubernetes/service/mysql/v8.4.2/standalone/)
                 - [主从模式](/work/kubernetes/service/mysql/v8.4.2/replication/)
