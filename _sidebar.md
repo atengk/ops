@@ -94,6 +94,18 @@
                 - [集群模式All](/work/kubernetes/service/doris/v2.1.5/cluster-all/)
             - Clickhouse
                 - [集群模式](/work/kubernetes/service/clickhouse/v23.12.2/)
+            - ElasticSearch
+                - [单机模式](/work/kubernetes/service/elasticsearch/v7.17.16/all-in-one/)
+                - [认证模式](/work/kubernetes/service/elasticsearch/v7.17.16/auth/)
+                - [SSL模式](/work/kubernetes/service/elasticsearch/v7.17.16/https-custom/)
+                - [集群模式](/work/kubernetes/service/elasticsearch/v7.17.16/cluster/)
+                - [Kibana](/work/kubernetes/service/kibana/v7.17.16/)
+            - OpenSearch
+                - [单机模式](/work/kubernetes/service/opensearch/v2.15.0/all-in-one/)
+                - [认证模式](/work/kubernetes/service/opensearch/v2.15.0/auth/)
+            - ETCD
+                - [集群模式](/work/kubernetes/service/etcd/v3.5.14/basic/)
+                - [认证模式](/work/kubernetes/service/etcd/v3.5.14/http-auth/)
         - 消息队列
             - RabbitMQ
                 - [集群模式](/work/kubernetes/service/rabbitmq/v3.13.4/)
@@ -103,9 +115,51 @@
                 - [认证模式](/work/kubernetes/service/kafka/v3.8.0/auth/)
             - Kafka UI
                 - [Kafka可视化](/work/kubernetes/service/kafka-ui/)
-        - Harbor
-            - [http](/work/kubernetes/service/harbor/v2.11.0/http/)
-            - [ingress-http](/work/kubernetes/service/harbor/v2.11.0/ingress-http/)
+        - 存储服务
+            - MinIO
+                - [单机模式](/work/kubernetes/service/minio/v2024.7.15/standalone/)
+                - [集群模式](/work/kubernetes/service/minio/v2024.7.15/distributed/)
+            - Harbor
+                - [http模式](/work/kubernetes/service/harbor/v2.11.0/http/)
+                - [ingress模式](/work/kubernetes/service/harbor/v2.11.0/ingress-http/)
+        - 开发工具
+            - [Spring Boot应用](/work/kubernetes/service/springboot-app/v1.0/)
+            - [Gitlab](/work/kubernetes/service/gitlab/v17.4.2/)
+            - [Gitea](/work/kubernetes/service/gitea/v1.22.1/)
+            - [jenkins](/work/kubernetes/service/jenkins/v2.452.3/baseic/)
+            - [Snail-Job](/work/kubernetes/service/snail-job/v1.1.2/)
+            - [PowerJob](/work/kubernetes/service/powerjob/)
+            - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
+            - [Nacos](/work/kubernetes/service/nacos/v2.4.0/)
+            - [Seata](/work/kubernetes/service/seata/v2.0.0/)
+            - [Sentinel](/work/kubernetes/service/sentinel/)
+            - [SkyWalking](/work/kubernetes/service/springboot-admin/v3.3.0/)
+        - 大数据
+            - [Flink](/work/kubernetes/service/zookeeper/v3.9.2/)
+            - [Flink](/work/kubernetes/service/flink/v1.19.1/)
+            - [Spark](/work/kubernetes/service/spark/v3.5.1/)
+            - [DolphinScheduler](/work/kubernetes/service/dolphinscheduler/)
+            - Doris
+                - [单机模式](/work/kubernetes/service/doris/v2.1.5/standalone/)
+                - [集群模式](/work/kubernetes/service/doris/v2.1.5/cluster/)
+                - [集群模式All](/work/kubernetes/service/doris/v2.1.5/cluster-all/)
+        - 负载均衡和网络
+            - [MetalLB](/work/kubernetes/service/metallb/v0.14.8/)
+            - [External-DNS](/work/kubernetes/service/external-dns/v0.15.0/)
+            - [HAProxy](/work/kubernetes/service/haproxy/v3.0.2/)
+            - [Nginx](/work/kubernetes/service/nginx/v1.27.0/)
+            - [Multus-CNI](/work/kubernetes/service/multus-cni/)
+        - 其他
+            - [Cert-Manager](/work/kubernetes/service/cert-manager/v1.15.1/)
+            - [Windows](/work/kubernetes/service/windows/)
+            - [Stirling-PDF](/work/kubernetes/service/Stirling-PDF/)
+        - KubeBlocks
+            - [安装](/work/kubernetes/service/kubeblocks/deploy/)
+            - [mysql](/work/kubernetes/service/kubeblocks/service/mysql/)
+            - [postgresql](/work/kubernetes/service/kubeblocks/service/postgresql/)
+            - [redis](/work/kubernetes/service/kubeblocks/service/redis/)
+            - [kafka](/work/kubernetes/service/kubeblocks/service/kafka/)
+            - [备份](/work/kubernetes/service/kubeblocks/backup/)
     - 备份服务
         - velero
             - [安装备份和恢复Velero](/work/kubernetes/deploy/backups/velero/v1.11.0/)
