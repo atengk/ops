@@ -189,9 +189,9 @@
         - [集群](work/bigdata/03-hadoop/cluster/)
         - [高可用集群](work/bigdata/03-hadoop/cluster-ha/)
     - Kafka
-        - [单机](work/bigdata/03-kafka/standalone/)
-        - [集群](work/bigdata/03-kafka/cluster/)
-        - [高可用集群](work/bigdata/03-kafka/cluster-ha/)
+        - [单机](work/bigdata/03-kafka/v3.6.1/standalone/)
+        - [集群](work/bigdata/03-kafka/v3.6.1/cluster/)
+        - [高可用集群](work/bigdata/03-kafka/v3.6.1/cluster-ha/)
     - HBase
         - [单机](work/bigdata/04-hbase/standalone/)
         - [集群](work/bigdata/04-hbase/cluster/)
