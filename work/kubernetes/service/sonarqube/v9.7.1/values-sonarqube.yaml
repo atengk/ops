@@ -1,0 +1,48 @@
+global:
+  storageClass: "openebs-hostpath"
+fullnameOverride: "sonarqube"
+image:
+  registry: docker.io
+  repository: bitnami/sonarqube
+  tag: 9.7.1-debian-11-r10
+  pullPolicy: IfNotPresent
+  debug: true
+sonarqubeUsername: admin
+sonarqubePassword: "Admin@123"
+sonarqubeEmail: 2385569970@qq.com
+minHeapSize: 1024m
+maxHeapSize: 1024m
+replicaCount: 1
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+resources:
+  limits: {}
+  requests: {}
+affinity: {}
+nodeSelector: {}
+service:
+  type: NodePort
+  ports:
+    http: 80
+    elastic: 9001
+  nodePorts:
+    http: ""
+    elastic: ""
+persistence:
+  size: 10Gi
+sysctl:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnami/bitnami-shell
+    tag: 11-debian-11-r56
+    pullPolicy: IfNotPresent
+postgresql:
+  enabled: true
+  auth:
+    password: "Admin@123"
+    username: bn_sonarqube
+    database: bitnami_sonarqube
+  persistence:
+    size: 8Gi

@@ -1,0 +1,64 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "sonarqube"
+image:
+  registry: registry.lingo.local
+  repository: service/sonarqube
+  tag: "10.7.0"
+  pullPolicy: IfNotPresent
+  debug: true
+sonarqubeUsername: admin
+sonarqubePassword: "Admin@123"
+sonarqubeEmail: 2385569970@qq.com
+minHeapSize: 1024m
+maxHeapSize: 2048m
+replicaCount: 1
+extraEnvVars:
+- name: TZ
+  value: Asia/Shanghai
+resourcesPreset: "none"
+resources: {}
+affinity: {}
+nodeSelector: {}
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: "1Gi"
+#   requests:
+#     cpu: "500m"
+#     memory: "512Mi"
+# ## Allowed values: `soft` or `hard`
+# #podAffinityPreset: "soft"  ## 调度到同一节点
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/sonarqube="true"
+  type: "soft"
+  key: "kubernetes.service/sonarqube"
+  values:
+    - "true"
+
+service:
+  type: NodePort
+  ports:
+    http: 80
+    elastic: 9001
+  nodePorts:
+    http: ""
+    elastic: ""
+persistence:
+  enabled: true
+  size: 10Gi
+sysctl:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: service/os-shell
+    tag: "12"
+    pullPolicy: IfNotPresent
+postgresql:
+  enabled: false
+externalDatabase:
+  host: "postgresql.lingo-service-dev"
+  user: postgres
+  password: "Lingo@local_postgresql_5432"
+  database: sonarqube
+  port: 5432

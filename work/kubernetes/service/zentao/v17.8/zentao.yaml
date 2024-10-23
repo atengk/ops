@@ -1,0 +1,104 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: zentao
+  namespace: kongyu
+  labels:
+    app: zentao
+spec:
+  replicas: 1
+  serviceName: zentao-headless
+  selector:
+    matchLabels:
+      app: zentao
+  template:
+    metadata:
+      labels:
+        app: zentao
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: k8s-worker01
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: zentao
+          image: 'registry.lingo.local/service/easysoft-zentao:17.8'
+          ports:
+            - name: http-80
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          resources: {}
+          volumeMounts:
+            - name: host-time
+              mountPath: /etc/localtime
+            - name: data-zentao-mysql
+              mountPath: /var/lib/mysql
+            - name: data-zentao-data
+              mountPath: /www/zentaopms
+          imagePullPolicy: IfNotPresent
+      volumes:
+        - name: host-time
+          hostPath:
+            path: /etc/localtime
+            type: ''
+  volumeClaimTemplates:
+    - metadata:
+        name: data-zentao-mysql
+        namespace: kongyu
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: openebs-hostpath
+        volumeMode: Filesystem
+    - metadata:
+        name: data-zentao-data
+        namespace: kongyu
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: openebs-hostpath
+        volumeMode: Filesystem
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: zentao-headless
+  namespace: kongyu
+  labels:
+    app: zentao-headless
+spec:
+  ports:
+    - name: http-80
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: zentao
+  clusterIP: None
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: zentao
+  namespace: kongyu
+  labels:
+    app: zentao
+spec:
+  ports:
+    - name: http-80
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 20103
+  selector:
+    app: zentao
+  type: NodePort

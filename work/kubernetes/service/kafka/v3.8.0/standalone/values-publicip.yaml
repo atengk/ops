@@ -1,10 +1,10 @@
 global:
-  storageClass: "openebs-hostpath"
+  defaultStorageClass: ""
 fullnameOverride: "kafka"
 image:
   registry: registry.lingo.local
   repository: service/kafka
-  tag: 3.7.1
+  tag: 3.8.0
   pullPolicy: IfNotPresent
   debug: false
 heapOpts: -Xmx1024m -Xms1024m
@@ -29,19 +29,44 @@ listeners:
     protocol: PLAINTEXT
     name: EXTERNAL
     sslClientAuth: "none"
+  extraListeners:
+   - name: PUBLICIP
+     containerPort: 9096
+     protocol: PLAINTEXT
+     sslClientAuth: "none"
 extraEnvVars:
   - name: TZ
     value: Asia/Shanghai
 controller:
-  replicaCount: 3
-  controllerOnly: true
+  replicaCount: 1
+  controllerOnly: false
   minId: 0
   zookeeperMigrationMode: false
   heapOpts: -Xmx1024m -Xms1024m
   automountServiceAccountToken: true
+  extraConfig: |
+    num.io.threads=3
+    num.network.threads=3
+    num.partitions=1
+    num.recovery.threads.per.data.dir=1
+    offsets.topic.replication.factor=1
+    default.replication.factor=1
+    transaction.state.log.replication.factor=1
+    transaction.state.log.min.isr=1
+    auto.create.topics.enable=true
+    delete.topic.enable=true
+    log.retention.hours=8
+    log.retention.bytes=1073741824
+    log.retention.check.interval.ms=300000
+    log.segment.bytes=1073741824
+    max.partition.fetch.bytes=104857600
+    max.request.size=104857600
+    message.max.bytes=104857600
+    fetch.max.bytes=104857600
+    replica.fetch.max.bytes=104857600
   persistence:
     enabled: true
-    size: 10Gi
+    size: 100Gi
   resourcesPreset: "none"
   resources: {}
   affinity: {}
@@ -62,21 +87,21 @@ controller:
     values:
       - "true"
 broker:
-  replicaCount: 3
+  replicaCount: 0
   minId: 100
   zookeeperMigrationMode: false
   extraConfig: |
-    num.io.threads=8
+    num.io.threads=3
     num.network.threads=3
-    num.partitions=3
+    num.partitions=1
     num.recovery.threads.per.data.dir=1
-    offsets.topic.replication.factor=3
-    default.replication.factor=3
+    offsets.topic.replication.factor=1
+    default.replication.factor=1
     transaction.state.log.replication.factor=1
     transaction.state.log.min.isr=1
     auto.create.topics.enable=true
     delete.topic.enable=true
-    log.retention.hours=72
+    log.retention.hours=8
     log.retention.bytes=1073741824
     log.retention.check.interval.ms=300000
     log.segment.bytes=1073741824
@@ -128,7 +153,7 @@ externalAccess:
     image:
       registry: registry.lingo.local
       repository: service/kubectl
-      tag: 1.30.2
+      tag: 1.31.1
     resourcesPreset: "none"
     resources: {}
   controller:
@@ -136,9 +161,9 @@ externalAccess:
     service:
       type: NodePort
       ports:
-        external: 9094
+        external: 9095
   broker:
     service:
       type: NodePort
       ports:
-        external: 9094
+        external: 9095

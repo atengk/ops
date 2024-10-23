@@ -67,6 +67,8 @@ log.segment.bytes=1073741824
 max.partition.fetch.bytes=104857600
 max.request.size=104857600
 message.max.bytes=104857600
+fetch.max.bytes=104857600
+replica.fetch.max.bytes=104857600
 EOF
 ```
 

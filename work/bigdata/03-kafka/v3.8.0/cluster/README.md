@@ -19,8 +19,8 @@
 解压软件包
 
 ```
-tar -zxvf kafka_2.13-3.6.1.tgz -C /usr/local/software/
-ln -s /usr/local/software/kafka_2.13-3.6.1 /usr/local/software/kafka
+tar -zxvf kafka_2.13-3.8.0.tgz -C /usr/local/software/
+ln -s /usr/local/software/kafka_2.13-3.8.0 /usr/local/software/kafka
 ```
 
 配置环境变量
@@ -71,6 +71,8 @@ log.segment.bytes=1073741824
 max.partition.fetch.bytes=104857600
 max.request.size=104857600
 message.max.bytes=104857600
+fetch.max.bytes=104857600
+replica.fetch.max.bytes=104857600
 EOF
 ```
 
@@ -105,9 +107,9 @@ scp $KAFKA_HOME/config/kraft/server.properties bigdata03:$KAFKA_HOME/config/kraf
 修改advertised.listeners
 
 ```
-[admin@bigdata02 ~]$ sed -i "s#advertised.listeners=.*#advertised.listeners=CLIENT://bigdata02:9092,INTERNAL://bigdata02:9094,EXTERNAL://14.104.200.4:19092#" $KAFKA_HOME/config/kraft/server.properties
+[admin@bigdata02 ~]$ sed -i "s#advertised.listeners=.*#advertised.listeners=CLIENT://bigdata02:9092,INTERNAL://bigdata02:9094,EXTERNAL://14.104.200.5:19092#" $KAFKA_HOME/config/kraft/server.properties
 
-[admin@bigdata03 ~]$ sed -i "s#advertised.listeners=.*#advertised.listeners=CLIENT://bigdata03:9092,INTERNAL://bigdata03:9094,EXTERNAL://14.104.200.4:19092#" $KAFKA_HOME/config/kraft/server.properties
+[admin@bigdata03 ~]$ sed -i "s#advertised.listeners=.*#advertised.listeners=CLIENT://bigdata03:9092,INTERNAL://bigdata03:9094,EXTERNAL://14.104.200.6:19092#" $KAFKA_HOME/config/kraft/server.properties
 ```
 
 
