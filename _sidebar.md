@@ -28,6 +28,8 @@
             - [其他](/work/service/postgresql/README_Test.md)
         - ETCD
             - [ETCD v3.5.1](/work/service/etcd/v3.5.1/)
+        - FoundationDB
+            - [FoundationDB v7.3.43](/work/service/foundationdb/v7.3.43/)
         - ElasticSearch
             - [standalone](/work/service/elastic/elasticsearch/standalone/)
             - [cluster](/work/service/elastic/elasticsearch/cluster/)
