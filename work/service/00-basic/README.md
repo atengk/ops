@@ -87,6 +87,78 @@ systemctl restart chronyd
 chronyc sources
 ```
 
+## 硬盘挂载
+
+**分区**
+
+新建磁盘标签类型为GPT
+
+```
+parted /dev/sdb mklabel gpt
+```
+
+创建分区
+
+```
+parted /dev/sdb mkpart part1 0% 20%
+parted /dev/sdb mkpart part2 20% 100%
+```
+
+刷新分区表
+
+```
+partprobe /dev/sdb
+```
+
+查看分区
+
+```
+lsblk /dev/sdb
+```
+
+**创建LVM**
+
+安装lvm2
+
+```
+yum install lvm2 -y
+```
+
+创建物理卷PV
+
+```
+pvcreate -f /dev/sdb[1-3]
+```
+
+创建卷组VG
+
+```
+vgcreate volumes /dev/sdb[1-2]
+```
+
+创建逻辑卷LV 
+
+```
+lvcreate -L 5G -n data01 volumes
+lvcreate -l 100%FREE -n data02 volumes
+```
+
+格式化并挂载
+
+```
+mkfs.xfs -f /dev/volumes01/data01
+mount /dev/volumes01/data01 /mnt
+df -hT /mnt
+```
+
+开机自动挂载
+
+```
+cat >> /etc/fstab <<EOF
+/dev/volumes01/data01 /mnt xfs defaults,nofail 0 2
+EOF
+```
+
 ## 关闭swap分区
 
 ```

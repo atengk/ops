@@ -1,0 +1,297 @@
+dorisCluster:
+  name: "doris"
+  annotations: {}
+  enabledCn: false
+  enabledBroker: false
+  adminUser:
+    name: root
+    password: "Admin@123"
+feSpec:
+  replicas: 3
+  labels:
+    app: doris
+    doris: fe
+  image:
+    repository: registry.lingo.local/service/doris.fe-ubuntu
+    tag: 2.1.6
+  service:
+    type: NodePort
+  configMap:
+    fe.conf: |
+      CUR_DATE=`date +%Y%m%d-%H%M%S`
+      LOG_DIR = ${DORIS_HOME}/log
+      JAVA_OPTS="-Djavax.security.auth.useSubjectCredsOnly=false -Xss1024m -Xmx8192m -XX:+UseMembar -XX:SurvivorRatio=8 -XX:MaxTenuringThreshold=7 -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -XX:-CMSParallelRemarkEnabled -XX:CMSInitiatingOccupancyFraction=80 -XX:SoftRefLRUPolicyMSPerMB=0 -Xloggc:$DORIS_HOME/log/fe.gc.log.$CUR_DATE"
+      # INFO, WARN, ERROR, FATAL
+      sys_log_level = WARN
+      # NORMAL, BRIEF, ASYNC
+      sys_log_mode = BRIEF
+      # 在Doris执行SQL select password('Admin@123') 获取加密密码
+      initial_root_password = *7BB96B4D3E986612D96E53E62DBE9A38AAA40A5A
+      qe_max_connection = 10240
+      qe_query_timeout_second = 300
+      qe_slow_log_ms = 5000
+      http_port = 8030
+      rpc_port = 9020
+      query_port = 9030
+      edit_log_port = 9010
+      enable_fqdn_mode = true
+    hdfs-site.xml: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <configuration>
+          <property>
+              <name>dfs.namenode.rpc-address</name>
+              <value>bigdata01:8020</value>
+          </property>
+      </configuration>
+  resource:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 8
+      memory: 8Gi
+  nodeSelector: {}
+  env:
+    - name: TZ
+      value: "Asia/Shanghai"
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app: doris
+                app.kubernetes.io/component: fe
+            topologyKey: kubernetes.io/hostname
+          weight: 1
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+              - key: kubernetes.service/doris
+                operator: In
+                values:
+                  - "true"
+          weight: 1
+  persistentVolumeClaim:
+    metaPersistentVolume:
+      storage: 200Gi
+      storageClassName: "openebs-hostpath"
+    logsPersistentVolume: {}
+    #  storage: 10Gi
+    #  storageClassName: "openebs-hostpath"
+  systemInitialization:
+    initImage: "registry.lingo.local/service/selectdb-alpine:latest"
+
+beSpec:
+  replicas: 3
+  labels:
+    app: doris
+    doris: be
+  image:
+    repository: registry.lingo.local/service/doris.be-ubuntu
+    tag: 2.1.6
+  service:
+    type: ClusterIP
+  configMap:
+    be.conf: |
+      CUR_DATE=`date +%Y%m%d-%H%M%S`
+      PPROF_TMPDIR="$DORIS_HOME/log/"
+      JAVA_OPTS="-Xss1024m -Xmx10240m -DlogPath=$DORIS_HOME/log/jni.log -Xloggc:$DORIS_HOME/log/be.gc.log.$CUR_DATE -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.java.command=DorisBE -XX:-CriticalJNINatives -DJDBC_MIN_POOL=1 -DJDBC_MAX_POOL=100 -DJDBC_MAX_IDLE_TIME=300000 -DJDBC_MAX_WAIT_TIME=5000"
+      JEMALLOC_CONF="percpu_arena:percpu,background_thread:true,metadata_thp:auto,muzzy_decay_ms:15000,dirty_decay_ms:15000,oversize_threshold:0,lg_tcache_max:20,prof:false,lg_prof_interval:32,lg_prof_sample:19,prof_gdump:false,prof_accum:false,prof_leak:false,prof_final:false"
+      JEMALLOC_PROF_PRFIX=""
+      # INFO, WARNING, ERROR, FATAL
+      sys_log_level = INFO
+      # ports for admin, web, heartbeat service
+      be_port = 9060
+      webserver_port = 8040
+      heartbeat_service_port = 9050
+      brpc_port = 8060
+    hdfs-site.xml: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <configuration>
+          <property>
+              <name>dfs.namenode.rpc-address</name>
+              <value>bigdata01:8020</value>
+          </property>
+      </configuration>
+  resource:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 8
+      memory: 16Gi
+  nodeSelector: {}
+  env:
+    - name: TZ
+      value: "Asia/Shanghai"
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app: doris
+                app.kubernetes.io/component: be
+            topologyKey: kubernetes.io/hostname
+          weight: 1
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+              - key: kubernetes.service/doris
+                operator: In
+                values:
+                  - "true"
+          weight: 1
+  persistentVolumeClaim:
+    dataPersistentVolume:
+      storage: 200Gi
+      storageClassName: "openebs-hostpath"
+    logsPersistentVolume: {}
+    #  storage: 10Gi
+    #  storageClassName: "openebs-hostpath"
+  systemInitialization:
+    initImage: "registry.lingo.local/service/selectdb-alpine:latest"
+    
+cnSpec:
+  replicas: 1
+  labels:
+    app: doris
+    doris: cn
+  image:
+    repository: registry.lingo.local/service/doris.be-ubuntu
+    tag: 2.1.6
+  service:
+    type: ClusterIP
+  configMap:
+    be.conf: |
+      CUR_DATE=`date +%Y%m%d-%H%M%S`
+      PPROF_TMPDIR="$DORIS_HOME/log/"
+      JAVA_OPTS="-Xss1024m -Xmx4096m -DlogPath=$DORIS_HOME/log/jni.log -Xloggc:$DORIS_HOME/log/be.gc.log.$CUR_DATE -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.java.command=DorisBE -XX:-CriticalJNINatives -DJDBC_MIN_POOL=1 -DJDBC_MAX_POOL=100 -DJDBC_MAX_IDLE_TIME=300000 -DJDBC_MAX_WAIT_TIME=5000"
+      JEMALLOC_CONF="percpu_arena:percpu,background_thread:true,metadata_thp:auto,muzzy_decay_ms:15000,dirty_decay_ms:15000,oversize_threshold:0,lg_tcache_max:20,prof:false,lg_prof_interval:32,lg_prof_sample:19,prof_gdump:false,prof_accum:false,prof_leak:false,prof_final:false"
+      JEMALLOC_PROF_PRFIX=""
+      sys_log_level = WARNING
+      be_port = 9060
+      webserver_port = 8040
+      heartbeat_service_port = 9050
+      brpc_port = 8060
+    hdfs-site.xml: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <configuration>
+          <property>
+              <name>dfs.namenode.rpc-address</name>
+              <value>bigdata01:8020</value>
+          </property>
+      </configuration>
+  resource:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 2
+      memory: 8Gi
+  nodeSelector: {}
+  env:
+    - name: TZ
+      value: "Asia/Shanghai"
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app: doris
+                app.kubernetes.io/component: cn
+            topologyKey: kubernetes.io/hostname
+          weight: 1
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+              - key: kubernetes.service/doris
+                operator: In
+                values:
+                  - "true"
+          weight: 1
+  persistentVolumeClaim:
+    dataPersistentVolume:
+      storage: 200Gi
+      storageClassName: "openebs-hostpath"
+    logsPersistentVolume: {}
+    #  storage: 10Gi
+    #  storageClassName: "openebs-hostpath"
+  systemInitialization:
+    initImage: "registry.lingo.local/service/selectdb-alpine:latest"
+  autoScalingPolicy:
+    enable: false
+    # version: v2
+    minReplicas: 1
+    maxReplicas: 4
+    hpaPolicy: {}
+      # metrics:
+      # - type: Resource
+      #   resource:
+      #     name: cpu
+      #     target:
+      #       type: Utilization
+      #       averageUtilization: 30
+
+brokerSpec:
+  replicas: 1
+  labels:
+    app: doris
+    doris: broker
+  image:
+    repository: registry.lingo.local/service/doris.broker-ubuntu
+    tag: 2.1.5
+  configMap:
+    apache_hdfs_broker.conf: |
+      sys_log_level = WARNING
+      broker_ipc_port: 8000
+      client_expire_seconds: 3600
+    hdfs-site.xml: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <configuration>
+          <property>
+              <name>dfs.namenode.rpc-address</name>
+              <value>bigdata01:8020</value>
+          </property>
+      </configuration>
+  resource:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 2
+      memory: 8Gi
+  nodeSelector: {}
+  env:
+    - name: TZ
+      value: "Asia/Shanghai"
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app: doris
+                app.kubernetes.io/component: broker
+            topologyKey: kubernetes.io/hostname
+          weight: 1
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+              - key: kubernetes.service/doris
+                operator: In
+                values:
+                  - "true"
+          weight: 1
+  persistentVolumeClaim: {}
+    #logsPersistentVolume:
+    #  storage: 10Gi
+    #  storageClassName: "openebs-hostpath"
+  systemInitialization:
+    initImage: "registry.lingo.local/service/selectdb-alpine:latest"

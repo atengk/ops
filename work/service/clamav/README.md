@@ -237,6 +237,7 @@ EOF
 2. 添加定时任务：
 
     ```bash
+    PATH=/usr/local/bin:/usr/bin:/bin
     0 9,18 * * * /bin/bash /data/shell/clamscan.sh
     ```
 
@@ -246,6 +247,14 @@ EOF
     - `/bin/bash /data/shell/clamscan.sh`：执行脚本的完整路径，确保使用正确的Shell环境运行。
 
 3. 保存并退出。
+
+    ```
+    [root@ftpserver ~]# crontab -l
+    PATH=/usr/local/bin:/usr/bin:/bin
+    
+    ## 每天的9:00和18:00执行任务: 扫描病毒
+    0 9,18 * * * /data/shell/clamscan.sh
+    ```
 
 配置完成后，系统会自动在设定时间执行 `/data/shell/clamscan.sh`，实现定时病毒扫描和报告推送。
 

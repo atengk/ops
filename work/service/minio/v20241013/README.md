@@ -9,8 +9,8 @@ MinIO 是一个高性能的对象存储系统，专为大规模数据基础设�
 首先，通过以下命令下载 MinIO 服务器和客户端二进制文件：
 
 ```bash
-wget https://dl.min.io/server/minio/release/linux-amd64/archive/minio.RELEASE.2024-07-16T23-46-41Z
-wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2024-07-15T17-46-06Z
+wget https://dl.min.io/server/minio/release/linux-amd64/archive/minio.RELEASE.2024-10-13T13-34-11Z
+wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2024-10-08T09-37-26Z
 ```
 
 ### 2. 安装 MinIO
@@ -18,9 +18,9 @@ wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2024-07-
 将下载的二进制文件复制到系统的可执行文件目录并赋予执行权限：
 
 ```bash
-cp minio.RELEASE.2024-07-16T23-46-41Z /usr/local/bin/minio
-cp mc.RELEASE.2024-07-15T17-46-06Z /usr/local/bin/mcli
-chmod +x /usr/local/bin/{minio,mcli}
+sudo cp minio.RELEASE.2024-10-13T13-34-11Z /usr/local/bin/minio
+sudo cp mc.RELEASE.2024-10-08T09-37-26Z /usr/local/bin/mcli
+sudo chmod +x /usr/local/bin/{minio,mcli}
 ```
 
 ### 3. 创建数据目录
@@ -85,9 +85,9 @@ EOF
 加载并启动 MinIO 服务：
 
 ```bash
-systemctl daemon-reload
-systemctl start minio
-systemctl enable minio
+sudo systemctl daemon-reload
+sudo systemctl start minio
+sudo systemctl enable minio
 ```
 
 ### 6. 访问 MinIO 控制台
@@ -129,8 +129,8 @@ mcli admin info minio
 首先，通过以下命令下载 MinIO 服务器和客户端二进制文件：
 
 ```bash
-wget https://dl.min.io/server/minio/release/linux-amd64/archive/minio.RELEASE.2024-07-16T23-46-41Z
-wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2024-07-15T17-46-06Z
+wget https://dl.min.io/server/minio/release/linux-amd64/archive/minio.RELEASE.2024-10-13T13-34-11Z
+wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2024-10-08T09-37-26Z
 ```
 
 确保下载了与操作系统匹配的最新稳定版本。可以访问 [MinIO Releases](https://dl.min.io) 查看最新发布版本。
@@ -140,9 +140,9 @@ wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2024-07-
 将下载的二进制文件复制到系统的可执行文件目录并赋予执行权限：
 
 ```bash
-cp minio.RELEASE.2024-07-16T23-46-41Z /usr/local/bin/minio
-cp mc.RELEASE.2024-07-15T17-46-06Z /usr/local/bin/mcli
-chmod +x /usr/local/bin/{minio,mcli}
+sudo cp minio.RELEASE.2024-10-13T13-34-11Z /usr/local/bin/minio
+sudo cp mc.RELEASE.2024-10-08T09-37-26Z /usr/local/bin/mcli
+sudo chmod +x /usr/local/bin/{minio,mcli}
 ```
 
 **说明**:  
@@ -159,7 +159,7 @@ mkdir -p /data/service/minio/data{01..02}
 **说明**:  
 - 目录 `/data/service/minio/data01` 和 `/data/service/minio/data02` 将被用于存储 MinIO 集群数据。  
 - 根据需求，可以扩展 `data{01..02}`，例如 `data{01..04}`。
-- 集群模式的存储目录不能和根目录在同一个分区上。
+- 集群模式的存储目录不能和根目录在同一个分区上，需要挂载单独的分区，如果系统中只有根分区，可以使用`fallocate -l 10G /mnt/minio.img`的方式创建一个文件，然后格式化后挂载到相应的目录。
 
 ### 4. 创建 MinIO 配置文件
 
@@ -214,9 +214,9 @@ EOF
 加载并启动服务：
 
 ```bash
-systemctl daemon-reload
-systemctl start minio
-systemctl enable minio
+sudo systemctl daemon-reload
+sudo systemctl start minio
+sudo systemctl enable minio
 ```
 
 ### 6. 访问 MinIO 控制台

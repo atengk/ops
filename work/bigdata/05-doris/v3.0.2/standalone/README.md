@@ -41,8 +41,8 @@ sudo ldconfig
 解压软件包
 
 ```
-tar -zxvf apache-doris-3.0.1-bin-x64.tar.gz -C /usr/local/software/
-ln -s /usr/local/software/apache-doris-3.0.1-bin-x64 /usr/local/software/doris
+tar -zxvf apache-doris-3.0.2-bin-x64.tar.gz -C /usr/local/software/
+ln -s /usr/local/software/apache-doris-3.0.2-bin-x64 /usr/local/software/doris
 ```
 
 配置环境变量
@@ -73,7 +73,7 @@ $DORIS_BE_HOME/lib/doris_be --version
 >
 > https://doris.apache.org/zh-CN/docs/3.0/admin-manual/cluster-management/fqdn
 
-添加java路径、添加元数据目录、服务端口和开启fqdn
+配置java路径、添加元数据目录、服务端口和开启fqdn，可以根据环境适当修改JAVA_OPTS的JVM堆内存
 
 ```
 $ vi $DORIS_FE_HOME/conf/fe.conf
@@ -101,7 +101,7 @@ start_fe.sh --daemon
 检查服务
 
 ```
-curl http://127.0.0.1:9040/api/bootstrap
+curl http://bigdata01:9040/api/bootstrap
 ```
 
 访问FE
@@ -123,7 +123,7 @@ Password: 密码为空
 解压MySQL客户端软件包
 
 ```
-tar -zxvf mysql-8.4.2-linux-glibc2.28-x86_64.tar.xz -C /usr/local/software/
+tar -xvf mysql-8.4.2-linux-glibc2.28-x86_64.tar.xz -C /usr/local/software/
 ln -s /usr/local/software/mysql-8.4.2-linux-glibc2.28-x86_64 /usr/local/software/mysql-8.4.2
 ```
 
@@ -164,15 +164,12 @@ show frontends\G;
 >
 > https://doris.apache.org/zh-CN/docs/admin-manual/config/be-config
 
-添加priority_networks参数、配置BE数据存储目录
-
-> JAVA_OPTS可以修改JVM堆内存
+配置java路径、BE数据存储目录、服务端口，可以根据环境适当修改JAVA_OPTS的JVM堆内存
 
 ```
 $ vi $DORIS_BE_HOME/conf/be.conf
 JAVA_HOME=/usr/local/software/jdk17
 storage_root_path=/data/service/doris/storage01;/data/service/doris/storage02
-# ports for admin, web, heartbeat service
 be_port = 9060
 webserver_port = 9070
 heartbeat_service_port = 9050
@@ -237,8 +234,8 @@ cp -r /usr/local/software/doris/extensions/apache_hdfs_broker /usr/local/softwar
 broker配置文件
 
 ```
-$ cd /usr/local/software/doris/broker/
-$ cat conf/apache_hdfs_broker.conf
+cd /usr/local/software/doris/broker/
+cat conf/apache_hdfs_broker.conf
 ```
 
 拷贝hdfs文件
@@ -372,7 +369,7 @@ Documentation=https://doros.apache.org
 After=network.target
 [Service]
 Type=forking
-Environment="JAVA_HOME=/usr/local/software/jdk1.8.0"
+Environment="JAVA_HOME=/usr/local/software/jdk17"
 ExecStart=/usr/local/software/doris/broker/bin/start_broker.sh --daemon
 ExecStop=/usr/local/software/doris/broker/bin/stop_broker.sh
 Restart=always
