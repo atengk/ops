@@ -38,21 +38,65 @@ helm install kafka -n kongyu -f values.yaml kafka-30.1.2.tgz
 
 ```
 kubectl get -n kongyu pod,svc,pvc -l app.kubernetes.io/instance=kafka
-kubectl logs -f -n kongyu kafka-controller-0
+kubectl logs -f -n kongyu kafka-controller-0 -c kafka
 ```
 
 **使用服务**
 
+创建客户端容器
+
 ```
 kubectl run kafka-client -i --tty --rm --restart='Never' --image registry.lingo.local/service/kafka:3.8.0 --namespace kongyu --command -- bash
+```
+
+内部网络访问-headless
+
+```
+## 生产数据
 kafka-console-producer.sh \
-    --broker-list kafka:9092 \
+    --broker-list kafka-controller-0.kafka-controller-headless.kongyu:9092 \
     --topic test
+## 消费数据
 kafka-console-consumer.sh \
-    --bootstrap-server kafka:9092 \
+    --bootstrap-server kafka-controller-0.kafka-controller-headless.kongyu:9092 \
     --topic test \
     --from-beginning
-curl kafka-jmx-metrics:5556/metrics
+```
+
+内部网络访问
+
+```
+## 生产数据
+kafka-console-producer.sh \
+    --broker-list kafka.kongyu:9092 \
+    --topic test
+## 消费数据
+kafka-console-consumer.sh \
+    --bootstrap-server kafka.kongyu:9092 \
+    --topic test \
+    --from-beginning
+```
+
+集群网络访问
+
+> 使用集群+NodePort访问，使用kafka-controller-0-external服务的端口
+
+```
+## 生产数据
+kafka-console-producer.sh \
+    --broker-list 192.168.1.10:35436 \
+    --topic test
+## 消费数据
+kafka-console-consumer.sh \
+    --bootstrap-server 192.168.1.10:35436 \
+    --topic test \
+    --from-beginning
+```
+
+metrics地址
+
+```
+curl kafka-jmx-metrics.kongyu:5556/metrics
 ```
 
 **删除服务以及数据**

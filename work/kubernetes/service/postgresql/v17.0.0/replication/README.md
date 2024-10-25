@@ -1,56 +1,93 @@
-# 安装postgresql
+# PostgreSQL
 
-查看版本
+PostgreSQL 是一个功能强大的开源关系型数据库，支持标准 SQL 和面向对象特性，具备高扩展性、数据完整性和并发控制能力。通过 PostGIS 扩展，它还能处理地理空间数据，适用于企业级应用、数据分析和地理信息系统（GIS）等多种场景。
+
+**查看版本**
 
 ```
 helm search repo bitnami/postgresql -l
 ```
 
-下载chart
+**下载chart**
 
 ```
-helm pull bitnami/postgresql --version 15.5.14
+helm pull bitnami/postgresql --version 16.0.1
 ```
 
-修改配置
+**修改配置**
 
-> values.yaml是修改后的配置，可以根据环境做出适当修改，例如修改存储类global.storageClass
+values.yaml是修改后的配置，可以根据环境做出适当修改
 
 ```
 cat values.yaml
 ```
 
-创建标签，运行在标签节点上
+**创建标签，运行在标签节点上**
 
 ```
 kubectl label nodes server02.lingo.local kubernetes.service/postgresql="true"
 kubectl label nodes server03.lingo.local kubernetes.service/postgresql="true"
 ```
 
-创建服务
+**创建服务**
 
 ```shell
-helm install postgresql -n kongyu -f values.yaml postgresql-15.5.14.tgz
+helm install postgresql -n kongyu -f values.yaml postgresql-16.0.1.tgz
 ```
 
-查看服务
+**查看服务**
 
 ```
 kubectl get -n kongyu pod,svc,pvc -l app.kubernetes.io/instance=postgresql
 kubectl logs -f -n kongyu postgresql-primary-0
 ```
 
-使用服务
+**使用服务**
+
+创建客户端容器
 
 ```
-kubectl run postgresql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/postgresql:16.3.0 --namespace kongyu --env="PGPASSWORD=Admin@123" --command -- psql --host postgresql-primary -U postgres -d postgres -p 5432
-## 查看所有配置
+kubectl run postgresql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/postgresql:17.0.0 --namespace kongyu --env="PGPASSWORD=Admin@123" --command -- bash
+```
+
+内部网络访问-headless
+
+```
+## 读写节点
+psql --host postgresql-primary-0.postgresql-primary-hl.kongyu -U postgres -d postgres -p 5432
+## 只读节点
+psql --host postgresql-read-0.postgresql-read-hl.kongyu -U postgres -d postgres -p 5432
+```
+
+内部网络访问
+
+```
+## 读写节点
+psql --host postgresql-primary.kongyu -U postgres -d postgres -p 5432
+## 只读节点
+psql --host postgresql-read.kongyu -U postgres -d postgres -p 5432
+```
+
+集群网络访问
+
+> 使用集群+NodePort访问
+
+```
+## 读写节点
+psql --host 192.168.1.10 -U postgres -d postgres -p 46045
+## 只读节点
+psql --host 192.168.1.10 -U postgres -d postgres -p 32143
+```
+
+使用SQL
+
+```
+\l
 SELECT name, setting FROM pg_settings;
-## 查看主从
 SELECT * FROM pg_stat_replication;
 ```
 
-删除服务以及数据
+**删除服务以及数据**
 
 ```
 helm uninstall -n kongyu postgresql

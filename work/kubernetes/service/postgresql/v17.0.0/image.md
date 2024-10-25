@@ -1,13 +1,15 @@
 # 下载镜像
 
-下载镜像
+镜像列表
 
 ```
-app=sonarqube
-version=10.7.0
+app=postgresql
+version=17.0.0
 cat > images-list.txt <<EOF
-bitnami/sonarqube:${version}
 bitnami/os-shell:12
+bitnami/pgpool:4.5.4
+bitnami/postgresql:${version}
+bitnami/postgresql-repmgr:16.4.0
 EOF
 ```
 
@@ -29,7 +31,7 @@ registry_address="registry.lingo.local/service"
 
 设置镜像标签并推送到本地仓库
 
-```
+```shell
 images=$(cat images-list.txt)
 for image in $images
 do

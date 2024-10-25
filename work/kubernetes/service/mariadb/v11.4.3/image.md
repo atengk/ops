@@ -1,13 +1,13 @@
 # 下载镜像
 
-下载镜像
+镜像列表
 
 ```
-app=sonarqube
-version=10.7.0
+app=mariadb-galera
+version=11.4.3
 cat > images-list.txt <<EOF
-bitnami/sonarqube:${version}
-bitnami/os-shell:12
+bitnami/mysqld-exporter:0.15.1
+bitnami/mariadb-galera:${version}
 EOF
 ```
 
@@ -29,7 +29,7 @@ registry_address="registry.lingo.local/service"
 
 设置镜像标签并推送到本地仓库
 
-```
+```shell
 images=$(cat images-list.txt)
 for image in $images
 do

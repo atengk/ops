@@ -45,13 +45,52 @@ kubectl logs -f -n kongyu kafka-controller-0
 
 **使用服务**
 
+创建客户端容器
+
 ```
 kubectl run kafka-client -i --tty --rm --restart='Never' --image registry.lingo.local/service/kafka:3.8.0 --namespace kongyu --command -- bash
+```
+
+内部网络访问-headless
+
+```
+## 生产数据
 kafka-console-producer.sh \
-    --broker-list kafka:9092 \
+    --broker-list kafka-controller-0.kafka-controller-headless.kongyu:9092 \
     --topic test
+## 消费数据
 kafka-console-consumer.sh \
-    --bootstrap-server kafka:9092 \
+    --bootstrap-server kafka-controller-0.kafka-controller-headless.kongyu:9092 \
+    --topic test \
+    --from-beginning
+```
+
+内部网络访问
+
+```
+## 生产数据
+kafka-console-producer.sh \
+    --broker-list kafka.kongyu:9092 \
+    --topic test
+## 消费数据
+kafka-console-consumer.sh \
+    --bootstrap-server kafka.kongyu:9092 \
+    --topic test \
+    --from-beginning
+```
+
+集群网络访问
+
+> 使用集群+NodePort访问，使用kafka-controller-0-external服务的端口
+
+```
+## 生产数据
+kafka-console-producer.sh \
+    --broker-list 192.168.1.10:35436 \
+    --topic test
+## 消费数据
+kafka-console-consumer.sh \
+    --bootstrap-server 192.168.1.10:35436 \
     --topic test \
     --from-beginning
 ```
@@ -98,7 +137,7 @@ kubectl label nodes server02.lingo.local kubernetes.service/kafka="true"
 **创建服务**
 
 ```
-helm install kafka -n kongyu -f values-public-ip.yaml kafka-30.1.2.tgz
+helm install kafka -n kongyu -f values-publicip.yaml kafka-30.1.2.tgz
 ```
 
 **查看服务**
@@ -115,7 +154,7 @@ kubectl logs -f -n kongyu kafka-controller-0
 ```
 # kubectl edit -n kongyu configmap kafka-controller-configuration
     ...
-    advertised.listeners=CLIENT://advertised-address-placeholder:9092,INTERNAL://advertised-address-placeholder:9094,PUBLICIP://106.86.176.153:10101
+    advertised.listeners=CLIENT://advertised-address-placeholder:9092,INTERNAL://advertised-address-placeholder:9094,PUBLICIP://119.86.75.32:39096
 ```
 
 新增公网IP服务
@@ -138,7 +177,7 @@ spec:
       protocol: TCP
       port: 9096
       targetPort: publicip
-      nodePort: 29096
+      nodePort: 39096
   selector:
     app.kubernetes.io/instance: kafka
     app.kubernetes.io/name: kafka
@@ -155,13 +194,68 @@ kubectl rollout restart -n kongyu statefulsets.apps kafka-controller
 
 **使用服务**
 
+创建客户端容器
+
 ```
 kubectl run kafka-client -i --tty --rm --restart='Never' --image registry.lingo.local/service/kafka:3.8.0 --namespace kongyu --command -- bash
+```
+
+内部网络访问-headless
+
+```
+## 生产数据
 kafka-console-producer.sh \
-    --broker-list 106.86.176.153:10101 \
+    --broker-list kafka-controller-0.kafka-controller-headless.kongyu:9092 \
     --topic test
+## 消费数据
 kafka-console-consumer.sh \
-    --bootstrap-server 106.86.176.153:10101 \
+    --bootstrap-server kafka-controller-0.kafka-controller-headless.kongyu:9092 \
+    --topic test \
+    --from-beginning
+```
+
+内部网络访问
+
+```
+## 生产数据
+kafka-console-producer.sh \
+    --broker-list kafka.kongyu:9092 \
+    --topic test
+## 消费数据
+kafka-console-consumer.sh \
+    --bootstrap-server kafka.kongyu:9092 \
+    --topic test \
+    --from-beginning
+```
+
+集群网络访问
+
+> 使用集群+NodePort访问，使用kafka-controller-0-external服务的端口
+
+```
+## 生产数据
+kafka-console-producer.sh \
+    --broker-list 192.168.1.10:35436 \
+    --topic test
+## 消费数据
+kafka-console-consumer.sh \
+    --bootstrap-server 192.168.1.10:35436 \
+    --topic test \
+    --from-beginning
+```
+
+云公网IP访问
+
+> 使用configmap kafka-controller-configuration配置文件的PUBLICIP的地址访问，注意公网IP的连通性
+
+```
+## 生产数据
+kafka-console-producer.sh \
+    --broker-list 119.86.75.32:39096 \
+    --topic test
+## 消费数据
+kafka-console-consumer.sh \
+    --bootstrap-server 119.86.75.32:39096 \
     --topic test \
     --from-beginning
 ```

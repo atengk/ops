@@ -1,45 +1,50 @@
 # 下载镜像
 
+镜像列表
+
+```
+app=postgresql
+version=16.4.0
+cat > images-list.txt <<EOF
+bitnami/os-shell:12
+bitnami/pgpool:4.5.4
+bitnami/postgresql:${version}
+bitnami/postgresql-repmgr:${version}
+EOF
+```
+
 下载镜像
 
 ```
-docker pull bitnami/postgresql:16.4.0
-docker pull bitnami/postgresql-repmgr:16.4.0
-docker pull bitnami/pgpool:4.5.4
-docker pull bitnami/os-shell:12
+images=$(cat images-list.txt)
+for image in $images
+do
+    docker pull $image
+done
 ```
 
 设置镜像仓库和命名空间
 
 ```
-export registry_address="registry.lingo.local/service"
+registry_address="registry.lingo.local/service"
 ```
 
-设置镜像标签
+设置镜像标签并推送到本地仓库
 
-```
-docker tag bitnami/postgresql:16.4.0 ${registry_address}/postgresql:16.4.0
-docker tag bitnami/postgresql-repmgr:16.4.0 ${registry_address}/postgresql-repmgr:16.4.0
-docker tag bitnami/pgpool:4.5.4 ${registry_address}/pgpool:4.5.4
-docker tag bitnami/os-shell:12 ${registry_address}/os-shell:12
-```
-
-推送到本地仓库
-
-```
-docker push ${registry_address}/postgresql:16.4.0
-docker push ${registry_address}/postgresql-repmgr:16.4.0
-docker push ${registry_address}/pgpool:4.5.4
-docker push ${registry_address}/os-shell:12
+```shell
+images=$(cat images-list.txt)
+for image in $images
+do
+	image_local=$(echo ${image} | awk -F "/" '{print "'"${registry_address}"'/"$NF}')
+	docker tag ${image} ${image_local}
+	docker push ${image_local}
+done
 ```
 
 保存到本地文件
 
 ```
-images="${registry_address}/postgresql:16.4.0
-${registry_address}/postgresql-repmgr:16.4.0
-${registry_address}/pgpool:4.5.4
-${registry_address}/os-shell:12"
-docker save $images | gzip -c > images-postgresql_16.4.0.tar.gz
+images=$(cat images-list.txt | awk -F "/" '{print "'"${registry_address}"'/"$NF}')
+docker save $images | gzip -c > images-${app}_${version}.tar.gz
 ```
 

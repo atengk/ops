@@ -26,6 +26,7 @@ cat values.yaml
 
 ```
 kubectl label nodes server02.lingo.local kubernetes.service/kafka="true"
+kubectl label nodes server03.lingo.local kubernetes.service/kafka="true"
 ```
 
 **创建服务**

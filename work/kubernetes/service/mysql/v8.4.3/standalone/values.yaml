@@ -1,0 +1,102 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "mysql"
+image:
+  debug: false
+  registry: registry.lingo.local
+  repository: service/mysql
+  tag: "8.4.3"
+  pullPolicy: IfNotPresent
+architecture: standalone
+auth:
+  rootPassword: "Admin@123"
+  createDatabase: true
+  database: kongyu
+  username: "kongyu"
+  password: "kongyu"
+  authenticationPolicy: "caching_sha2_password"
+primary:
+  configuration: |-
+    [mysqld]
+    authentication_policy='{{- .Values.auth.authenticationPolicy | default "* ,," }}'
+    skip-name-resolve
+    explicit_defaults_for_timestamp
+    basedir=/opt/bitnami/mysql
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    port={{ .Values.primary.containerPorts.mysql }}
+    mysqlx={{ ternary 1 0 .Values.primary.enableMySQLX }}
+    mysqlx_port={{ .Values.primary.containerPorts.mysqlx }}
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    datadir=/bitnami/mysql/data
+    tmpdir=/opt/bitnami/mysql/tmp
+    max_allowed_packet=100M
+    bind-address=*
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+    log-error=/opt/bitnami/mysql/logs/mysqld.log
+    character-set-server=utf8mb4
+    collation-server=utf8mb4_general_ci
+    init_connect='SET NAMES utf8mb4'
+    slow_query_log=0
+    slow_query_log_file=/bitnami/mysql/data/slow_query.log
+    long_query_time=10.0
+    default_time_zone = "+8:00"
+    lower_case_table_names = 0
+    max_connections = 1024
+    max_connect_errors = 1024
+    server-id=1
+    log-bin=mysql-bin
+    max_binlog_size=1024M
+    binlog_expire_logs_seconds=2592000
+    [client]
+    port={{ .Values.primary.containerPorts.mysql }}
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    default-character-set=UTF8
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    [manager]
+    port={{ .Values.primary.containerPorts.mysql }}
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+
+  extraEnvVars:
+    - name: TZ
+      value: "Asia/Shanghai"
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/mysql="true"
+    type: "soft"
+    key: "kubernetes.service/mysql"
+    values:
+      - "true"
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 3
+    successThreshold: 1
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 1
+    failureThreshold: 10
+    successThreshold: 1
+  persistence:
+    enabled: true
+    size: 100Gi
+  service:
+    type: NodePort
+    ports:
+      mysql: 3306
+    nodePorts:
+      mysql: ""

@@ -1,11 +1,11 @@
 global:
-  storageClass: "openebs-hostpath"
+  defaultStorageClass: ""
 fullnameOverride: "postgresql"
 postgresql:
   image:
     registry: registry.lingo.local
     repository: service/postgresql-repmgr
-    tag: 16.3.0
+    tag: "16.4.0"
     pullPolicy: IfNotPresent
     debug: false
   replicaCount: 3
@@ -62,7 +62,7 @@ pgpool:
   image:
     registry: registry.lingo.local
     repository: service/pgpool
-    tag: 4.5.2
+    tag: "4.5.2"
     debug: false
   extraEnvVars:
     - name: TZ
@@ -79,7 +79,7 @@ volumePermissions:
   image:
     registry: registry.lingo.local
     repository: service/os-shell
-    tag: 12
+    tag: "12"
     pullPolicy: IfNotPresent
 persistence:
   enabled: true

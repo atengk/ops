@@ -1,5 +1,5 @@
 global:
-  storageClass: "openebs-hostpath"
+  defaultStorageClass: ""
 fullnameOverride: "postgresql"
 image:
   registry: registry.lingo.local

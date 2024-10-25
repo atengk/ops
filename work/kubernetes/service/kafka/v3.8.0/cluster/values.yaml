@@ -33,12 +33,12 @@ extraEnvVars:
   - name: TZ
     value: Asia/Shanghai
 controller:
-  replicaCount: 3
+  replicaCount: 1
   controllerOnly: true
   minId: 0
   zookeeperMigrationMode: false
-  heapOpts: -Xmx1024m -Xms1024m
   automountServiceAccountToken: true
+  heapOpts: -Xmx1024m -Xms1024m
   persistence:
     enabled: true
     size: 10Gi
@@ -129,8 +129,6 @@ externalAccess:
       registry: registry.lingo.local
       repository: service/kubectl
       tag: 1.31.1
-    resourcesPreset: "none"
-    resources: {}
   controller:
     forceExpose: false
     service:

@@ -49,6 +49,12 @@ kubectl logs -f -n kongyu postgresql-0
 kubectl run postgresql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/postgresql:17.0.0 --namespace kongyu --env="PGPASSWORD=Admin@123" --command -- bash
 ```
 
+内部网络访问-headless
+
+```
+psql --host postgresql-0.postgresql-hl.kongyu -U postgres -d postgres -p 5432
+```
+
 内部网络访问
 
 ```

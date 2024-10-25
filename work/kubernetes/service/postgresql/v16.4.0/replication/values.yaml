@@ -1,10 +1,10 @@
 global:
-  storageClass: "openebs-hostpath"
+  defaultStorageClass: ""
 fullnameOverride: "postgresql"
 image:
   registry: registry.lingo.local
   repository: service/postgresql
-  tag: 16.4.0
+  tag: "16.4.0"
   pullPolicy: IfNotPresent
   debug: false
 auth:

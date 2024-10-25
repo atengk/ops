@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mysql-kongyu
+  ## 需要创建在pometheus所在的命名空间下
+  namespace: kubesphere-monitoring-system
+  labels:
+    ## prometheus的label
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/instance: k8s
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: kube-prometheus
+    app.kubernetes.io/version: 2.39.1
+spec:
+  jobLabel: "mysql-kongyu"
+  endpoints:
+    ## mysql-metrics的svc的端口名称
+    - port: metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      ## mysql所在的命名空间
+      - kongyu
+  selector:
+    matchLabels:
+      ## mysql-metrics的svc的label
+      app.kubernetes.io/component: metrics
+      app.kubernetes.io/instance: mysql
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: mysql
+      app.kubernetes.io/version: 8.4.1
+      helm.sh/chart: mysql-11.1.7
+

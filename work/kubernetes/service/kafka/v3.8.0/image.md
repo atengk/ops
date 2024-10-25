@@ -1,13 +1,14 @@
 # 下载镜像
 
-下载镜像
+镜像列表
 
 ```
-app=sonarqube
-version=10.7.0
+app=kafka
+version=3.8.0
 cat > images-list.txt <<EOF
-bitnami/sonarqube:${version}
-bitnami/os-shell:12
+bitnami/kubectl:1.31.1
+bitnami/kafka:${version}
+bitnami/jmx-exporter:1.0.1
 EOF
 ```
 
@@ -29,7 +30,7 @@ registry_address="registry.lingo.local/service"
 
 设置镜像标签并推送到本地仓库
 
-```
+```shell
 images=$(cat images-list.txt)
 for image in $images
 do

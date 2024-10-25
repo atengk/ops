@@ -43,11 +43,37 @@ kubectl logs -f -n kongyu kafka-controller-0
 
 **使用服务**
 
+创建客户端容器
+
 ```
-## 启动容器
 kubectl run kafka-client -i --tty --rm --restart='Never' --image registry.lingo.local/service/kafka:3.8.0 --namespace kongyu --command -- bash
-## 拷贝client.properties
+```
+
+拷贝client.properties
+
+```
 kubectl cp --namespace kongyu client.properties kafka-client:/tmp/client.properties
+```
+
+内部网络访问-headless
+
+```
+## 生产数据
+kafka-console-producer.sh \
+    --producer.config /tmp/client.properties \
+    --broker-list kafka-broker-0.kafka-broker-headless.kongyu:9092,kafka-broker-1.kafka-broker-headless.kongyu:9092,kafka-broker-2.kafka-broker-headless.kongyu:9092 \
+    --topic test
+## 消费数据
+kafka-console-consumer.sh \
+    --consumer.config /tmp/client.properties \
+    --bootstrap-server kafka-broker-0.kafka-broker-headless.kongyu:9092,kafka-broker-1.kafka-broker-headless.kongyu:9092,kafka-broker-2.kafka-broker-headless.kongyu:9092 \
+    --topic test \
+    --from-beginning
+```
+
+内部网络访问
+
+```
 ## 生产数据
 kafka-console-producer.sh \
     --producer.config /tmp/client.properties \
@@ -57,6 +83,24 @@ kafka-console-producer.sh \
 kafka-console-consumer.sh \
     --consumer.config /tmp/client.properties \
     --bootstrap-server kafka:9092 \
+    --topic test \
+    --from-beginning
+```
+
+集群网络访问
+
+> 使用集群+NodePort访问，使用kafka-controller-0-external服务的端口
+
+```
+## 生产数据
+kafka-console-producer.sh \
+    --producer.config /tmp/client.properties \
+    --broker-list 192.168.1.10:47263,192.168.1.10:15666,192.168.1.10:15487 \
+    --topic test
+## 消费数据
+kafka-console-consumer.sh \
+    --consumer.config /tmp/client.properties \
+    --bootstrap-server 192.168.1.10:47263,192.168.1.10:15666,192.168.1.10:15487 \
     --topic test \
     --from-beginning
 ```

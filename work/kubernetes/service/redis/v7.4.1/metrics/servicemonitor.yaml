@@ -1,0 +1,32 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: redis-kongyu
+  ## 需要创建在pometheus所在的命名空间下
+  namespace: kubesphere-monitoring-system
+  labels:
+    ## prometheus的label
+    app.kubernetes.io/component: prometheus
+    app.kubernetes.io/instance: k8s
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/part-of: kube-prometheus
+    app.kubernetes.io/version: 2.39.1
+spec:
+  jobLabel: "redis-kongyu"
+  endpoints:
+    ## redis-metrics的svc的端口名称
+    - port: http-metrics
+      interval: 30s
+  namespaceSelector:
+    matchNames:
+      ## redis所在的命名空间
+      - kongyu
+  selector:
+    matchLabels:
+      ## redis-metrics的svc的label
+      app.kubernetes.io/component: metrics
+      app.kubernetes.io/instance: redis
+      app.kubernetes.io/managed-by: Helm
+      app.kubernetes.io/name: redis
+      helm.sh/chart: redis-16.13.2
+

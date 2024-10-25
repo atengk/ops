@@ -1,0 +1,52 @@
+installation:
+  enabled: true
+  kubernetesProvider: ""
+  ## Image format: <registry><imagePath>/<imagePrefix><imageName>:<image-tag>
+  ## <imageName>:<image-tag> 是固定的，无需修改
+  registry: registry.lingo.local/
+  imagePath: kubernetes
+  imagePrefix: calico-
+  calicoNetwork:
+    ipPools:
+    ## IPIP 模式
+    - blockSize: 24
+      ## 需要和kubeadm初始化时的podCIDR保持一致
+      cidr: 10.100.0.0/16
+      ## 将跨子网启用IPIP (Always, CrossSubnet, Never)
+      ## https://projectcalico.docs.tigera.io/networking/vxlan-ipip#configure-default-ip-pools-at-install-time
+      encapsulation: IPIPCrossSubnet
+      natOutgoing: Enabled
+      nodeSelector: all()
+    nodeAddressAutodetectionV4:
+      ## https://docs.tigera.io/calico/latest/reference/installation/api#operator.tigera.io/v1.NodeAddressAutodetection
+      ## 开启基于匹配接口的IP自动检测功能给定的正则表达式
+      #interface: "en.*|em.*|eth.*"
+      ## CanReach根据节点上的哪个源地址到达指定的IP或域，实现IP自动检测
+      canReach: "192.168.1.1"
+    ## VXLAN 模式
+    #- blockSize: 24
+    #  ## 需要和kubeadm初始化时的podCIDR保持一致
+    #  cidr: 10.100.0.0/16
+    #  ## 将跨子网启用IPIP (Always, CrossSubnet, Never)
+    #  ## https://projectcalico.docs.tigera.io/networking/vxlan-ipip#configure-default-ip-pools-at-install-time
+    #  encapsulation: VXLANCrossSubnet
+    #  natOutgoing: Enabled
+    #  nodeSelector: all()
+    #nodeAddressAutodetectionV4:
+    #  ## 开启基于匹配接口的IP自动检测功能给定的正则表达式
+    #  ## https://docs.tigera.io/calico/latest/reference/installation/api#operator.tigera.io/v1.NodeAddressAutodetection
+    #  ## 开启基于匹配接口的IP自动检测功能给定的正则表达式
+    #  #interface: "en.*|em.*|eth.*"
+    #  ## CanReach根据节点上的哪个源地址到达指定的IP或域，实现IP自动检测
+    #  canReach: "192.168.1.1"
+
+apiServer:
+  enabled: true
+
+tigeraOperator:
+  image: kubernetes/calico-operator
+  version: v1.34.5
+  registry: registry.lingo.local
+calicoctl:
+  image: registry.lingo.local/kubernetes/calico-ctl
+  tag: v3.28.2
