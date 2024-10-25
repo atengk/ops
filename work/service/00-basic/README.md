@@ -58,10 +58,10 @@ ip addr
 ```
 hostnamectl set-hostname service01
 cat >> /etc/hosts <<EOF
-## Service Hosts
-192.168.1.131 service01
-192.168.1.132 service02
-192.168.1.133 service03
+## Service Cluster Hosts
+192.168.1.131 service01 service01.ateng.local
+192.168.1.132 service02 service02.ateng.local
+192.168.1.133 service03 service03.ateng.local
 ## Service Cluster Hosts
 EOF
 ```

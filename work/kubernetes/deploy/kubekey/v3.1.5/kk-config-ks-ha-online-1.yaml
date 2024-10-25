@@ -6,6 +6,9 @@ metadata:
   name: k8s-cluster
 spec:
   hosts:
+  ## {name: node1, address: 172.16.0.2, internalAddress: "172.16.0.2,2022::2", port: 8022, user: ubuntu, password: "Qcloud@123"}
+  ## {name: node2, address: 172.16.0.3, internalAddress: "172.16.0.3,2022::3", password: "Qcloud@123", labels: {disk: SSD, role: backend}}
+  ## {name: node3, address: 172.16.0.4, internalAddress: "172.16.0.4,2022::4", privateKeyPath: "~/.ssh/id_rsa"}
   - {name: k8s-master01, address: 192.168.1.101, internalAddress: 192.168.1.101, user: root, password: "Admin@123"}
   - {name: k8s-master02, address: 192.168.1.102, internalAddress: 192.168.1.102, user: root, password: "Admin@123"}
   - {name: k8s-master03, address: 192.168.1.103, internalAddress: 192.168.1.103, user: root, password: "Admin@123"}

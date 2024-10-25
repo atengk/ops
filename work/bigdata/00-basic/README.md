@@ -2,7 +2,7 @@
 
 ## 配置网卡
 
-> 根据实际环境配置每个节点
+**使用配置文件**
 
 ```
 # vi /etc/sysconfig/network-scripts/ifcfg-ens32
@@ -16,6 +16,41 @@ DNS1="114.114.114.114"
 # systemctl restart network
 ```
 
+**使用nmcli命令**
+
+还未配置网络的情况，配置ens37网卡
+
+```
+[root@localhost ~]# nmcli device
+DEVICE  TYPE      STATE         CONNECTION
+ens33   ethernet  已连接        ens33
+lo      loopback  连接（外部）  lo
+ens37   ethernet  已断开        --
+[root@localhost ~]# nmcli connection show
+NAME   UUID                                  TYPE      DEVICE
+ens33  c96bc909-188e-ec64-3a96-6a90982b08ad  ethernet  ens33
+lo     059519d3-c2a2-4b2c-88b7-650acb194eee  loopback  lo
+[root@localhost ~]# nmcli connection add type ethernet ifname ens37 con-name ens37 ipv4.addresses 10.14.0.100/24 ipv4.gateway 10.14.0.1 ipv4.dns "8.8.8.8 8.8.4.4" ipv4.method manual
+连接 "ens37" (cfde388a-39d7-41a1-9a09-781eea7e56f3) 已成功添加。
+[root@localhost ~]# nmcli connection show
+NAME   UUID                                  TYPE      DEVICE
+ens33  c96bc909-188e-ec64-3a96-6a90982b08ad  ethernet  ens33
+ens37  cfde388a-39d7-41a1-9a09-781eea7e56f3  ethernet  ens37
+lo     059519d3-c2a2-4b2c-88b7-650acb194eee  loopback  lo
+```
+
+已经配置了网络，需要修改的情况
+
+```
+nmcli connection modify ens37 ipv4.addresses 10.14.0.101/24
+nmcli connection modify ens37 ipv4.gateway 10.14.0.254
+nmcli connection modify ens37 ipv4.dns "1.1.1.1 1.0.0.1"
+nmcli connection up ens37
+ip addr
+```
+
+
+
 ## 修改主机名和hosts
 
 > 每个节点修改相应的主机名和配置hosts
@@ -24,9 +59,9 @@ DNS1="114.114.114.114"
 hostnamectl set-hostname bigdata01
 cat >> /etc/hosts <<EOF
 ## BigData Cluster Hosts
-192.168.1.131 bigdata01
-192.168.1.132 bigdata02
-192.168.1.133 bigdata03
+192.168.1.131 bigdata01 bigdata01.ateng.local
+192.168.1.132 bigdata02 bigdata02.ateng.local
+192.168.1.133 bigdata03 bigdata03.ateng.local
 ## BigData Cluster Hosts
 EOF
 ```
