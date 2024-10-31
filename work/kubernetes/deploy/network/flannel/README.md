@@ -58,8 +58,16 @@ helm uninstall flannel -n kube-system
 > 所有节点
 
 ```
-rm -rf /var/lib/cni/ /run/flannel /run/xtables.lock
-rm -f /etc/cni/net.d/10-flannel.conflist
+rm -rf /var/lib/cni/
+rm -f /etc/cni/net.d/10-flannel.conflist /opt/cni/bin/flannel
+```
+
+卸载内核模块
+
+> 所有节点
+
+```
+modprobe -r vxlan
 ```
 
 删除网络设备
@@ -72,16 +80,10 @@ for net in $(ifconfig | egrep "tunl|cni|flannel|veth" | awk -F: '{print $1}');do
 
 重启kubelet
 
-> 所有节点
+> 在卸载服务之后，**所有节点**建议重启 `kubelet` 服务和网络服务，以确保 Kubernetes 节点恢复到正常的网络状态
 
 ```
 systemctl restart kubelet
-```
-
-重启所有pod
-
-```
-kubectl delete pod --all --all-namespaces
 ```
 
 查看pod状态

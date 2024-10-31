@@ -26,10 +26,10 @@ helm pull cilium/cilium --version 1.16.3
 
 **修改配置**
 
-根据环境做出相应的修改
+根据需求修改配置文件：   `values-vxlan.yaml` `values-direct-routing.yaml` `values-hybrid.yaml`
 
 ```
-cat values.yaml
+cat values-vxlan.yaml
 ```
 
 **删除kube-proxy**
@@ -58,7 +58,7 @@ helm install cilium -n kube-system -f values-vxlan.yaml cilium-1.16.3.tgz
 直连路由模式通过节点的路由表实现跨主机的容器通信，减少了隧道开销，适合低延迟、高性能的场景。
 
 ```
-helm install cilium -n kube-system -f values-directrouting.yaml cilium-1.16.3.tgz
+helm install cilium -n kube-system -f values-direct-routing.yaml cilium-1.16.3.tgz
 ```
 
 **查看服务**
@@ -139,24 +139,27 @@ cilium bpf tunnel list
 helm uninstall -n kube-system cilium
 ```
 
-删除相关规则
-
-> 所有节点
-
-```
-iptables -P INPUT ACCEPT
-iptables -P OUTPUT ACCEPT
-iptables -F
-iptables -X
-iptables -Z
-```
-
 删除相关内核
 
 > 所有节点
 
 ```
-sudo docker run -it -v /run/cilium/cgroupv2/:/run/cilium/cgroupv2/ -v /sys/fs/bpf:/sys/fs/bpf -v /sys/fs/cgroup/:/sys/fs/cgroup/ --privileged --net=host registry.lingo.local/kubernetes/cilium:v1.16.3 cilium  post-uninstall-cleanup -f --all-state
+sudo docker run --rm \
+  -v /run/cilium/cgroupv2/:/run/cilium/cgroupv2/ \
+  -v /sys/fs/bpf:/sys/fs/bpf \
+  -v /sys/fs/cgroup/:/sys/fs/cgroup/ \
+  --privileged --net=host \
+  registry.lingo.local/kubernetes/cilium:v1.16.3 \
+  cilium post-uninstall-cleanup -f --all-state
+```
+
+卸载 cgroup 文件系统
+
+> 所有节点
+
+```
+umount /var/run/cilium/cgroupv2
+rm -rf /var/run/cilium
 ```
 
 删除相关的文件
@@ -165,6 +168,15 @@ sudo docker run -it -v /run/cilium/cgroupv2/:/run/cilium/cgroupv2/ -v /sys/fs/bp
 
 ```
 rm -f /etc/cni/net.d/05-cilium.conflist
+rm -f /opt/cni/bin/{cilium-cni,loopback}
+```
+
+卸载内核模块
+
+> 所有节点
+
+```
+modprobe -r vxlan
 ```
 
 删除网络设备
@@ -172,21 +184,15 @@ rm -f /etc/cni/net.d/05-cilium.conflist
 > 所有节点
 
 ```
-for net in $(ifconfig | egrep "lxc|cilium|dumm|ipvs|veth" | awk -F: '{print $1}');do ifconfig $net down && ip link delete $net;done
+for net in $(ifconfig | egrep "lxc|cilium|dumm|veth" | awk -F: '{print $1}');do ifconfig $net down && ip link delete $net;done
 ```
 
 重启kubelet
 
-> 所有节点
+> 在卸载服务之后，**所有节点**建议重启 `kubelet` 服务和网络服务，以确保 Kubernetes 节点恢复到正常的网络状态
 
 ```
 systemctl restart kubelet
-```
-
-重启所有pod
-
-```
-kubectl delete pod --all --all-namespaces
 ```
 
 查看pod状态
@@ -196,12 +202,4 @@ kubectl get pod -A -o wide
 ```
 
 ![image-20241030200612740](./assets/image-20241030200612740.png)
-
-重启操作系统
-
-> 所有节点
-
-```
-reboot
-```
 

@@ -22,6 +22,14 @@ rm -f /etc/cni/net.d/{10-calico.conflist,calico-kubeconfig}
 rm -rf /var/lib/calico/
 ```
 
+卸载内核模块
+
+> 所有节点
+
+```
+modprobe -r ipip vxlan
+```
+
 删除网络设备
 
 > 所有节点
@@ -32,16 +40,10 @@ for net in $(ifconfig | egrep "tunl|vxlan.calico|cali" | awk -F: '{print $1}');d
 
 重启kubelet
 
-> 所有节点
+> 在卸载 Calico 之后，**所有节点**建议重启 `kubelet` 服务和网络服务，以确保 Kubernetes 节点恢复到正常的网络状态
 
 ```
 systemctl restart kubelet
-```
-
-重启所有pod
-
-```
-kubectl delete pod --all --all-namespaces
 ```
 
 查看pod状态
@@ -72,6 +74,14 @@ rm -f /etc/cni/net.d/{10-calico.conflist,calico-kubeconfig}
 rm -rf /var/lib/calico/
 ```
 
+卸载内核模块
+
+> 所有节点
+
+```
+modprobe -r ipip vxlan
+```
+
 删除网络设备
 
 > 所有节点
@@ -82,16 +92,10 @@ for net in $(ifconfig | egrep "tunl|vxlan.calico|cali" | awk -F: '{print $1}');d
 
 重启kubelet
 
-> 所有节点
+> 在卸载 Calico 之后，**所有节点**建议重启 `kubelet` 服务和网络服务，以确保 Kubernetes 节点恢复到正常的网络状态
 
 ```
 systemctl restart kubelet
-```
-
-重启所有pod
-
-```
-kubectl get pods --all-namespaces -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,HOSTNETWORK:.spec.hostNetwork --no-headers=true | grep '<none>' | awk '{print "-n "$1" "$2}' | xargs -L 1 -r kubectl delete pod
 ```
 
 查看pod状态
@@ -109,7 +113,30 @@ kubectl get pod -A -o wide
 删除相关的资源
 
 ```
-helm uninstall cilium  -n kube-system
+helm uninstall -n kube-system cilium
+```
+
+删除相关内核
+
+> 所有节点
+
+```
+sudo docker run --rm \
+  -v /run/cilium/cgroupv2/:/run/cilium/cgroupv2/ \
+  -v /sys/fs/bpf:/sys/fs/bpf \
+  -v /sys/fs/cgroup/:/sys/fs/cgroup/ \
+  --privileged --net=host \
+  registry.lingo.local/kubernetes/cilium:v1.16.3 \
+  cilium post-uninstall-cleanup -f --all-state
+```
+
+卸载 cgroup 文件系统
+
+> 所有节点
+
+```
+umount /var/run/cilium/cgroupv2
+rm -rf /var/run/cilium
 ```
 
 删除相关的文件
@@ -118,6 +145,15 @@ helm uninstall cilium  -n kube-system
 
 ```
 rm -f /etc/cni/net.d/05-cilium.conflist
+rm -f /opt/cni/bin/{cilium-cni,loopback}
+```
+
+卸载内核模块
+
+> 所有节点
+
+```
+modprobe -r vxlan
 ```
 
 删除网络设备
@@ -125,21 +161,15 @@ rm -f /etc/cni/net.d/05-cilium.conflist
 > 所有节点
 
 ```
-for net in $(ifconfig | egrep "lxc|cilium_host|cilium_vxlan" | awk -F: '{print $1}');do ifconfig $net down && ip link delete $net;done
+for net in $(ifconfig | egrep "lxc|cilium|dumm|veth" | awk -F: '{print $1}');do ifconfig $net down && ip link delete $net;done
 ```
 
 重启kubelet
 
-> 所有节点
+> 在卸载服务之后，**所有节点**建议重启 `kubelet` 服务和网络服务，以确保 Kubernetes 节点恢复到正常的网络状态
 
 ```
 systemctl restart kubelet
-```
-
-重启所有pod
-
-```
-kubectl get pods --all-namespaces -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,HOSTNETWORK:.spec.hostNetwork --no-headers=true | grep '<none>' | awk '{print "-n "$1" "$2}' | xargs -L 1 -r kubectl delete pod
 ```
 
 查看pod状态
@@ -165,8 +195,16 @@ helm uninstall flannel -n kube-system
 > 所有节点
 
 ```
-rm -rf /var/lib/cni/ /run/flannel /run/xtables.lock
-rm -f /etc/cni/net.d/10-flannel.conflist
+rm -rf /var/lib/cni/
+rm -f /etc/cni/net.d/10-flannel.conflist /opt/cni/bin/flannel
+```
+
+卸载内核模块
+
+> 所有节点
+
+```
+modprobe -r vxlan
 ```
 
 删除网络设备
@@ -179,16 +217,10 @@ for net in $(ifconfig | egrep "tunl|cni|flannel|veth" | awk -F: '{print $1}');do
 
 重启kubelet
 
-> 所有节点
+> 在卸载服务之后，**所有节点**建议重启 `kubelet` 服务和网络服务，以确保 Kubernetes 节点恢复到正常的网络状态
 
 ```
 systemctl restart kubelet
-```
-
-重启所有pod
-
-```
-kubectl delete pod --all --all-namespaces
 ```
 
 查看pod状态

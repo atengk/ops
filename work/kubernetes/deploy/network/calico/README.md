@@ -80,12 +80,36 @@ EOF
 source ~/.bash_profile
 ```
 
-使用
+查看节点的详细信息
 
 ```
-calicoctl get workloadendpoints
-calicoctl get nodes
-calicoctl get ipPool --output wide
+# calicoctl get nodes -o wide
+NAME           ASN       IPV4               IPV6
+k8s-master01   (64512)   192.168.1.101/24
+k8s-worker01   (64512)   192.168.1.102/24
+k8s-worker02   (64512)   192.168.1.103/24
+```
+
+查看 IP 地址池的详细信息
+
+```
+# calicoctl get ipPool -o wide
+NAME                  CIDR            NAT    IPIPMODE      VXLANMODE   DISABLED   DISABLEBGPEXPORT   SELECTOR
+default-ipv4-ippool   10.100.0.0/16   true   CrossSubnet   Never       false      false              all()
+```
+
+显示 IP 地址管理的详细信息
+
+```
+# calicoctl ipam show --show-blocks
++----------+-----------------+-----------+------------+--------------+
+| GROUPING |      CIDR       | IPS TOTAL | IPS IN USE |   IPS FREE   |
++----------+-----------------+-----------+------------+--------------+
+| IP Pool  | 10.100.0.0/16   |     65536 | 29 (0%)    | 65507 (100%) |
+| Block    | 10.100.130.0/24 |       256 | 6 (2%)     | 250 (98%)    |
+| Block    | 10.100.181.0/24 |       256 | 12 (5%)    | 244 (95%)    |
+| Block    | 10.100.61.0/24  |       256 | 11 (4%)    | 245 (96%)    |
++----------+-----------------+-----------+------------+--------------+
 ```
 
 **删除服务以及数据**
@@ -106,6 +130,14 @@ rm -f /etc/cni/net.d/{10-calico.conflist,calico-kubeconfig}
 rm -rf /var/lib/calico/
 ```
 
+卸载内核模块
+
+> 所有节点
+
+```
+modprobe -r ipip vxlan
+```
+
 删除网络设备
 
 > 所有节点
@@ -116,16 +148,10 @@ for net in $(ifconfig | egrep "tunl|vxlan.calico|cali" | awk -F: '{print $1}');d
 
 重启kubelet
 
-> 所有节点
+> 在卸载 Calico 之后，**所有节点**建议重启 `kubelet` 服务和网络服务，以确保 Kubernetes 节点恢复到正常的网络状态
 
 ```
 systemctl restart kubelet
-```
-
-重启所有pod
-
-```
-kubectl get pods --all-namespaces -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,HOSTNETWORK:.spec.hostNetwork --no-headers=true | grep '<none>' | awk '{print "-n "$1" "$2}' | xargs -L 1 -r kubectl delete pod
 ```
 
 查看pod状态

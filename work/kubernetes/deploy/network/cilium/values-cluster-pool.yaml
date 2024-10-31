@@ -1,5 +1,5 @@
 
-tunnelProtocol: "vxlan"  # 隧道协议，用于跨节点通信。
+tunnelProtocol: ""  # 隧道协议，用于跨节点通信。设置为空表示不使用隧道，依赖原生路由模式。
 routingMode: native  # 路由模式设置为原生模式，直接使用路由表实现节点间的通信，不依赖隧道协议。
 
 ipam:                  # IP 地址管理（IPAM）配置
@@ -12,7 +12,7 @@ ipam:                  # IP 地址管理（IPAM）配置
 
 autoDirectNodeRoutes: true  # 自动启用节点直连路由。Cilium 会在节点间自动创建直连路由，实现跨节点的无隧道通信。
 
-ipv4NativeRoutingCIDR: "10.100.0.0/23"  # 指定 IPv4 的原生路由 CIDR，位于此范围内的流量将直接路由，无需隧道。
+ipv4NativeRoutingCIDR: "10.100.0.0/16"  # 指定 IPv4 的原生路由 CIDR，位于此范围内的流量将直接路由，无需隧道。
 ipv6NativeRoutingCIDR: "fd00::/104"     # 指定 IPv6 的原生路由 CIDR，位于此范围内的流量将直接路由，无需隧道。
 
 kubeProxyReplacement: true  # 是否替代 kube-proxy。设为 true 则使用 Cilium 的 eBPF 功能完全替代 kube-proxy。
