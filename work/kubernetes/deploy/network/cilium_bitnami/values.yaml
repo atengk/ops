@@ -1,0 +1,82 @@
+fullnameOverride: "cilium"
+clusterName: default
+agent:
+  image:
+    registry: registry.lingo.local
+    repository: kubernetes/cilium
+    tag: "1.16.3"
+    debug: false
+  resourcesPreset: "none"
+  extraEnvVars:
+    - name: TZ
+      value: "Asia/Shanghai"
+operator:
+  image:
+    registry: registry.lingo.local
+    repository: kubernetes/cilium-operator
+    tag: "1.16.3"
+    pullPolicy: IfNotPresent
+    debug: false
+  replicaCount: 1
+  resourcesPreset: "none"
+  extraEnvVars:
+    - name: TZ
+      value: "Asia/Shanghai"
+envoy:
+  useDaemonSet: false
+  image:
+    registry: registry.lingo.local
+    repository: kubernetes/cilium-proxy
+    tag: "1.29.9"
+    pullPolicy: IfNotPresent
+    debug: false
+  resourcesPreset: "none"
+  extraEnvVars:
+    - name: TZ
+      value: "Asia/Shanghai"
+hubble:
+  relay:
+    enabled: false
+    image:
+      registry: registry.lingo.local
+      repository: kubernetes/hubble-relay
+      tag: "1.16.3"
+      pullPolicy: IfNotPresent
+      debug: false
+    replicaCount: 1
+    resourcesPreset: "none"
+    extraEnvVars:
+      - name: TZ
+        value: "Asia/Shanghai"
+  ui:
+    enabled: false
+    frontend:
+      image:
+        registry: registry.lingo.local
+        repository: kubernetes/hubble-ui
+        tag: "0.13.1"
+        pullPolicy: IfNotPresent
+        debug: false
+      resourcesPreset: "none"
+      extraEnvVars:
+        - name: TZ
+          value: "Asia/Shanghai"
+    backend:
+      image:
+        registry: registry.lingo.local
+        repository: kubernetes/hubble-ui-backend
+        tag: "0.13.1"
+        pullPolicy: IfNotPresent
+      resourcesPreset: "none"
+      extraEnvVars:
+        - name: TZ
+          value: "Asia/Shanghai"
+    service:
+      type: NodePort
+      ports:
+        http: 80
+      nodePorts:
+        http: ""
+externalKvstore:
+  enabled: false
+  endpoints: []

@@ -1,0 +1,50 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "minio"
+image:
+  registry: registry.lingo.local
+  repository: service/minio
+  tag: 2024.10.13
+  pullPolicy: IfNotPresent
+  debug: false
+clientImage:
+  registry: registry.lingo.local
+  repository: service/minio-client
+  tag: 2024.10.8
+mode: distributed
+auth:
+  rootUser: admin
+  rootPassword: "Admin@123"
+disableWebUI: false
+statefulset:
+  ## replicaCount*drivesPerNode>=4 && replicaCount>=2
+  replicaCount: 4
+  drivesPerNode: 1
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+terminationGracePeriodSeconds: "10"
+resourcesPreset: "none"
+resources: {}
+affinity: {}
+nodeSelector: {}
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/minio="true"
+  type: "soft"
+  key: "kubernetes.service/minio"
+  values:
+    - "true"
+containerPorts:
+  api: 9000
+  console: 9001
+service:
+  type: NodePort
+  ports:
+    api: 9000
+    console: 9001
+  nodePorts:
+    api: ""
+    console: ""
+persistence:
+  size: 100Gi
+

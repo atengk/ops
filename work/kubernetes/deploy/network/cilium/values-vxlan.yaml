@@ -1,0 +1,32 @@
+
+tunnelProtocol: vxlan  # 隧道协议，用于跨节点通信，设置为 'vxlan' 表示使用 VXLAN 隧道。可选值还包括 'geneve'。
+
+routingMode: tunnel  # 路由模式设置为 'tunnel'，表示在节点间使用隧道模式传输流量。
+
+ipam:                   # IP 地址管理（IPAM）配置
+  mode: kubernetes      # 使用 Kubernetes 的 IPAM 模式，Kubernetes 将负责 IP 地址的分配。
+
+k8s:
+  requireIPv4PodCIDR: true   # 是否要求 IPv4 Pod CIDR。设置为 true 表示需要在 Kubernetes 中配置 IPv4 地址池。
+  requireIPv6PodCIDR: false  # 是否要求 IPv6 Pod CIDR。设置为 false 表示不需要 IPv6 地址池。
+
+kubeProxyReplacement: true   # 是否替代 kube-proxy。设置为 true 使用 Cilium 的 eBPF 功能完全替代 kube-proxy，实现更高效的服务代理。
+
+image:
+  repository: "registry.lingo.local/kubernetes/cilium"
+  tag: "v1.16.3"
+  pullPolicy: "IfNotPresent"
+  useDigest: false
+envoy:
+  image:
+    repository: "registry.lingo.local/kubernetes/cilium-envoy"
+    tag: "v1.29.9-1728346947-0d05e48bfbb8c4737ec40d5781d970a550ed2bbd"
+    pullPolicy: "IfNotPresent"
+    useDigest: false
+operator:
+  image:
+    repository: "registry.lingo.local/kubernetes/operator"
+    tag: "v1.16.3"
+    useDigest: false
+    pullPolicy: "IfNotPresent"
+  replicas: 2

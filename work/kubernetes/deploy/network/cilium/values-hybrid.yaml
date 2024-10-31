@@ -1,0 +1,40 @@
+
+tunnelProtocol: "vxlan"  # 隧道协议，用于跨节点通信。
+routingMode: native  # 路由模式设置为原生模式，直接使用路由表实现节点间的通信，不依赖隧道协议。
+
+ipam:                  # IP 地址管理（IPAM）配置
+  mode: "cluster-pool" # IPAM 模式设置为 cluster-pool，适用于 Cilium 管理的 IP 地址池，支持跨节点的 IP 分配。
+  operator:
+    clusterPoolIPv4PodCIDRList: ["10.100.0.0/16"]  # IPv4 地址池，Cilium 在这个地址范围内分配 Pod IP。
+    clusterPoolIPv4MaskSize: 24                    # 子网掩码为 24，IPv4 地址池被分为多个 /24 的子网分配给各节点。
+    clusterPoolIPv6PodCIDRList: ["fd00::/104"]     # IPv6 地址池，Cilium 在这个地址范围内分配 IPv6 Pod IP。
+    clusterPoolIPv6MaskSize: 120                   # 子网掩码为 120，IPv6 地址池被分为多个 /120 的子网分配给各节点。
+
+autoDirectNodeRoutes: true  # 自动启用节点直连路由。Cilium 会在节点间自动创建直连路由，实现跨节点的无隧道通信。
+
+ipv4NativeRoutingCIDR: "10.100.0.0/23"  # 指定 IPv4 的原生路由 CIDR，位于此范围内的流量将直接路由，无需隧道。
+ipv6NativeRoutingCIDR: "fd00::/104"     # 指定 IPv6 的原生路由 CIDR，位于此范围内的流量将直接路由，无需隧道。
+
+kubeProxyReplacement: true  # 是否替代 kube-proxy。设为 true 则使用 Cilium 的 eBPF 功能完全替代 kube-proxy。
+
+loadBalancer:
+  mode: hybrid
+
+image:
+  repository: "registry.lingo.local/kubernetes/cilium"
+  tag: "v1.16.3"
+  pullPolicy: "IfNotPresent"
+  useDigest: false
+envoy:
+  image:
+    repository: "registry.lingo.local/kubernetes/cilium-envoy"
+    tag: "v1.29.9-1728346947-0d05e48bfbb8c4737ec40d5781d970a550ed2bbd"
+    pullPolicy: "IfNotPresent"
+    useDigest: false
+operator:
+  image:
+    repository: "registry.lingo.local/kubernetes/operator"
+    tag: "v1.16.3"
+    useDigest: false
+    pullPolicy: "IfNotPresent"
+  replicas: 2

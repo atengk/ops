@@ -50,7 +50,7 @@ done
 保存到本地文件
 
 ```
-images=$(cat images-list.txt | awk -F "/" '{print "'"${registry_address}"'/"$NF}')
+images=$(cat images-list.txt | awk -F "/" '{print "'"${registry_address}"'/calico-"$NF}')
 docker save $images | gzip -c > images-${app}_${version}.tar.gz
 ```
 

@@ -1,0 +1,22 @@
+podCidr: "10.100.0.0/16"
+podCidrv6: ""
+flannel:
+  image:
+    repository: registry.lingo.local/kubernetes/flannel
+    tag: v0.26.0
+  image_cni:
+    repository: registry.lingo.local/kubernetes/flannel-cni-plugin
+    tag: v1.5.1-flannel2
+  # Backend for kube-flannel. Backend should not be changed
+  # at runtime. (vxlan, host-gw, wireguard, udp)
+  # Documentation at https://github.com/flannel-io/flannel/blob/master/Documentation/backends.md
+  backend: "vxlan"
+netpol:
+  enabled: false
+  args:
+  - "--hostname-override=$(MY_NODE_NAME)"
+  - "--v=2"
+  image:
+    repository: registry.lingo.local/kubernetes/kube-network-policies
+    tag: v0.4.0
+

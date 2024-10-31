@@ -43,6 +43,22 @@ HAProxy（High Availability Proxy）是一个开源的负载均衡和反向代�
    ```
    - 这会将HAProxy安装到`/usr/local/software/haproxy`。
 
+   配置环境变量
+
+   ```
+   sudo tee /etc/profile.d/00-haproxy.sh <<"EOF"
+   export HAPROXY_HOME=/usr/local/software/haproxy
+   export PATH=$PATH:$HAPROXY_HOME/sbin
+   EOF
+   source /etc/profile
+   ```
+
+   查看版本
+
+   ```
+   haproxy -v
+   ```
+
 6. **配置HAProxy**
 
    - 创建目录：
@@ -117,7 +133,7 @@ HAProxy（High Availability Proxy）是一个开源的负载均衡和反向代�
      ```
 
 8. **启用并启动HAProxy服务**
-   
+  
    ```bash
    sudo systemctl daemon-reload
    sudo systemctl enable haproxy
@@ -149,20 +165,15 @@ HAProxy（High Availability Proxy）是一个开源的负载均衡和反向代�
 ```ini
 # 前端配置
 frontend http_front
-    bind *:8080
+    bind *:19000
     default_backend http_back
-
-    # 允许的请求方法
-    acl allowed_methods method GET POST PUT DELETE
-    http-request deny if !allowed_methods
 
 # 后端配置
 backend http_back
     balance roundrobin
-    option httpchk GET /health
-    http-check expect status 200
-    server http1 192.168.1.12:8080 check
-    server http2 192.168.1.13:8080 check
+    option tcp-check
+    server http1 192.168.1.112:9000 check
+    server http2 192.168.1.113:9000 check
 ```
 
 重启服务
