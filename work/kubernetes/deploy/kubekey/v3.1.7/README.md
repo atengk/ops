@@ -15,13 +15,13 @@ https://github.com/kubesphere/kubekey/blob/master/README_zh-CN.md
 下载kubekey
 
 ```
-wget https://github.com/kubesphere/kubekey/releases/download/v3.1.5/kubekey-v3.1.5-linux-amd64.tar.gz
+wget https://github.com/kubesphere/kubekey/releases/download/v3.1.7/kubekey-v3.1.7-linux-amd64.tar.gz
 ```
 
 安装kubekey
 
 ```
-tar -zxvf kubekey-v3.1.5-linux-amd64.tar.gz -C /usr/bin
+tar -zxvf kubekey-v3.1.7-linux-amd64.tar.gz -C /usr/bin
 kk version
 ```
 
@@ -43,10 +43,27 @@ kk version --show-supported-k8s
 
 生成制品清单示例
 
-> 参考该清单示例文件中的镜像，将前缀改为**registry.cn-beijing.aliyuncs.com/kubesphereio/**
+```
+kk create manifest --with-kubernetes v1.23.17,v1.24.17,v1.25.16,v1.26.15,v1.27.16,v1.28.15,v1.29.10,v1.30.6,v1.31.2 --arch amd64 --with-registry -f kk-manifest-ks-sample.yaml
+```
+
+获取基础镜像并修改为阿里云仓库
 
 ```
-kk create manifest --with-kubernetes v1.23.17,v1.24.17,v1.25.16,v1.26.15,v1.27.16,v1.28.12,v1.29.7,v1.30.4,v1.31.0 --arch amd64 --with-registry -f kk-manifest-ks-sample.yaml
+grep -E docker.io kk-manifest-ks-sample.yaml | awk -F '/' '{print "registry.cn-beijing.aliyuncs.com/kubesphereio/"$NF}' | sed "s/^/  - /"
+```
+
+获取KubeSphere镜像并修改为阿里云仓库
+
+```
+wget -O ks-images-list.txt https://github.com/kubesphere/ks-installer/releases/download/v3.4.1/images-list.txt
+grep -E -v "^$|^#" ks-images-list.txt | awk -F '/' '{print "registry.cn-beijing.aliyuncs.com/kubesphereio/"$NF}' | sed "s/^/  - /"
+```
+
+根据生成的kk-manifest-ks-sample.yaml文件按需求自定义manifest配置文件，以上步骤的镜像修改在文件中
+
+```
+vi ks-manifest-ks.yaml
 ```
 
 设置时区变量
@@ -86,7 +103,7 @@ kk artifact export -m kk-manifest-ks-all.yaml -o kubekey-artifact-ks-all.tar.gz
 安装kubekey
 
 ```
-tar -zxvf kubekey-v3.1.5-linux-amd64.tar.gz -C /usr/bin/
+tar -zxvf kubekey-v3.1.7-linux-amd64.tar.gz -C /usr/bin/
 ```
 
 初始化镜像仓库
@@ -260,7 +277,7 @@ rm -rf /data/service/etcd
 
 ```
 export KKZONE=cn
-export VERSION=v3.1.5
+export VERSION=v3.1.7
 curl -sfL https://get-kk.kubesphere.io | sh -
 mv kk /usr/bin
 ```
