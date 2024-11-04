@@ -5,48 +5,55 @@
         - [升级OpenSSH](/work/service/openssh/v9.9/)
     - 存储服务
         - [网络文件共享 NFS](work/service/nfs/)
-        - [对象存储服务 MinIO](/work/service/minio/v20240717/)
+        - 对象存储服务 MinIO
+            - [安装文档](/work/service/minio/v20241013/)
+            - [使用文档](/work/service/minio/OPS.md)
         - [分布式存储 JuiceFS](/work/service/juicefs/v1.1.1/)
         - [备份工具 Restic](/work/service/restic/)
     - 数据库
         - MySQL
-            - [MySQL v8.0.39](/work/service/mysql/v8.0.39/)
-            - [MySQL v8.4.2](/work/service/mysql/v8.4.2-lts/)
+            - [安装8.0.39版本](/work/service/mysql/v8.0.39/)
+            - [安装8.4.2版本](/work/service/mysql/v8.4.2-lts/)
             - [编译安装](/work/service/mysql/make/)
             - [OpenEuler编译安装](/work/service/mysql/make/README_OpenEuler.md)
             - [OpenEuler dnf安装](/work/service/mysql/openeuler/v8.0.37/)
+            - [使用文档](/work/service/mysql/OPS.md)
         - MariaDB Galera
-            - [MariaDB v11.4.2](/work/service/mariadb/v11.4.2/)
+            - [安装11.4.2版本](/work/service/mariadb/v11.4.2/)
         - Redis
-            - [Redis v6.2.14](/work/service/redis/v6.2.14/)
-            - [Redis v7.2.5](/work/service/redis/v7.2.5/)
+            - [安装6.2.14版本](/work/service/redis/v6.2.14/)
+            - [安装7.2.5版本](/work/service/redis/v7.2.5/)
+            - [使用文档](/work/service/redis/OPS.md)
         - PostgreSQL
             - [编译安装PostgreSQL](/work/service/postgresql/)
             - [编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
             - [OpenEuler编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
             - [OpenEuler安装PostgreSQL](/work/service/postgresql/openeuler/v15.6/)
+            - [使用文档](/work/service/postgresql/OPS.md)
             - [其他](/work/service/postgresql/README_Test.md)
         - ETCD
-            - [ETCD v3.5.1](/work/service/etcd/v3.5.1/)
+            - [安装3.5.1版本](/work/service/etcd/v3.5.1/)
+            - [使用文档](/work/service/etcd/OPS.md)
         - FoundationDB
-            - [FoundationDB v7.3.43](/work/service/foundationdb/v7.3.43/)
+            - [安装7.3.43版本](/work/service/foundationdb/v7.3.43/)
+            - [使用文档](/work/service/foundationdb/OPS.md)
         - ElasticSearch
-            - [standalone](/work/service/elastic/elasticsearch/standalone/)
-            - [cluster](/work/service/elastic/elasticsearch/cluster/)
+            - [安装单机模式](/work/service/elastic/elasticsearch/standalone/)
+            - [安装集群模式](/work/service/elastic/elasticsearch/cluster/)
         - [CoreDNS](/work/service/coredns/)
     - Web服务
         - Nginx
-            - [Nginx v1.23.4](/work/service/nginx/v1.23.4/)
-            - [Nginx v1.26.2](/work/service/nginx/v1.26.2/)
+            - [安装1.23.4版本](/work/service/nginx/v1.23.4/)
+            - [安装1.26.2版本](/work/service/nginx/v1.26.2/)
             - [配置HTTPS证书](/work/service/nginx/v1.23.4/tls/)
         - TLS证书
-            - [cfssl](/work/service/tls/tls-cfssl/)
-            - [openssl](/work/service/tls/tls-openssl/)
+            - [cfssl创建证书](/work/service/tls/tls-cfssl/)
+            - [openssl创建证书](/work/service/tls/tls-openssl/)
     - 内网远程访问
         - [内网穿透FRP](/work/service/frp/)
 - Kubernetes
     - 基础设施安装
-        - [kubekey](/work/kubernetes/deploy/kubekey/v3.1.5/)
+        - [kubekey](/work/kubernetes/deploy/kubekey/v3.1.7/)
         - [kubesphere](/work/kubernetes/deploy/kubesphere/v3.4.1/)
         - [kubeadm](/work/kubernetes/deploy/kubeadm/v1.23.12/)
         - [kubevirt](/work/kubernetes/deploy/kubevirt/deploy/v1.3.0/)
@@ -72,28 +79,28 @@
     - 中间件服务
         - 数据库
             - Redis
-                - [单机模式](/work/kubernetes/service/redis/v7.2.5/standalone/)
-                - [主从模式](/work/kubernetes/service/redis/v7.2.5/replication/)
-                - [哨兵模式](/work/kubernetes/service/redis/v7.2.5/sentinel/)
-                - [集群模式](/work/kubernetes/service/redis/v7.2.5/cluster/)
+                - [单机模式](/work/kubernetes/service/redis/v7.4.1/standalone/)
+                - [主从模式](/work/kubernetes/service/redis/v7.4.1/replication/)
+                - [哨兵模式](/work/kubernetes/service/redis/v7.4.1/sentinel/)
+                - [集群模式](/work/kubernetes/service/redis/v7.4.1/cluster/)
             - Mariadb Galera
-                - [Galera集群](/work/kubernetes/service/mariadb/v11.3.2/)
+                - [Galera集群](/work/kubernetes/service/mariadb/v11.4.3/)
             - PostgreSQL
-                - [单机模式](/work/kubernetes/service/postgresql/v16.3.0/standalone/)
-                - [主从模式](/work/kubernetes/service/postgresql/v16.3.0/replication/)
-                - [集群模式](/work/kubernetes/service/postgresql/v16.3.0/ha/)
+                - [单机模式](/work/kubernetes/service/postgresql/v16.4.0/standalone/)
+                - [主从模式](/work/kubernetes/service/postgresql/v16.4.0/replication/)
+                - [集群模式](/work/kubernetes/service/postgresql/v16.4.0/ha/)
             - MongoDB
-                - [单机模式](/work/kubernetes/service/mongodb/v7.0.12/standalone/)
-                - [副本集群模式](/work/kubernetes/service/mongodb/v7.0.12/replicaset/)
-                - [分配集群模式](/work/kubernetes/service/mongodb/v7.0.12/sharded/)
+                - [单机模式](/work/kubernetes/service/mongodb/v8.0.1/standalone/)
+                - [副本集群模式](/work/kubernetes/service/mongodb/v8.0.1/replicaset/)
+                - [分配集群模式](/work/kubernetes/service/mongodb/v8.0.1/sharded/)
             - MySQL
-                - [单机模式](/work/kubernetes/service/mysql/v8.4.2/standalone/)
-                - [主从模式](/work/kubernetes/service/mysql/v8.4.2/replication/)
-                - [配置metrics](/work/kubernetes/service/mysql/v8.4.2/metrics/)
+                - [单机模式](/work/kubernetes/service/mysql/v8.4.3/standalone/)
+                - [主从模式](/work/kubernetes/service/mysql/v8.4.3/replication/)
+                - [配置metrics](/work/kubernetes/service/mysql/v8.4.3/metrics/)
             - Doris
-                - [单机模式](/work/kubernetes/service/doris/v2.1.5/standalone/)
-                - [集群模式](/work/kubernetes/service/doris/v2.1.5/cluster/)
-                - [集群模式All](/work/kubernetes/service/doris/v2.1.5/cluster-all/)
+                - [单机模式](/work/kubernetes/service/doris/v2.1.6/standalone/)
+                - [集群模式](/work/kubernetes/service/doris/v2.1.6/cluster/)
+                - [集群模式All](/work/kubernetes/service/doris/v2.1.6/cluster-all/)
             - Clickhouse
                 - [集群模式](/work/kubernetes/service/clickhouse/v23.12.2/)
             - ElasticSearch
@@ -119,8 +126,8 @@
                 - [Kafka可视化](/work/kubernetes/service/kafka-ui/)
         - 存储服务
             - MinIO
-                - [单机模式](/work/kubernetes/service/minio/v2024.7.15/standalone/)
-                - [集群模式](/work/kubernetes/service/minio/v2024.7.15/distributed/)
+                - [单机模式](/work/kubernetes/service/minio/v2024.10.13/standalone/)
+                - [集群模式](/work/kubernetes/service/minio/v2024.10.13/distributed/)
             - Harbor
                 - [http模式](/work/kubernetes/service/harbor/v2.11.0/http/)
                 - [ingress模式](/work/kubernetes/service/harbor/v2.11.0/ingress-http/)
@@ -128,7 +135,7 @@
             - [Spring Boot应用](/work/kubernetes/service/springboot-app/v1.0/)
             - [Gitlab](/work/kubernetes/service/gitlab/v17.4.2/)
             - [Gitea](/work/kubernetes/service/gitea/v1.22.1/)
-            - [jenkins](/work/kubernetes/service/jenkins/v2.452.3/baseic/)
+            - [Jenkins](/work/kubernetes/service/jenkins/v2.452.3/baseic/)
             - [Snail-Job](/work/kubernetes/service/snail-job/v1.1.2/)
             - [PowerJob](/work/kubernetes/service/powerjob/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
@@ -136,15 +143,17 @@
             - [Seata](/work/kubernetes/service/seata/v2.0.0/)
             - [Sentinel](/work/kubernetes/service/sentinel/)
             - [SkyWalking](/work/kubernetes/service/springboot-admin/v3.3.0/)
+            - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
+            - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
         - 大数据
             - [Flink](/work/kubernetes/service/zookeeper/v3.9.2/)
             - [Flink](/work/kubernetes/service/flink/v1.19.1/)
             - [Spark](/work/kubernetes/service/spark/v3.5.1/)
             - [DolphinScheduler](/work/kubernetes/service/dolphinscheduler/)
             - Doris
-                - [单机模式](/work/kubernetes/service/doris/v2.1.5/standalone/)
-                - [集群模式](/work/kubernetes/service/doris/v2.1.5/cluster/)
-                - [集群模式All](/work/kubernetes/service/doris/v2.1.5/cluster-all/)
+                - [单机模式](/work/kubernetes/service/doris/v2.1.6/standalone/)
+                - [集群模式](/work/kubernetes/service/doris/v2.1.6/cluster/)
+                - [集群模式All](/work/kubernetes/service/doris/v2.1.6/cluster-all/)
         - 负载均衡和网络
             - [MetalLB](/work/kubernetes/service/metallb/v0.14.8/)
             - [External-DNS](/work/kubernetes/service/external-dns/v0.15.0/)
