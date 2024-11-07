@@ -36,7 +36,7 @@
             - [安装3.5.1版本](/work/service/etcd/v3.5.1/)
             - [使用文档](/work/service/etcd/OPS.md)
         - FoundationDB
-            - [安装7.3.43版本](/work/service/foundationdb/v7.1.38/)
+            - [安装7.1.38版本](/work/service/foundationdb/v7.1.38/)
             - [安装7.3.43版本](/work/service/foundationdb/v7.3.43/)
             - [使用文档](/work/service/foundationdb/OPS.md)
         - ElasticSearch
