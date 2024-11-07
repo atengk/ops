@@ -18,9 +18,9 @@ wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2024-10-
 将下载的二进制文件复制到系统的可执行文件目录并赋予执行权限：
 
 ```bash
-sudo cp minio.RELEASE.2024-10-13T13-34-11Z /usr/local/bin/minio
-sudo cp mc.RELEASE.2024-10-08T09-37-26Z /usr/local/bin/mcli
-sudo chmod +x /usr/local/bin/{minio,mcli}
+sudo cp minio.RELEASE.2024-10-13T13-34-11Z /usr/bin/minio
+sudo cp mc.RELEASE.2024-10-08T09-37-26Z /usr/bin/mcli
+sudo chmod +x /usr/bin/{minio,mcli}
 ```
 
 ### 3. 创建数据目录
@@ -67,7 +67,7 @@ Type=simple
 Restart=on-failure
 RestartSec=5
 EnvironmentFile=-/etc/default/minio
-ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
+ExecStart=/usr/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
 ExecStop=/bin/kill -SIGTERM $MAINPID
 KillSignal=SIGTERM
 TimeoutStopSec=30
@@ -140,9 +140,9 @@ wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2024-10-
 将下载的二进制文件复制到系统的可执行文件目录并赋予执行权限：
 
 ```bash
-sudo cp minio.RELEASE.2024-10-13T13-34-11Z /usr/local/bin/minio
-sudo cp mc.RELEASE.2024-10-08T09-37-26Z /usr/local/bin/mcli
-sudo chmod +x /usr/local/bin/{minio,mcli}
+sudo cp minio.RELEASE.2024-10-13T13-34-11Z /usr/bin/minio
+sudo cp mc.RELEASE.2024-10-08T09-37-26Z /usr/bin/mcli
+sudo chmod +x /usr/bin/{minio,mcli}
 ```
 
 **说明**:  
@@ -197,7 +197,7 @@ Type=simple
 Restart=on-failure
 RestartSec=5
 EnvironmentFile=-/etc/default/minio
-ExecStart=/usr/local/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
+ExecStart=/usr/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
 ExecStop=/bin/kill -SIGTERM $MAINPID
 KillSignal=SIGTERM
 TimeoutStopSec=30
@@ -254,3 +254,123 @@ mcli admin info minio
 
 此命令将返回 MinIO 集群的配置信息、状态和健康检查结果。
 
+
+
+## 配置负载均衡
+
+### Nginx
+
+**编辑配置文件**
+
+编辑`/etc/nginx/conf.d/minio.conf`添加以下内容：
+
+```
+upstream minio_api_servers {
+    least_conn;
+    server 192.168.1.101:9000 max_fails=3 fail_timeout=30s;
+    server 192.168.1.102:9000 max_fails=3 fail_timeout=30s;
+    server 192.168.1.103:9000 max_fails=3 fail_timeout=30s;
+    keepalive 32;
+}
+
+server {
+    listen 19000;
+    server_name _;
+
+    location / {
+        proxy_pass http://minio_api_servers;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        proxy_connect_timeout 5s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+```
+
+参数含义说明
+
+- `least_conn`: 使用最少连接的负载均衡策略，将请求转发到当前连接数最少的服务器上。
+- `server`: 定义后端服务器的 IP 和端口，`max_fails=3` 表示若服务器连续失败 3 次则判定为不可用，`fail_timeout=30s` 表示服务器不可用的超时时间为 30 秒。
+- `keepalive`: 定义与后端服务器之间保持的最大长连接数，减少连接开销。
+- `listen`: 定义前端监听的端口号，在此配置中为 `19000`。
+- `server_name`: 用 `_` 匹配所有请求的域名。
+- `proxy_pass`: 转发请求到指定的 `upstream` 组。
+- `proxy_set_header`: 设置代理请求头：
+    - `Host`: 设置请求头的 `Host` 字段为客户端请求的主机。
+    - `X-Real-IP`: 设置请求头的 `X-Real-IP` 字段为客户端真实 IP。
+    - `X-Forwarded-For`: 保留所有代理 IP，确保多层代理时能追踪到客户端真实 IP。
+    - `X-Forwarded-Proto`: 设置协议头，保留客户端请求的协议类型。
+- `proxy_connect_timeout`: 定义代理服务器与后端服务器连接的超时时间。
+- `proxy_send_timeout`: 定义发送数据到后端服务器的超时时间。
+- `proxy_read_timeout`: 定义从后端服务器读取响应的超时时间。
+
+**重新读取配置**
+
+```
+sudo systemctl reload nginx
+```
+
+**添加负载均衡后的服务**
+
+```
+mcli config host add minio-lb http://192.168.1.101:19000 admin Admin@123 --api s3v4
+```
+
+**查看状态**
+
+```
+mcli admin info minio-lb
+```
+
+### HaProxy
+
+**编辑配置文件**
+
+编辑`/etc/haproxy/haproxy.cfg`添加以下内容：
+
+```
+frontend minio_api
+    bind *:19000
+    default_backend minio_api_servers
+
+backend minio_api_servers
+    balance leastconn
+    option tcp-check
+    server minio01 192.168.1.101:9000 check inter 3s fall 3 rise 2
+    server minio02 192.168.1.102:9000 check inter 3s fall 3 rise 2
+    server minio03 192.168.1.103:9000 check inter 3s fall 3 rise 2
+```
+
+参数含义说明
+
+- `balance leastconn`: 使用最少连接的负载均衡策略，将请求转发到当前连接数最少的服务器上，适用于长连接的负载均衡需求。
+- `option httpchk GET /`: 开启 HTTP 健康检查，通过发送 GET 请求检查服务器是否存活。
+- `server`: 定义后端服务器的 IP 和端口，并添加健康检查设置：
+    - `check`: 开启对服务器的健康检查。
+    - `inter 3s`: 设置健康检查的间隔时间为 3 秒。
+    - `fall 3`: 如果连续 3 次健康检查失败，判定服务器不可用。
+    - `rise 2`: 如果连续 2 次健康检查成功，判定服务器恢复可用。
+
+**重新读取配置**
+
+```
+sudo systemctl restart haproxy
+```
+
+**添加负载均衡后的服务**
+
+```
+mcli config host add minio-lb http://192.168.1.101:19000 admin Admin@123 --api s3v4
+```
+
+**查看状态**
+
+```
+mcli admin info minio-lb
+```
+
+### 

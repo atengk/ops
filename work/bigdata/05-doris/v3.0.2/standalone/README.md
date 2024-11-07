@@ -2,19 +2,36 @@
 
 > Apache Doris 是一个用于实时分析的现代数据仓库。它可以对大规模实时数据进行闪电般的快速分析。
 >
-> https://doris.apache.org/
+> Doris 3.0 实现了存算分离架构，将数据存储和计算资源独立管理。存储层基于对象存储（如 S3、OSS），用于存放压缩后的列式数据，提供高可靠性和持久性。计算层则负责查询和处理任务，可根据需求动态扩展，提升资源利用效率。在这种架构下，计算节点无需本地持久化数据，故障恢复更迅速，且资源可以根据负载弹性调整，降低了运营成本并提升了系统的可用性。总体而言，Doris 3.0 的存算分离增强了系统的灵活性和扩展性，适用于大规模数据分析场景。
 >
-> https://doris.apache.org/zh-CN/docs/install/cluster-deployment/standard-deployment
+> https://doris.apache.org/zh-CN/docs/3.0/compute-storage-decoupled/overview
 
 文档使用以下1台服务器，具体服务分配见描述的进程
 
-| IP地址        | 主机名    | 描述             |
-| ------------- | --------- | ---------------- |
-| 192.168.1.112 | bigdata01 | DorisFE、DorisBE |
+| IP地址        | 主机名    | 描述                                    |
+| ------------- | --------- | --------------------------------------- |
+| 192.168.1.112 | bigdata01 | FoundationDB、DorisFE、DorisBE、DorisMS |
 
 
 
 ## 基础环境配置
+
+### 安装FoundationDB
+
+参考[文档](https://kongyu666.github.io/work/#/work/service/foundationdb/v7.1.38/)
+
+最终服务正常启动，查看配置文件
+
+> 注意配置域名映射，版本使用官网指定的版本，高版本会导致MS服务无法启动
+
+```
+$ /usr/local/software/foundationdb/bin/fdbserver --version
+FoundationDB 7.1 (v7.1.38)
+source version f606ece0d13e9382452ac8466cca503b9256181d
+protocol fdb00b071010000
+$ cat /etc/foundationdb/fdb.cluster
+mycluster:abcd1234abcd5678@bigdata01:4500
+```
 
 ### JDK配置
 
@@ -52,7 +69,8 @@ cat >> ~/.bash_profile <<"EOF"
 ## DORIS_HOME
 export DORIS_BE_HOME=/usr/local/software/doris/be
 export DORIS_FE_HOME=/usr/local/software/doris/fe
-export PATH=$PATH:$DORIS_BE_HOME/bin:$DORIS_FE_HOME/bin
+export DORIS_MS_HOME=/usr/local/software/doris/ms
+export DORIS_RE_HOME=/usr/local/software/doris/recycler
 EOF
 source ~/.bash_profile
 ```
@@ -64,6 +82,58 @@ $DORIS_BE_HOME/lib/doris_be --version
 ```
 
 
+
+## 配置元数据管理
+
+https://doris.apache.org/zh-CN/docs/3.0/compute-storage-decoupled/compilation-and-deployment#3-meta-service-%E9%83%A8%E7%BD%B2
+
+安装依赖
+
+```
+sudo yum -y install patchelf
+```
+
+拷贝ms目录，用于recycler服务部署
+
+```
+cp -r $DORIS_MS_HOME $DORIS_RE_HOME
+```
+
+编辑配置文件
+
+> 修改以下配置，其余配置不用动
+
+```
+$ vi +22 $DORIS_MS_HOME/conf/doris_cloud.conf
+brpc_listen_port = 5000
+fdb_cluster = mycluster:abcd1234abcd5678@bigdata01:4500
+```
+
+启动服务
+
+```
+$DORIS_MS_HOME/bin/start.sh --meta-service --daemon
+```
+
+## 配置回收功能
+
+https://doris.apache.org/zh-CN/docs/3.0/compute-storage-decoupled/compilation-and-deployment#4-%E6%95%B0%E6%8D%AE%E5%9B%9E%E6%94%B6%E5%8A%9F%E8%83%BD%E7%8B%AC%E7%AB%8B%E9%83%A8%E7%BD%B2%E5%8F%AF%E9%80%89
+
+编辑配置文件
+
+> 修改以下配置，其余配置不用动
+
+```
+$ vi +19 $DORIS_RE_HOME/conf/doris_cloud.conf
+brpc_listen_port = 5001
+fdb_cluster = mycluster:abcd1234abcd5678@bigdata01:4500
+```
+
+启动服务
+
+```
+$DORIS_RE_HOME/bin/start.sh --recycler --daemon
+```
 
 ## 配置Frontend 
 

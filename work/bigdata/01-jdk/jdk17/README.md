@@ -1,5 +1,9 @@
 ## 安装OpenJDK17
 
+下载地址
+
+https://adoptium.net/zh-CN/temurin/releases/?os=linux&arch=x64&package=jdk&version=17
+
 解压软件包
 
 ```

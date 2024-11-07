@@ -122,10 +122,13 @@ HAProxy（High Availability Proxy）是一个开源的负载均衡和反向代�
      After=network.target
      
      [Service]
-     ExecStart=/usr/local/software/haproxy/sbin/haproxy -f /etc/haproxy/haproxy.cfg -db
+     ExecStart=/usr/local/software/haproxy/sbin/haproxy -f /etc/haproxy/haproxy.cfg -db -Ws
      ExecReload=/bin/kill -USR2 $MAINPID
      KillMode=mixed
      Restart=always
+     RestartSec=5s
+     LimitNOFILE=100000
+     TimeoutStopSec=10s
      
      [Install]
      WantedBy=multi-user.target
@@ -179,6 +182,6 @@ backend http_back
 重启服务
 
 ```shell
-sudo systemctl restart haproxy
+sudo systemctl reload haproxy
 ```
 

@@ -129,6 +129,8 @@ DROP TABLE users;
 
 - `--data-only`：仅导出数据（不包括表结构）。
 
+- `--column-inserts`: 导出的 INSERT 语句包含字段名称。
+
 - `--inserts`：使用 `INSERT` 语句导出数据。
 
 - `--schema-only`：仅导出数据库的模式（结构，不包括数据）。
@@ -243,7 +245,7 @@ pg_dump -h localhost -U postgres -F p --data-only -t users -f users_data.sql kon
 导出数据为 INSERT 语句
 
 ```
-pg_dump -h localhost -U postgres -F p --data-only --inserts -t users -f users_data.sql kongyu
+pg_dump -h localhost -U postgres -F p --data-only --column-inserts --inserts -t users -f users_data.sql kongyu
 ```
 
 **导出数据为 CSV 文件**
@@ -1032,70 +1034,78 @@ SELECT * FROM users LIMIT 10;
 
     累计 `balance` 并按总和比例计算累计百分比，适用于帕累托分析（80/20 原则），例如分析高净值用户在总资产中的占比。
 
-## JSONB
+了解了，这里将 `JSONB` 的 `JSONObject` 和 `JSONArray` 用法融合到一个示例中，展示如何创建表、插入混合数据、查询和更新操作。
 
-在 PostgreSQL 中，`JSONB` 是一种用于存储和操作 JSON 数据的二进制格式。相较于普通的 `JSON` 类型，`JSONB` 提供更高效的存储和更强的操作能力。以下是关于 `JSONB` 的详细使用示例，包括创建表、插入数据、查询和更新。
+---
 
-### 1. 创建表
+## PostgreSQL 中的 JSONB 使用示例 (包含 JSONObject 和 JSONArray)
 
-创建一个包含 `JSONB` 字段的表，示例表用于存储用户信息及其偏好设置。
+`JSONB` 是 PostgreSQL 中用于高效存储和操作 JSON 数据的二进制格式。本文将通过示例展示如何创建包含 JSONB 字段的表，并在数据中混合使用 JSON 对象和 JSON 数组，展示创建表、插入数据、查询和更新等操作。
+
+### 1. 创建包含 JSONB 字段的表
+
+我们创建一个 `users` 表，用于存储用户信息和购物历史记录，其中 `preferences` 字段用于存储 JSON 对象，`orders` 字段存储 JSON 数组，以实现灵活的数据结构。
 
 ```sql
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,                       -- 用户 ID
-    username VARCHAR(50) NOT NULL,              -- 用户名
-    email VARCHAR(100) UNIQUE NOT NULL,         -- 电子邮件
-    preferences JSONB DEFAULT '{}'               -- 用户偏好设置，默认为空 JSON 对象
+    username VARCHAR(50) NOT NULL,               -- 用户名
+    email VARCHAR(100) UNIQUE NOT NULL,          -- 电子邮件
+    preferences JSONB DEFAULT '{}',              -- 用户偏好设置 (JSON 对象)
+    orders JSONB DEFAULT '[]'                    -- 用户的订单记录 (JSON 数组)
 );
 ```
 
 ### 2. 插入数据
 
-向表中插入数据，包括 `JSONB` 格式的偏好设置。
+向 `users` 表中插入数据，其中 `preferences` 存储的是 JSON 对象，包含用户偏好设置；`orders` 是 JSON 数组，记录多个订单，每个订单是一个包含商品、数量和价格的 JSON 对象。
 
 ```sql
-INSERT INTO users (username, email, preferences) VALUES 
-('Alice', 'alice@example.com', '{"theme": "dark", "notifications": {"email": true, "sms": false}}'),
-('Bob', 'bob@example.com', '{"theme": "light", "notifications": {"email": false, "sms": true}}'),
-('Charlie', 'charlie@example.com', '{"theme": "dark", "language": "en"}');
+INSERT INTO users (username, email, preferences, orders) VALUES 
+('Alice', 'alice@example.com', '{"theme": "dark", "notifications": {"email": true, "sms": false}}', 
+ '[{"item": "Laptop", "quantity": 1, "price": 1200}, {"item": "Mouse", "quantity": 2, "price": 25}]'),
+('Bob', 'bob@example.com', '{"theme": "light", "notifications": {"email": false, "sms": true}}',
+ '[{"item": "Keyboard", "quantity": 1, "price": 75}, {"item": "Monitor", "quantity": 2, "price": 200}]');
 ```
 
 ### 3. 查询数据
 
-使用 `JSONB` 提供的函数和操作符进行查询。
+`JSONB` 支持多种查询操作符，可以查询 JSON 对象中的字段或 JSON 数组中的元素。
 
-#### 查询所有用户及其偏好设置
-
-```sql
-SELECT * FROM users;
-```
-
-#### 查询特定字段
-
-获取所有用户的主题偏好：
+#### 查询用户的偏好设置和订单信息
 
 ```sql
-SELECT username, preferences->>'theme' AS theme
+SELECT username, preferences, orders 
 FROM users;
 ```
 
-#### 查询具有特定条件的用户
+#### 提取用户的主题偏好
 
-查找偏好设置中启用了邮件通知的用户：
+从 `preferences` 字段中获取主题偏好：
 
 ```sql
-SELECT username 
-FROM users 
-WHERE preferences->'notifications'->>'email' = 'true';
+SELECT username, preferences->>'theme' AS theme 
+FROM users;
+```
+
+#### 查询满足条件的订单
+
+例如，查找购买了多个数量商品的订单。通过 `jsonb_array_elements` 将 JSON 数组展开为独立记录。
+
+```sql
+SELECT username, item ->> 'item' AS item_name, item ->> 'quantity' AS quantity
+FROM users,
+LATERAL jsonb_array_elements(orders) AS item
+WHERE (item ->> 'quantity')::int > 1;
 ```
 
 ### 4. 更新数据
 
-可以使用 `JSONB` 的操作符更新字段。
+使用 `jsonb_set` 和数组更新操作符 `||` 更新 JSONB 数据。
 
-#### 更新偏好设置
+#### 更新偏好设置的主题
 
-将用户的主题偏好更新为“light”，同时保留其他设置。
+将 `Alice` 的主题偏好更新为 `light`：
 
 ```sql
 UPDATE users 
@@ -1103,46 +1113,61 @@ SET preferences = jsonb_set(preferences, '{theme}', '"light"')
 WHERE username = 'Alice';
 ```
 
-#### 添加新的偏好设置
+#### 为用户添加新订单
 
-为用户添加一个新的偏好设置字段，比如语言设置：
+为 `Bob` 添加一个新订单到 `orders` 数组中：
 
 ```sql
 UPDATE users 
-SET preferences = preferences || '{"language": "zh"}'
+SET orders = orders || '[{"item": "Tablet", "quantity": 1, "price": 300}]'::jsonb
 WHERE username = 'Bob';
 ```
 
 ### 5. 删除数据
 
-删除 JSONB 中的特定字段。
+可以删除 `JSONB` 对象中的字段，或删除 JSON 数组中的特定元素。
 
-#### 删除偏好设置中的 `notifications` 字段
+#### 删除 `preferences` 中的 `notifications` 字段
 
 ```sql
 UPDATE users 
 SET preferences = preferences - 'notifications'
-WHERE username = 'Charlie';
+WHERE username = 'Alice';
 ```
 
-### 6. 使用 JSONB 的索引
+#### 删除特定订单记录
 
-为了提高查询效率，可以对 `JSONB` 字段创建索引。
+例如，删除 `Bob` 的第一条订单记录：
 
-#### 创建 GIN 索引
+```sql
+UPDATE users 
+SET orders = orders - 0
+WHERE username = 'Bob';
+```
+
+### 6. 创建索引
+
+为了加速查询，可以对 `JSONB` 字段创建 GIN 索引：
 
 ```sql
 CREATE INDEX idx_preferences ON users USING GIN (preferences);
+CREATE INDEX idx_orders ON users USING GIN (orders);
 ```
 
-### 7. 高级查询
+### 7. 高级查询示例
 
-可以结合 `JSONB` 的功能进行复杂查询，比如查找主题为“dark”的用户：
+#### 查找包含特定订单的用户
+
+查找购买了价格大于 1000 的商品的用户：
 
 ```sql
-SELECT username 
-FROM users 
-WHERE preferences @> '{"theme": "dark"}';
+SELECT username
+FROM users
+WHERE EXISTS (
+    SELECT 1
+    FROM jsonb_array_elements(orders) AS ord
+    WHERE (ord->>'price')::int > 1000
+);
 ```
 
 ## 分区表

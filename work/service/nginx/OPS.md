@@ -41,7 +41,7 @@ curl localhost:8000
 创建一个简单的示例，来测试Nginx是否正常
 
 ```
-sudo tee /etc/nginx/conf.d/demo.conf <<EOF
+sudo tee /etc/nginx/conf.d/demo.conf <<"EOF"
 upstream backend_servers {
     server 192.168.1.101:9000;
     server 192.168.1.102:9000;

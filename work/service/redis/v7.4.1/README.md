@@ -232,6 +232,7 @@ databases 20
 dir /data/service/redis/${redisPort}
 logfile /data/service/redis/${redisPort}/redis-server.log
 requirepass Admin@123
+masterauth Admin@123
 protected-mode no
 daemonize no
 save ""
@@ -259,6 +260,7 @@ port ${redisPort}
 dir /data/service/redis/${redisPort}
 logfile /data/service/redis/${redisPort}/redis-server.log
 requirepass Admin@123
+masterauth Admin@123
 protected-mode no
 daemonize no
 save ""
@@ -375,3 +377,43 @@ redis-cli -c -h 192.168.1.112 -p 6001 cluster nodes
 - **节点数量**：至少需要 6 个节点（3 主 3 从），以确保在主节点故障时能自动进行故障转移。
 - **端口映射**：在集群模式下，除了 Redis 数据端口（如 6379）外，每个实例还会使用 `+10000` 的端口用于集群通信（如 16379）。确保防火墙配置允许这些端口的通信。
 - **分片数据**：Redis 集群会自动将数据分片到不同的主节点中，每个节点负责不同的键空间。客户端需要使用集群模式连接（如 `redis-cli -c`）。
+
+
+
+## 安装模块
+
+我使用的操作系统是 `OpenEuler 24.03`，可以直接下载官网提供的Redis Stack包中的lib，详情可以参考下载地址：https://redis.io/downloads/ 的 **Redis Stack downloads** 部分。本来想用编译安装这些模块的，但是涉及的依赖太多，研究起来有点浪费时间就直接用官网的算了。
+
+**下载Redis Stack**
+
+```
+wget https://packages.redis.io/redis-stack/redis-stack-server-7.4.0-v1.rhel9.x86_64.tar.gz
+```
+
+**解压软件包**
+
+```
+tar -zxvf redis-stack-server-7.4.0-v1.rhel9.x86_64.tar.gz
+```
+
+**拷贝模块包**
+
+```
+cp -r ./redis-stack-server-7.4.0-v1/lib /usr/local/software/redis/
+```
+
+**编辑配置文件**
+
+将需要的模块添加到 `/usr/local/software/redis/conf/redis.conf` 文件中
+
+```
+loadmodule /usr/local/software/redis/lib/rejson.so
+loadmodule /usr/local/software/redis/lib/redisearch.so
+```
+
+**重启服务**
+
+```
+sudo systemctl restart redis
+```
+
