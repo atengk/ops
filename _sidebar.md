@@ -23,6 +23,7 @@
         - Redis
             - [安装6.2.14版本](/work/service/redis/v6.2.14/)
             - [安装7.2.5版本](/work/service/redis/v7.2.5/)
+            - [安装7.4.1版本](/work/service/redis/v7.4.1/)
             - [使用文档](/work/service/redis/OPS.md)
         - PostgreSQL
             - [编译安装PostgreSQL](/work/service/postgresql/)
@@ -35,6 +36,7 @@
             - [安装3.5.1版本](/work/service/etcd/v3.5.1/)
             - [使用文档](/work/service/etcd/OPS.md)
         - FoundationDB
+            - [安装7.3.43版本](/work/service/foundationdb/v7.1.38/)
             - [安装7.3.43版本](/work/service/foundationdb/v7.3.43/)
             - [使用文档](/work/service/foundationdb/OPS.md)
         - ElasticSearch
