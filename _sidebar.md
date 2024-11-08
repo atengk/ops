@@ -164,7 +164,7 @@
             - [Multus-CNI](/work/kubernetes/service/multus-cni/)
         - 其他
             - [Cert-Manager](/work/kubernetes/service/cert-manager/v1.15.1/)
-            - [Windows](/work/kubernetes/service/windows/)
+            - [安装Windows系统](/work/kubernetes/service/windows/)
             - [Stirling-PDF](/work/kubernetes/service/Stirling-PDF/)
         - KubeBlocks
             - [安装](/work/kubernetes/service/kubeblocks/deploy/)
@@ -173,6 +173,11 @@
             - [redis](/work/kubernetes/service/kubeblocks/service/redis/)
             - [kafka](/work/kubernetes/service/kubeblocks/service/kafka/)
             - [备份](/work/kubernetes/service/kubeblocks/backup/)
+        - 堡垒机
+            - [JumpServer](/work/kubernetes/service/jumpserver/v4.3.1/)
+            - [Nexterm](/work/kubernetes/service/nexterm/v1.0.2/)
+        - 共享文件
+            - [kodbox](/work/kubernetes/service/kodbox/v1.52/)
     - 备份服务
         - velero
             - [安装备份和恢复Velero](/work/kubernetes/deploy/backups/velero/v1.11.0/)
