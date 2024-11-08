@@ -2,21 +2,47 @@
 
 > Apache Doris 是一个用于实时分析的现代数据仓库。它可以对大规模实时数据进行闪电般的快速分析。
 >
-> https://doris.apache.org/
+> Doris 存算分离架构：
 >
-> https://doris.apache.org/zh-CN/docs/install/cluster-deployment/standard-deployment
+> - FE：负责接收用户请求，负责存储库表的元数据，目前是有状态的，未来会和 BE 类似，演化为无状态。
+>
+> - BE：无状态化的 Doris BE 节点，负责具体的计算任务。BE 上会缓存一部分 Tablet 元数据和数据以提高查询性能。
+>
+> - MS：存算分离模式新增模块，程序名为 doris_cloud，可通过启动不同参数来指定为以下两种角色之一
+>
+> - - Meta Service：元数据管理，提供元数据操作的服务，例如创建 Tablet，新增 Rowset，Tablet 查询以及 Rowset 元数据查询等功能。
+>     - Recycler：数据回收。通过定期对记录已标记删除的数据的元数据进行扫描，实现对数据的定期异步正向回收（文件实际存储在 S3 或 HDFS 上），而无须列举数据对象进行元数据对比。
+>
+> https://doris.apache.org/zh-CN/docs/3.0/compute-storage-decoupled/overview
 
 文档使用以下3台服务器，具体服务分配见描述的进程
 
-| IP地址        | 主机名    | 描述             |
-| ------------- | --------- | ---------------- |
-| 192.168.1.131 | bigdata01 | DorisFE、DorisBE |
-| 192.168.1.132 | bigdata02 | DorisBE          |
-| 192.168.1.133 | bigdata03 | DorisBE          |
+| IP地址        | 主机名    | 描述                                    |
+| ------------- | --------- | --------------------------------------- |
+| 192.168.1.131 | bigdata01 | FoundationDB、DorisFE、DorisBE、DorisMS |
+| 192.168.1.132 | bigdata02 | DorisBE                                 |
+| 192.168.1.133 | bigdata03 | DorisBE                                 |
 
 
 
 ## 基础环境配置
+
+### 安装FoundationDB
+
+参考[文档](https://kongyu666.github.io/work/#/work/service/foundationdb/v7.1.38/)
+
+最终服务正常启动，查看配置文件
+
+> 注意配置域名映射，版本使用官网指定的版本，高版本会导致MS服务无法启动
+
+```
+$ /usr/local/software/foundationdb/bin/fdbserver --version
+FoundationDB 7.1 (v7.1.38)
+source version f606ece0d13e9382452ac8466cca503b9256181d
+protocol fdb00b071010000
+$ cat /etc/foundationdb/fdb.cluster
+mycluster:abcd1234abcd5678@bigdata01:4500
+```
 
 ### JDK配置
 
@@ -54,7 +80,8 @@ cat >> ~/.bash_profile <<"EOF"
 ## DORIS_HOME
 export DORIS_BE_HOME=/usr/local/software/doris/be
 export DORIS_FE_HOME=/usr/local/software/doris/fe
-export PATH=$PATH:$DORIS_BE_HOME/bin:$DORIS_FE_HOME/bin
+export DORIS_MS_HOME=/usr/local/software/doris/ms
+export DORIS_RE_HOME=/usr/local/software/doris/recycler
 EOF
 source ~/.bash_profile
 ```
@@ -65,19 +92,76 @@ source ~/.bash_profile
 $DORIS_BE_HOME/lib/doris_be --version
 ```
 
+## 配置元数据管理
 
+https://doris.apache.org/zh-CN/docs/3.0/compute-storage-decoupled/compilation-and-deployment#3-meta-service-%E9%83%A8%E7%BD%B2
+
+安装依赖
+
+```
+sudo yum -y install patchelf
+```
+
+拷贝ms目录，用于recycler服务部署
+
+```
+cp -r $DORIS_MS_HOME $DORIS_RE_HOME
+```
+
+编辑配置文件
+
+> 配置以下参数，其余配置不用动
+
+```
+$ vi +22 $DORIS_MS_HOME/conf/doris_cloud.conf
+JAVA_HOME=/usr/local/software/jdk17
+brpc_listen_port = 5000
+fdb_cluster = mycluster:abcd1234abcd5678@bigdata01:4500
+```
+
+启动服务
+
+> - 仅元数据操作功能的 Meta Service 进程应作为 FE 和 BE 的 `meta_service_endpoint` 配置目标。
+> - 数据回收功能进程不应作为 `meta_service_endpoint` 配置目标。
+
+```
+$DORIS_MS_HOME/bin/start.sh --meta-service --daemon
+```
+
+## 配置回收功能
+
+https://doris.apache.org/zh-CN/docs/3.0/compute-storage-decoupled/compilation-and-deployment#4-%E6%95%B0%E6%8D%AE%E5%9B%9E%E6%94%B6%E5%8A%9F%E8%83%BD%E7%8B%AC%E7%AB%8B%E9%83%A8%E7%BD%B2%E5%8F%AF%E9%80%89
+
+编辑配置文件
+
+> 配置以下参数，其余配置不用动
+
+```
+$ vi +19 $DORIS_RE_HOME/conf/doris_cloud.conf
+JAVA_HOME=/usr/local/software/jdk17
+brpc_listen_port = 5001
+fdb_cluster = mycluster:abcd1234abcd5678@bigdata01:4500
+```
+
+启动服务
+
+```
+$DORIS_RE_HOME/bin/start.sh --recycler --daemon
+```
 
 ## 配置Frontend 
 
 > 用户请求访问、查询解析和规划、元数据管理、节点管理等。
 >
-> https://doris.apache.org/zh-CN/docs/admin-manual/config/fe-config
+> https://doris.apache.org/zh-CN/docs/3.0/admin-manual/config/fe-config
 >
 > https://doris.apache.org/zh-CN/docs/3.0/admin-manual/cluster-management/fqdn
 >
+> https://doris.apache.org/zh-CN/docs/3.0/compute-storage-decoupled/compilation-and-deployment#5-fe-%E5%92%8C-be-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B
+>
 > 在bigdata01节点配置FE
 
-配置java路径、添加元数据目录、服务端口和开启fqdn，可以根据环境适当修改JAVA_OPTS的JVM堆内存
+配置java路径、添加元数据目录、服务端口、开启fqdn、启动存算分离模式和集群ID、Meta Service地址，可以根据环境适当修改JAVA_OPTS的JVM堆内存
 
 ```
 $ vi $DORIS_FE_HOME/conf/fe.conf
@@ -88,6 +172,9 @@ rpc_port = 9020
 query_port = 9030
 edit_log_port = 9010
 enable_fqdn_mode = true
+deploy_mode = cloud
+cluster_id = 1
+meta_service_endpoint = bigdata01:5000
 ```
 
 创建目录
@@ -172,16 +259,17 @@ show frontends\G;
 >
 > 在bigdata01、bigdata02、bigdata03节点配置BE
 
-配置java路径、BE数据存储目录、服务端口，可以根据环境适当修改JAVA_OPTS的JVM堆内存
+配置java路径、BE数据存储目录、服务端口、开启存算分离模式并设置缓存路径和大小（100GB），可以根据环境适当修改JAVA_OPTS的JVM堆内存
 
 ```
 $ vi $DORIS_BE_HOME/conf/be.conf
 JAVA_HOME=/usr/local/software/jdk17
-storage_root_path=/data/service/doris/storage01;/data/service/doris/storage02
 be_port = 9060
 webserver_port = 9070
 heartbeat_service_port = 9050
 brpc_port = 9080
+deploy_mode = cloud
+file_cache_path = [{"path":"/data/service/doris/file_cache01","total_size":104857600000,"query_limit":10485760000}, {"path":"/data/service/doris/file_cache02","total_size":104857600000,"query_limit":10485760000}]
 ```
 
 分发配置文件
@@ -196,7 +284,7 @@ scp $DORIS_BE_HOME/conf/be.conf bigdata03:$DORIS_BE_HOME/conf/be.conf
 > 相关节点都需要创建
 
 ```
-mkdir -p /data/service/doris/storage{01,02}
+mkdir -p /data/service/doris/file_cache{01,02}
 ```
 
 启动BE
@@ -242,99 +330,129 @@ ALTER SYSTEM ADD BACKEND "bigdata01:9050","bigdata02:9050","bigdata03:9050";
 SHOW BACKENDS\G;
 ```
 
+## 创建 Storage Vault
 
+Storage Vault 是 Doris 存算分离架构中的重要组件。它们代表了存储数据的共享存储层。您可以使用 HDFS 或兼容 S3 的对象存储创建一个或多个 Storage Vault 。可以将一个 Storage Vault 设置为默认 Storage Vault ，系统表和未指定 Storage Vault 的表都将存储在这个默认 Storage Vault 中。默认 Storage Vault 不能被删除。以下是为您的 Doris 集群创建 Storage Vault 的方法：
 
-## 配置Broker
+https://doris.apache.org/zh-CN/docs/3.0/sql-manual/sql-statements/Data-Definition-Statements/Create/CREATE-STORAGE-VAULT/
 
-> Broker 是 Doris 集群中一种可选进程，主要用于支持 Doris 读写远端存储上的文件和目录。
->
-> 建议每一个 FE 和 BE 节点都部署一个 Broker。
+创建 S3 Storage Vault
 
-拷贝broker文件
+> MinIO安装文档参考：[地址](https://kongyu666.github.io/work/#/work/service/minio/v20241013/)
 
-```
-cp -r /usr/local/software/doris/extensions/apache_hdfs_broker /usr/local/software/doris/broker/
-```
-
-broker配置文件
-
-```
-cd /usr/local/software/doris/broker/
-cat conf/apache_hdfs_broker.conf
-```
-
-拷贝hdfs文件
-
-```
-cp $HADOOP_HOME/etc/hadoop/{core-site.xml,hdfs-site.xml} conf/
+```sql
+CREATE STORAGE VAULT IF NOT EXISTS minio_vault
+    PROPERTIES (
+    "type"="S3",
+    "s3.endpoint"="http://192.168.1.13:9000",
+    "s3.access_key" = "admin",
+    "s3.secret_key" = "Lingo@local_minio_9000",
+    "s3.region" = "us-east-1",
+    "s3.root.path" = "data",
+    "s3.bucket" = "doris",
+    "provider" = "S3"
+    );
 ```
 
-启动broker
+设置默认 Storage Vault
 
 ```
-bin/start_broker.sh --daemon
+SET minio_vault AS DEFAULT STORAGE VAULT;
 ```
 
-
-
-## 添加Broker节点
-
-连接FE
+查看 Storage Vault
 
 ```
-mysql -uroot -P9030 -h127.0.0.1
-```
-
-向集群添加 broker 节点
-
-```
-ALTER SYSTEM ADD BROKER ateng_doris_broker "bigdata01:8000","bigdata02:8000","bigdata03:8000";
-```
-
-查看BE运行状态
-
-> 在MySQL命令行中执行如下命令，可以查看broker的运行状态。
->
-> Alive : true 表示节点正常运行
-
-```
-SHOW BROKER\G;
+SHOW STORAGE VAULTS\G;
 ```
 
 
 
 ## 停止服务
 
-停止broker
-
-```
-/usr/local/software/doris/broker/bin/stop_broker.sh
-```
-
 停止BE
 
 ```
-stop_be.sh
+$DORIS_BE_HOME/bin/stop_be.sh
 ```
 
 停止FE
 
 ```
-stop_fe.sh
+$DORIS_FE_HOME/bin/stop_fe.sh
+```
+
+停止元数据服务
+
+```
+$DORIS_RE_HOME/bin/stop.sh
+$DORIS_MS_HOME/bin/stop.sh
 ```
 
 
 
 ## 设置自启
 
-> 后台进程使用**Type=forking**
+### 元数据服务
+
+在bigdata01节点配置
+
+```
+sudo tee /etc/systemd/system/doris-meta.service <<"EOF"
+[Unit]
+Description=Doris Meta Service
+Documentation=https://doros.apache.org
+After=network.target
+[Service]
+Type=forking
+ExecStart=/usr/local/software/doris/ms/bin/start.sh --meta-service --daemon
+ExecStop=/usr/local/software/doris/ms/bin/stop.sh
+Restart=always
+RestartSec=10
+User=admin
+Group=ateng
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable doris-meta.service
+sudo systemctl start doris-meta.service
+sudo systemctl status doris-meta.service
+```
+
+### 回收服务
+
+在bigdata01节点配置
+
+```
+sudo tee /etc/systemd/system/doris-recycler.service <<"EOF"
+[Unit]
+Description=Doris Recycler Service
+Documentation=https://doros.apache.org
+After=network.target
+[Service]
+Type=forking
+ExecStart=/usr/local/software/doris/recycler/bin/start.sh --recycler --daemon
+ExecStop=/usr/local/software/doris/recycler/bin/stop.sh
+Restart=always
+RestartSec=10
+User=admin
+Group=ateng
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable doris-recycler.service
+sudo systemctl start doris-recycler.service
+sudo systemctl status doris-recycler.service
+```
 
 ### Doris Frontend 服务
 
 在bigdata01节点配置FE
 
 ```
-$ sudo vi /etc/systemd/system/doris-frontend.service
+sudo tee /etc/systemd/system/doris-frontend.service <<"EOF"
 [Unit]
 Description=Doris Frontend
 Documentation=https://doros.apache.org
@@ -349,9 +467,7 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
-```
-
-```
+EOF
 sudo systemctl daemon-reload
 sudo systemctl enable doris-frontend.service
 sudo systemctl start doris-frontend.service
@@ -363,7 +479,7 @@ sudo systemctl status doris-frontend.service
 在bigdata01、bigdata02、bigdata03节点配置BE
 
 ```
-$ sudo vi /etc/systemd/system/doris-backend.service
+sudo tee /etc/systemd/system/doris-backend.service <<"EOF"
 [Unit]
 Description=Doris Backend 
 Documentation=https://doros.apache.org
@@ -379,41 +495,11 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
-```
-
-```
+EOF
 sudo systemctl daemon-reload
 sudo systemctl enable doris-backend.service
 sudo systemctl start doris-backend.service
 sudo systemctl status doris-backend.service
-```
-
-### Doris Broker 服务
-
-```
-$ sudo vi /etc/systemd/system/doris-broker.service
-[Unit]
-Description=Doris Broker 
-Documentation=https://doros.apache.org
-After=network.target
-[Service]
-Type=forking
-Environment="JAVA_HOME=/usr/local/software/jdk17"
-ExecStart=/usr/local/software/doris/broker/bin/start_broker.sh --daemon
-ExecStop=/usr/local/software/doris/broker/bin/stop_broker.sh
-Restart=always
-RestartSec=10
-User=admin
-Group=ateng
-[Install]
-WantedBy=multi-user.target
-```
-
-```
-sudo systemctl daemon-reload
-sudo systemctl enable doris-broker.service
-sudo systemctl start doris-broker.service
-sudo systemctl status doris-broker.service
 ```
 
 
@@ -424,6 +510,17 @@ sudo systemctl status doris-broker.service
 
 ```
 mysql -uroot -P9030 -h127.0.0.1
+```
+
+查看计算组
+
+```
+mysql> SHOW COMPUTE GROUPS;
++-----------------------+-----------+-------+------------+
+| Name                  | IsCurrent | Users | BackendNum |
++-----------------------+-----------+-------+------------+
+| default_compute_group | TRUE      |       | 3          |
++-----------------------+-----------+-------+------------+
 ```
 
 创建数据库
