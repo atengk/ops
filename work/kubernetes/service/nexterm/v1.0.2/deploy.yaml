@@ -1,0 +1,85 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: nexterm
+  labels:
+    app: nexterm
+spec:
+  replicas: 1
+  serviceName: nexterm-headless
+  selector:
+    matchLabels:
+      app: nexterm
+  template:
+    metadata:
+      labels:
+        app: nexterm
+    spec:
+      #nodeSelector:
+      #  kubernetes.io/hostname: k8s-worker01
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: nexterm
+          image: registry.lingo.local/service/nexterm:1.0.2-OPEN-PREVIEW
+          ports:
+            - name: http-6989
+              containerPort: 6989
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          resources: {}
+          volumeMounts:
+            - name: host-time
+              mountPath: /etc/localtime
+            - name: data
+              mountPath: /app/data
+          imagePullPolicy: IfNotPresent
+      volumes:
+        - name: host-time
+          hostPath:
+            path: /etc/localtime
+            type: ''
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: "openebs-hostpath"
+        volumeMode: Filesystem
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nexterm-headless
+  labels:
+    app: nexterm-headless
+spec:
+  ports:
+    - name: http-6989
+      protocol: TCP
+      port: 6989
+      targetPort: 6989
+  selector:
+    app: nexterm
+  clusterIP: None
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nexterm
+  labels:
+    app: nexterm
+spec:
+  ports:
+    - name: http-6989
+      protocol: TCP
+      port: 6989
+      targetPort: 6989
+  selector:
+    app: nexterm
+  type: NodePort

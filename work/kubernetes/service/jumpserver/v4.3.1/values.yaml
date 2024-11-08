@@ -1,0 +1,65 @@
+fullnameOverride: "jumpserver"
+global:
+  imageRegistry: registry.lingo.local
+  imageOwner: jumpserver
+  storageClass: "openebs-hostpath"
+externalDatabase:
+  engine: postgresql
+  host: postgresql.lingo-service-dev
+  port: 5432
+  user: postgres
+  password: "Lingo@local_postgresql_5432"
+  database: jumpserver
+externalRedis:
+  host: redis-master.lingo-service-dev
+  port: 6379
+  password: "Admin@123"
+ingress:
+  enabled: false
+core:
+  enabled: true
+  env:
+    ## See: https://docs.jumpserver.org/zh/master/admin-guide/env/#core
+    SESSION_EXPIRE_AT_BROWSER_CLOSE: true
+    # SESSION_COOKIE_AGE: 86400
+    # SECURITY_VIEW_AUTH_NEED_MFA: true
+    ## Django CSRF_TRUSTED_ORIGINS need to be set to the domain name of the jumpserver (https://docs.jumpserver.org/zh/v3/installation/upgrade_notice/)
+    DOMAINS: "192.168.1.10:30080, demo.jumpserver.org:443, 172.17.200.11:80"
+
+  config:
+    ## Generate a new random secret key by execute `cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 50`
+    secretKey: "gQUQVwv58qiFS9CvgU9O5c4E0hDQ11ePWlamx1QFwi3MNNBARS"
+    ## Generate a new random bootstrap token by execute `cat /dev/urandom | tr -dc A-Za-z0-9 | head -c 24`
+    bootstrapToken: "RgF4T6dHLF8pxqD4qKHanKaI"
+  persistence:
+    accessModes:
+      - ReadWriteOnce
+    size: 100Gi
+koko:
+  enabled: true
+  persistence:
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+lion:
+  enabled: true
+  persistence:
+    accessModes:
+      - ReadWriteOnce
+    size: 50Gi
+chen:
+  enabled: true
+  persistence:
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+web:
+  enabled: true
+  service:
+    type: NodePort
+    web:
+      port: 30080
+  persistence:
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
