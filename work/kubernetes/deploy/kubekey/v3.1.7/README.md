@@ -137,7 +137,7 @@ kk artifact image push -f kk-config-ks.yaml -a kubekey-artifact-ks.tar.gz
 > 注意修改相应的主机信息
 
 ```
-kk create cluster -f kk-config-ks.yaml -a kubekey-artifact-ks.tar.gz --with-packages
+kk create cluster -f kk-config-ks.yaml -a kubekey-artifact-ks.tar.gz --with-packages --with-local-storage
 ```
 
 命令补全
@@ -184,7 +184,7 @@ rm -rf /data/service/etcd
 > 注意修改相应的主机信息
 
 ```
-kk create cluster -f kk-config-ks-ha-1.yaml -a kubekey-artifact-ks.tar.gz --with-packages
+kk create cluster -f kk-config-ks-ha-1.yaml -a kubekey-artifact-ks.tar.gz --with-packages --with-local-storage
 ```
 
 命令补全
@@ -231,7 +231,7 @@ rm -rf /data/service/etcd
 > 注意修改相应的主机信息
 
 ```
-kk create cluster -f kk-config-ks-ha-2.yaml -a kubekey-artifact-ks.tar.gz --with-packages
+kk create cluster -f kk-config-ks-ha-2.yaml -a kubekey-artifact-ks.tar.gz --with-packages --with-local-storage
 ```
 
 命令补全
