@@ -8,7 +8,9 @@
         - 对象存储服务 MinIO
             - [安装文档](/work/service/minio/v20241013/)
             - [使用文档](/work/service/minio/OPS.md)
-        - [分布式存储 JuiceFS](/work/service/juicefs/v1.1.1/)
+        - 分布式存储 JuiceFS
+            - [安装文档](/work/service/juicefs/v1.2.1/)
+            - [使用文档](/work/service/juicefs/OPS.md)
         - [备份工具 Restic](/work/service/restic/)
     - 数据库
         - MySQL
@@ -34,6 +36,7 @@
             - [其他](/work/service/postgresql/README_Test.md)
         - ETCD
             - [安装3.5.1版本](/work/service/etcd/v3.5.1/)
+            - [安装3.5.16版本](/work/service/etcd/v3.5.16/)
             - [使用文档](/work/service/etcd/OPS.md)
         - FoundationDB
             - [安装7.1.38版本](/work/service/foundationdb/v7.1.38/)
@@ -56,7 +59,8 @@
 - Kubernetes
     - 基础设施安装
         - [kubekey](/work/kubernetes/deploy/kubekey/v3.1.7/)
-        - [kubesphere](/work/kubernetes/deploy/kubesphere/v3.4.1/)
+        - [kubesphere3](/work/kubernetes/deploy/kubesphere/v3.4.1/)
+        - [kubesphere4](/work/kubernetes/deploy/kubesphere/v4.1.2/)
         - [kubeadm](/work/kubernetes/deploy/kubeadm/v1.23.12/)
         - [kubevirt](/work/kubernetes/deploy/kubevirt/deploy/v1.3.0/)
     - 镜像仓库
