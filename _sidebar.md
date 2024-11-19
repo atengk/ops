@@ -57,6 +57,8 @@
     - 内网远程访问
         - [内网穿透FRP](/work/service/frp/)
 - Kubernetes
+    - 使用文档
+        - [K8S使用文档](/work/kubernetes/OPS.md)
     - 基础设施安装
         - [kubekey](/work/kubernetes/deploy/kubekey/v3.1.7/)
         - [kubesphere3](/work/kubernetes/deploy/kubesphere/v3.4.1/)
@@ -142,7 +144,7 @@
             - [Gitlab](/work/kubernetes/service/gitlab/v17.4.2/)
             - [Gitea](/work/kubernetes/service/gitea/v1.22.1/)
             - [Jenkins](/work/kubernetes/service/jenkins/v2.452.3/baseic/)
-            - [Snail-Job](/work/kubernetes/service/snail-job/v1.1.2/)
+            - [Snail-Job](/work/kubernetes/service/snail-job/v1.2.0/)
             - [PowerJob](/work/kubernetes/service/powerjob/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
             - [Nacos](/work/kubernetes/service/nacos/v2.4.0/)
