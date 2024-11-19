@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snail-job
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snail-job
+  template:
+    metadata:
+      labels:
+        app: snail-job
+    spec:
+      containers:
+      - name: snail-job
+        image: registry.lingo.local/service/snail-job:1.2.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: netty
+          containerPort: 1788
+        env:
+        - name: TZ
+          value: "Asia/Shanghai"
+        - name: JAVA_OPTS
+          value: "-Xms256m -Xmx2048m"
+        - name: PARAMS
+          value: "--spring.datasource.username=postgres --spring.datasource.password=Lingo@local_postgresql_5432 --spring.datasource.url=jdbc:postgresql://192.168.1.10:32297/snail_job_demo --spring.datasource.driver-class-name=org.postgresql.Driver"
+        livenessProbe:
+          httpGet:
+            path: /snail-job/system/version
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /snail-job/system/version
+            port: 8080
+            scheme: HTTP
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snail-job
+  labels:
+    app: snail-job
+spec:
+  selector:
+    app: snail-job
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 32681
+    - name: netty
+      protocol: TCP
+      port: 1788
+      targetPort: 1788
+      nodePort: 32682
+  type: NodePort
+
