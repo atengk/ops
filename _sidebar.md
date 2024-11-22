@@ -5,6 +5,8 @@
         - [升级OpenSSH](/work/service/openssh/v9.9/)
     - 存储服务
         - [网络文件共享 NFS](work/service/nfs/)
+        - [网络文件共享 Samba](work/service/samba/)
+        - [网络文件共享 VSFTP](work/service/vsftp/)
         - 对象存储服务 MinIO
             - [安装文档](/work/service/minio/v20241013/)
             - [使用文档](/work/service/minio/OPS.md)

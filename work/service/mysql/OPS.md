@@ -33,7 +33,8 @@ MySQL 8 引入了许多新特性，提升了性能、管理便利性和安全性
      - `-p`：提示输入密码
      - `-h`：服务器地址（默认本地：127.0.0.1）
      - `-P`：端口号（默认 3306）
-
+     - `export MYSQL_PWD=Admin@123`: 使用环境变量设置密码
+     
    - **使用 MySQL Workbench 连接**：
      1. 打开 MySQL Workbench。
      2. 创建新的连接，输入主机名、用户名和密码等信息。
@@ -1108,6 +1109,94 @@ mysqldump -u username -p --no-data database_name > backup_structure.sql
 mysqldump -u username -p --no-create-info database_name > backup_data.sql
 -- 说明: 仅导出数据库数据，不包括结构
 ```
+
+- **只备份insert语句的数据**：
+
+```bash
+mysqldump -u username -p --no-create-info --no-create-db --skip-comments --compact --complete-insert database_name table_name > backup_data.sql
+```
+
+- `--no-create-info`：不生成 `CREATE TABLE` 等表结构语句，只导出数据。
+- `--no-create-db`：不生成 `CREATE DATABASE` 语句。
+- `--skip-comments`：不生成导出文件中的注释（如时间戳等）。
+- `--compact`：减少多余的空行和格式内容，仅保留核心语句。
+- `--complete-insert`: 在 `INSERT` 语句中显示完整的列名。
+- `--skip-extended-insert`: 每条记录生成一条独立的 `INSERT` 语句。
+
+
+
+- **条件备份**：
+
+按主键范围导出
+
+```bash
+mysqldump -u username -p --where="id BETWEEN 1 AND 500" database_name table_name > backup_data.sql
+```
+
+按日期范围导出
+
+```bash
+mysqldump -u username -p --where="create_time >= '2024-01-01' AND create_time < '2024-06-01'" database_name table_name > backup_data.sql
+```
+
+- **导出自定义字段**
+
+创建表
+
+```sql
+CREATE TABLE temp_export AS
+SELECT year, name, start_date, end_date, duration, create_time
+FROM expressway.e_vacation
+WHERE year = '2023';
+```
+
+导出表
+
+```bash
+mysqldump -h192.168.1.10 -uroot -pAdmin@123 -P35725 --no-create-info --skip-comments --compact --complete-insert \
+  expressway temp_export > result.sql
+```
+
+替换表名
+
+```
+sed -i "s#temp_export#e_vacation#g" result.sql
+```
+
+删除表
+
+```sql
+DROP TABLE temp_export;
+```
+
+- **导出CSV文件**
+
+导出CSV
+
+```sql
+SELECT year, name, start_date, end_date, duration, create_time
+INTO OUTFILE '/tmp/result.csv'
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+FROM expressway.e_vacation
+WHERE year = '2023';
+```
+
+- `INTO OUTFILE '/path/to/result.csv'`: 导出文件的路径。**确保你有权限写入该路径**。
+- `FIELDS TERMINATED BY ','`: 使用逗号 `,` 作为字段分隔符，适合 CSV 格式。
+- `ENCLOSED BY '"'`: 使用双引号 `"` 包裹字段值，确保字段中如果有逗号不会被误解析。
+- `LINES TERMINATED BY '\n'`: 每一行记录后面有一个换行符。
+
+导出CSV
+
+```bash
+mysql -h192.168.1.10 -uroot -pAdmin@123 -P35725 -e \
+"SELECT year, name, start_date, end_date, duration, create_time FROM expressway.e_vacation WHERE year = '2023'" \
+> result.csv
+```
+
+
 
 #### 8.1.2 `mysqldump` 的其他常用选项
 
