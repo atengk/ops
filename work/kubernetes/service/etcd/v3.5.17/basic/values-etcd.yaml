@@ -1,10 +1,10 @@
 global:
-  storageClass: "openebs-hostpath"
+  defaultStorageClass: ""
 fullnameOverride: "etcd"
 image:
   registry: registry.lingo.local
-  repository: service/bitnami-etcd
-  tag: 3.5.13
+  repository: bitnami/etcd
+  tag: "3.5.17"
   debug: false
 auth:
   rbac:
@@ -32,6 +32,8 @@ extraEnvVars:
     value: Asia/Shanghai
 resourcesPreset: "none"
 resources: {}
+affinity: {}
+nodeSelector: {}
 # resources:
 #   limits:
 #     cpu: "1"
@@ -41,15 +43,12 @@ resources: {}
 #     memory: "512Mi"
 # ## Allowed values: `soft` or `hard`
 # #podAffinityPreset: "soft"  ## 调度到同一节点
-# podAntiAffinityPreset: "hard"  ## 调度到不同节点
-# nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local ateng.etcd.data=node
-#   type: "hard"
-#   key: "ateng.etcd.data"
-#   values:
-#     - node
-# affinity: {}
-# nodeSelector: {}
-# terminationGracePeriodSeconds: "30"
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/etcd="true"
+  type: "soft"
+  key: "kubernetes.service/etcd"
+  values:
+    - "true"
 service:
   type: NodePort
   enabled: true
@@ -69,16 +68,13 @@ startFromSnapshot:
   existingClaim: ""
   snapshotFilename: ""
 disasterRecovery:
-  enabled: true
+  enabled: false
   cronjob:
     schedule: "0 */8 * * *"
-    historyLimit: 1
-    snapshotHistoryLimit: 30
-    resources:
-      limits: {}
-      requests: {}
-    nodeSelector: {}
-    tolerations: []
   pvc:
     size: 200Gi
     storageClassName: nfs-client
+defrag:
+  enabled: false
+  cronjob:
+    schedule: "0 0 * * *"

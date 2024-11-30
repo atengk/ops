@@ -4,12 +4,13 @@
 
 ```
 app=postgresql
-version=17.0.0
+version=17.2.0
 cat > images-list.txt <<EOF
 bitnami/os-shell:12
 bitnami/pgpool:4.5.4
+bitnami/postgres-exporter:0.16.0
 bitnami/postgresql:${version}
-bitnami/postgresql-repmgr:16.4.0
+bitnami/postgresql-repmgr:${version}
 EOF
 ```
 

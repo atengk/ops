@@ -4,7 +4,7 @@ fullnameOverride: "postgresql"
 image:
   registry: registry.lingo.local
   repository: service/postgresql
-  tag: "17.0.0"
+  tag: "17.2.0"
   pullPolicy: IfNotPresent
   debug: false
 auth:

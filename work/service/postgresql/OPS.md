@@ -102,6 +102,63 @@ DROP TABLE users;
 
 
 
+## 用户管理
+
+### 1. 创建用户
+
+创建两个用户，第一个是数据库的管理员，第二个只读用户
+
+```sql
+CREATE USER mydb_admin WITH PASSWORD 'Admin@123';
+CREATE USER mydb_read WITH PASSWORD '123456';
+```
+
+### 2. 创建数据库
+
+创建一个新的数据库并设置管理员
+
+```sql
+CREATE DATABASE mydb OWNER mydb_admin;
+```
+
+### 3. 赋予用户在数据库中的权限
+
+如果你想要用户拥有更具体的权限，比如对某个数据库中所有表的访问权限，可以使用 `GRANT` 命令。常见的权限包括 `SELECT`（读取）、`INSERT`（插入）、`UPDATE`（更新）、`DELETE`（删除）等。
+
+- 授予用户对某个数据库中所有表的 `SELECT` 权限：
+
+> 注意当前权限只对当前的表生效，后续创建表后还需执行一次
+
+```sql
+\c mydb;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO mydb_read;
+```
+
+### 4. 查看权限
+
+查看当前数据库中所有表、视图、序列等对象的权限设置
+
+```sql
+mydb=> \dp
+                                        Access privileges
+ Schema |     Name     |   Type   |       Access privileges       | Column privileges | Policies
+--------+--------------+----------+-------------------------------+-------------------+----------
+ public | users        | table    | mydb_admin=arwdDxt/mydb_admin+|                   |
+        |              |          | mydb_read=r/mydb_admin        |                   |
+ public | users_id_seq | sequence |                               |                   |
+(2 rows)
+```
+
+### 5. 删除用户
+
+如果需要删除一个用户，可以使用 `DROP USER` 命令。但删除用户之前，确保该用户没有正在使用的数据库或对象（如表、视图等），否则会出错。
+
+```sql
+DROP USER new_user;
+```
+
+
+
 ## 导入导出
 
 ### pg_dump 命令参数说明

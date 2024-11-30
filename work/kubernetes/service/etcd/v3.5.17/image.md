@@ -3,14 +3,11 @@
 镜像列表
 
 ```
-app=postgresql
-version=16.4.0
+app=etcd
+version=3.5.17
 cat > images-list.txt <<EOF
+bitnami/etcd:${version}
 bitnami/os-shell:12
-bitnami/postgres-exporter:0.15.0
-bitnami/pgpool:4.5.4
-bitnami/postgresql:${version}
-bitnami/postgresql-repmgr:${version}
 EOF
 ```
 
@@ -27,7 +24,7 @@ done
 设置镜像仓库和命名空间
 
 ```
-registry_address="registry.lingo.local/service"
+registry_address="registry.lingo.local/bitnami"
 ```
 
 设置镜像标签并推送到本地仓库

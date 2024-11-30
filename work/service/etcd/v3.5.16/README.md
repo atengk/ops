@@ -116,6 +116,9 @@ CA（Certificate Authority）证书用于签署其他证书。该步骤包括创
     ```bash
     tee ca-csr.json <<EOF
     {
+        "CA": {
+            "expiry": "876000h"
+        },
         "CN": "ateng.local",
         "key": {
             "algo": "rsa",
@@ -133,9 +136,9 @@ CA（Certificate Authority）证书用于签署其他证书。该步骤包括创
     }
     EOF
     ```
-
+    
     > 配置说明：
-
+    
     - `CN`：证书的通用名称(Common Name)为 `ateng.local`。
     - `key`：使用 RSA 算法和 2048 位的密钥长度。
     - `names`：包含证书的地理信息，如国家（C）、城市（L）、组织（O）等。

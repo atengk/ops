@@ -11,7 +11,7 @@ helm search repo bitnami/postgresql -l
 **下载chart**
 
 ```
-helm pull bitnami/postgresql --version 16.0.1
+helm pull bitnami/postgresql --version 16.2.2
 ```
 
 **修改配置**
@@ -26,19 +26,20 @@ cat values.yaml
 
 ```
 kubectl label nodes server02.lingo.local kubernetes.service/postgresql="true"
+kubectl label nodes server03.lingo.local kubernetes.service/postgresql="true"
 ```
 
 **创建服务**
 
 ```shell
-helm install postgresql -n kongyu -f values.yaml postgresql-16.0.1.tgz
+helm install postgresql -n kongyu -f values.yaml postgresql-16.2.2.tgz
 ```
 
 **查看服务**
 
 ```
 kubectl get -n kongyu pod,svc,pvc -l app.kubernetes.io/instance=postgresql
-kubectl logs -f -n kongyu postgresql-0
+kubectl logs -f -n kongyu postgresql-primary-0
 ```
 
 **使用服务**
@@ -46,19 +47,25 @@ kubectl logs -f -n kongyu postgresql-0
 创建客户端容器
 
 ```
-kubectl run postgresql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/postgresql:17.0.0 --namespace kongyu --env="PGPASSWORD=Admin@123" --command -- bash
+kubectl run postgresql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/postgresql:17.2.0 --namespace kongyu --env="PGPASSWORD=Admin@123" --command -- bash
 ```
 
 内部网络访问-headless
 
 ```
-psql --host postgresql-0.postgresql-hl.kongyu -U postgres -d postgres -p 5432
+## 读写节点
+psql --host postgresql-primary-0.postgresql-primary-hl.kongyu -U postgres -d postgres -p 5432
+## 只读节点
+psql --host postgresql-read-0.postgresql-read-hl.kongyu -U postgres -d postgres -p 5432
 ```
 
 内部网络访问
 
 ```
-psql --host postgresql.kongyu -U postgres -d postgres -p 5432
+## 读写节点
+psql --host postgresql-primary.kongyu -U postgres -d postgres -p 5432
+## 只读节点
+psql --host postgresql-read.kongyu -U postgres -d postgres -p 5432
 ```
 
 集群网络访问
@@ -66,7 +73,10 @@ psql --host postgresql.kongyu -U postgres -d postgres -p 5432
 > 使用集群+NodePort访问
 
 ```
-psql --host 192.168.1.10 -U postgres -d postgres -p 21177
+## 读写节点
+psql --host 192.168.1.10 -U postgres -d postgres -p 46045
+## 只读节点
+psql --host 192.168.1.10 -U postgres -d postgres -p 32143
 ```
 
 使用SQL
@@ -74,6 +84,7 @@ psql --host 192.168.1.10 -U postgres -d postgres -p 21177
 ```
 \l
 SELECT name, setting FROM pg_settings;
+SELECT * FROM pg_stat_replication;
 ```
 
 **删除服务以及数据**
