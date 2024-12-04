@@ -50,11 +50,10 @@
         - [CoreDNS](/work/service/coredns/)
     - Web服务
         - Nginx
-            - [安装1.23.4版本](/work/service/nginx/v1.23.4/)
-            - [安装1.26.2版本](/work/service/nginx/v1.26.2/)
+            - [安装Nginx](/work/service/nginx/v1.27.3/)
             - [使用文档](/work/service/nginx/OPS.md)
         - TLS证书
-            - [cfssl创建证书](/work/service/tls/tls-cfssl/)
+            - [cfssl创建证书](/work/service/tls/tls-cfssl/v1.6.5/)
             - [openssl创建证书](/work/service/tls/tls-openssl/)
     - 内网远程访问
         - [内网穿透FRP](/work/service/frp/)

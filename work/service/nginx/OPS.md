@@ -5,7 +5,7 @@
 创建一个简单的示例，来测试Nginx是否正常
 
 ```
-sudo tee /etc/nginx/conf.d/demo.conf <<EOF
+tee /etc/nginx/conf.d/demo.conf <<EOF
 server {
   listen 8000;
   server_name _;
@@ -41,7 +41,7 @@ curl localhost:8000
 创建一个简单的示例，来测试Nginx是否正常
 
 ```
-sudo tee /etc/nginx/conf.d/demo.conf <<"EOF"
+tee /etc/nginx/conf.d/demo.conf <<"EOF"
 upstream backend_servers {
     server 192.168.1.101:9000;
     server 192.168.1.102:9000;
@@ -79,7 +79,7 @@ curl localhost:19000
 创建配置文件
 
 ```nginx
-sudo tee /etc/nginx/conf.d/8001-vue-demo.conf <<"EOF"
+tee /etc/nginx/conf.d/8001-vue-demo.conf <<"EOF"
 server {
     listen       8001;
     server_name  _;
@@ -165,17 +165,18 @@ http://192.168.1.112:8001
 
 ```bash
 # 创建目录
-sudo mkdir -p /etc/nginx/ssl
+mkdir -p /etc/nginx/ssl
 
 # 生成私钥
-sudo openssl genrsa -out /etc/nginx/ssl/private.key 2048
+openssl genrsa -out /etc/nginx/ssl/nginx.key 2048
 
 # 生成自签名证书
-sudo openssl req -new -x509 -key /etc/nginx/ssl/private.key -out /etc/nginx/ssl/certificate.crt -days 365 -utf8 \
-    -subj "/C=CN/ST=重庆市/L=重庆市/O=阿腾集团/OU=研发中心/CN=nginx.ateng.local"
+openssl req -new -x509 -key /etc/nginx/ssl/nginx.key \
+  -out /etc/nginx/ssl/nginx.crt -days 36500 -utf8 \
+  -subj "/C=CN/ST=Chongqing/L=Chongqing/O=Ateng/OU=Ateng/CN=nginx.ateng.local"
 ```
 
-这些命令将生成一个私钥文件 `private.key` 和一个自签名证书文件 `certificate.crt`，有效期为 365 天。
+这些命令将生成一个私钥文件 `nginx.key` 和一个自签名证书文件 `nginx.crt`，有效期为 365 天。
 
 - `openssl genrsa`：生成一个 RSA 私钥。
 
@@ -198,7 +199,7 @@ sudo openssl req -new -x509 -key /etc/nginx/ssl/private.key -out /etc/nginx/ssl/
 以下是一个简单的 Nginx 配置文件，启用 HTTPS 并使用刚刚创建的 SSL 证书：
 
 ```nginx
-sudo tee /etc/nginx/conf.d/demo-https.conf <<"EOF"
+tee /etc/nginx/conf.d/demo-https.conf <<"EOF"
 server {
     listen 80;
     server_name nginx.ateng.local;
@@ -209,8 +210,8 @@ server {
 
     server_name nginx.ateng.local;  # 替换为你的域名
 
-    ssl_certificate /etc/nginx/ssl/certificate.crt;  # SSL 证书路径
-    ssl_certificate_key /etc/nginx/ssl/private.key;  # SSL 私钥路径
+    ssl_certificate /etc/nginx/ssl/nginx.crt;  # SSL 证书路径
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;  # SSL 私钥路径
 
     ssl_protocols TLSv1.2 TLSv1.3;  # 启用的 SSL 协议
     ssl_ciphers HIGH:!aNULL:!MD5;   # 安全加密算法配置
@@ -254,6 +255,6 @@ sudo systemctl reload nginx
 ### 5. 访问服务
 
 ```
-curl --cacert /etc/nginx/ssl/certificate.crt https://nginx.ateng.local
+curl --cacert /etc/nginx/ssl/nginx.crt https://nginx.ateng.local
 ```
 
