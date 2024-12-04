@@ -4,7 +4,7 @@ fullnameOverride: "postgresql"
 postgresql:
   image:
     registry: registry.lingo.local
-    repository: service/postgresql-repmgr
+    repository: bitnami/postgresql-repmgr
     tag: "17.2.0"
     pullPolicy: IfNotPresent
     debug: false
@@ -61,8 +61,8 @@ postgresql:
 pgpool:
   image:
     registry: registry.lingo.local
-    repository: service/pgpool
-    tag: "4.5.2"
+    repository: bitnami/pgpool
+    tag: "4.5.4"
     debug: false
   extraEnvVars:
     - name: TZ
@@ -78,7 +78,7 @@ volumePermissions:
   enabled: true
   image:
     registry: registry.lingo.local
-    repository: service/os-shell
+    repository: bitnami/os-shell
     tag: "12"
     pullPolicy: IfNotPresent
 persistence:

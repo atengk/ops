@@ -1,0 +1,78 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "mongodb"
+image:
+  registry: registry.lingo.local
+  repository: bitnami/mongodb-sharded
+  tag: "8.0.3"
+  pullPolicy: IfNotPresent
+  debug: false
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: "Admin@123"
+shards: 3
+common:
+  mongodbEnableNumactl: false
+  useHostnames: true
+  mongodbEnableIPv6: false
+  mongodbDirectoryPerDB: false
+  mongodbSystemLogVerbosity: 0
+  mongodbDisableSystemLog: false
+  mongodbMaxWaitTimeout: 120
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  containerPorts:
+    mongodb: 27017
+  serviceAccount:
+    create: true
+    automountServiceAccountToken: true
+service:
+  name: ""
+  type: NodePort
+  ports:
+    mongodb: 27017
+  nodePorts:
+    mongodb: ""
+configsvr:
+  replicas: 1
+  persistence:
+    enabled: true
+    size: 10Gi
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+mongos:
+  replicas: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+shardsvr:
+  dataNode:
+    replicas: 3
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/mongodb="true"
+    type: "soft"
+    key: "kubernetes.service/mongodb"
+    values:
+      - "true"
+  persistence:
+    size: 100Gi
+  arbiter:
+    replicaCount: 0

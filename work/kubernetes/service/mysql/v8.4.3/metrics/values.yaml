@@ -4,7 +4,7 @@ fullnameOverride: "mysql"
 image:
   debug: false
   registry: registry.lingo.local
-  repository: service/mysql
+  repository: bitnami/mysql
   tag: "8.4.3"
   pullPolicy: IfNotPresent
 architecture: standalone
@@ -99,7 +99,7 @@ metrics:
   enabled: true
   image:
     registry: registry.lingo.local
-    repository: service/mysqld-exporter
+    repository: bitnami/mysqld-exporter
     tag: "0.15.1"
     pullPolicy: IfNotPresent
   service:

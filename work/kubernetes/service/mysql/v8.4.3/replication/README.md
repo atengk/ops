@@ -13,16 +13,17 @@ helm search repo bitnami/mysql -l
 **下载chart**
 
 ```
-helm pull bitnami/mysql --version 11.1.19
+helm pull bitnami/mysql --version 11.1.20
 ```
 
 **修改配置**
 
-根据环境做出相应的修改
+values.yaml是修改后的配置，可以根据环境做出适当修改
 
-```
-cat values.yaml
-```
+- 存储类：defaultStorageClass（不填为默认）
+- 认证配置：auth.rootPassword
+- 镜像地址：image.registry
+- 其他配置：...
 
 **创建标签，运行在标签节点上**
 
@@ -34,7 +35,7 @@ kubectl label nodes server03.lingo.local kubernetes.service/mysql="true"
 **创建服务**
 
 ```
-helm install mysql -n kongyu -f values.yaml mysql-11.1.19.tgz
+helm install mysql -n kongyu -f values.yaml mysql-11.1.20.tgz
 ```
 
 **查看服务**
@@ -46,44 +47,28 @@ kubectl logs -f -n kongyu -l app.kubernetes.io/instance=mysql
 
 **使用服务**
 
-```
-kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/mysql:8.4.3 --namespace kongyu --command -- bash
-$ mysql -hmysql-primary -uroot -pAdmin@123
-mysql> SHOW REPLICAS;
-$ mysql -hmysql-secondary -uroot -pAdmin@123
-mysql> SHOW REPLICA STATUS\G;
-```
-
 创建客户端容器
 
 ```
-kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/mysql:8.4.3 --namespace kongyu --command -- bash
+kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/mysql:8.4.3 --namespace kongyu --command -- bash
 ```
 
-内部网络访问-headless
+访问主节点
+
+> read/write: mysql-primary
 
 ```
-
+$ mysql -hmysql-primary -uroot -pAdmin@123
+mysql> SHOW REPLICAS;
 ```
 
-内部网络访问
+访问从节点
+
+> read-only: mysql-secondary
 
 ```
-## 读写节点
-mysql -hmysql-primary.kongyu -uroot -pAdmin@123 -e "SHOW REPLICAS"
-## 只读节点
-mysql -hmysql-secondary.kongyu -uroot -pAdmin@123 -e "SHOW REPLICA STATUS\G"
-```
-
-集群网络访问
-
-> 使用集群+NodePort访问
-
-```
-## 读写节点
-mysql -h192.168.1.10 -P42375 -uroot -pAdmin@123 -e "SHOW REPLICAS"
-## 只读节点
-mysql -h192.168.1.10 -P3862 -uroot -pAdmin@123 -e "SHOW REPLICA STATUS\G"
+$ mysql -hmysql-secondary -uroot -pAdmin@123
+mysql> SHOW REPLICA STATUS\G;
 ```
 
 **删除服务以及数据**

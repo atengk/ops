@@ -25,7 +25,7 @@ done
 设置镜像仓库和命名空间
 
 ```
-registry_address="registry.lingo.local/service"
+registry_address="registry.lingo.local/bitnami"
 ```
 
 设置镜像标签并推送到本地仓库

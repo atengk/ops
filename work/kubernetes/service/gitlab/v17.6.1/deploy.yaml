@@ -1,0 +1,196 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: gitlab-ce
+  labels:
+    app: gitlab-ce
+spec:
+  replicas: 1
+  serviceName: gitlab-ce-headless
+  selector:
+    matchLabels:
+      app: gitlab-ce
+  template:
+    metadata:
+      labels:
+        app: gitlab-ce
+    spec:
+      containers:
+        - name: gitlab-ce
+          image: registry.lingo.local/service/gitlab-ce:17.6.1-ce.0
+          ports:
+            - name: http-80
+              containerPort: 80
+              protocol: TCP
+            - name: tcp-22
+              containerPort: 22
+              protocol: TCP
+          env:
+            - name: GITLAB_ROOT_PASSWORD
+              value: Ateng@2024
+            - name: TZ
+              value: Asia/Shanghai
+          resources: {}
+          readinessProbe:
+            exec:
+              command:
+                - /opt/gitlab/bin/gitlab-healthcheck
+            initialDelaySeconds: 150
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command:
+                - /opt/gitlab/bin/gitlab-healthcheck
+            initialDelaySeconds: 200
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 10
+          volumeMounts:
+            - name: host-time
+              mountPath: /etc/localtime
+            - name: config-gitlab
+              mountPath: /etc/gitlab/gitlab.rb
+              subPath: gitlab.rb
+            - name: config
+              mountPath: /etc/gitlab
+            - name: log
+              mountPath: /var/log/gitlab
+            - name: data
+              mountPath: /var/opt/gitlab
+          imagePullPolicy: IfNotPresent
+      volumes:
+        - name: host-time
+          hostPath:
+            path: /etc/localtime
+            type: ''
+        - name: config-gitlab
+          configMap:
+            name: gitlab-ce
+            items:
+              - key: gitlab.rb
+                path: gitlab.rb
+            defaultMode: 420
+      terminationGracePeriodSeconds: 60
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/gitlab-ce
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 50Gi
+        storageClassName: openebs-hostpath
+        volumeMode: Filesystem
+    - metadata:
+        name: log
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: openebs-hostpath
+        volumeMode: Filesystem
+    - metadata:
+        name: config
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: openebs-hostpath
+        volumeMode: Filesystem
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gitlab-ce-headless
+  labels:
+    app: gitlab-ce-headless
+spec:
+  ports:
+    - name: http-80
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: tcp-22
+      protocol: TCP
+      port: 22
+      targetPort: 22
+  selector:
+    app: gitlab-ce
+  clusterIP: None
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gitlab-ce
+  labels:
+    app: gitlab-ce
+spec:
+  ports:
+    - name: http-80
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 20001
+    - name: tcp-22
+      protocol: TCP
+      port: 22
+      targetPort: 22
+      nodePort: 20002
+  selector:
+    app: gitlab-ce
+  type: NodePort
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: gitlab-ce
+data:
+  gitlab.rb: |-
+    # 修改 http 访问地址
+    external_url 'http://192.168.1.10:20001'
+    # 修改了 http 端口同时也要修改 nginx 端口
+    nginx['listen_port'] = 80
+    # 修改 ssh 访问地址
+    gitlab_rails['gitlab_ssh_host'] = '192.168.1.10'
+    # 修改 ssh 端口为上面 docker run 设置的端口
+    gitlab_rails['gitlab_shell_ssh_port'] = 20002
+    # 修改 ssh 用户
+    gitlab_rails['gitlab_ssh_user'] = 'git'
+    # 修改时区
+    gitlab_rails['time_zone'] = 'Asia/Shanghai'
+    # 设置备份保留30天（7*3600*24*30=18144000），秒为单位
+    gitlab_rails['backup_keep_time'] = 18144000
+    
+    # 优化减少服务的内存占用
+    puma['worker_processes'] = 2
+    postgresql['shared_buffers'] = "128MB"
+    postgresql['max_worker_processes'] = 4
+    sidekiq['max_concurrency'] = 2
+    sidekiq['min_concurrency'] = 1
+     
+    # 关闭不需要的服务
+    prometheus['enable'] = false
+    redis_exporter['enable'] = false
+    gitlab_exporter['enable'] = false
+    node_exporter['enable'] = false
+    postgres_exporter['enable'] = false

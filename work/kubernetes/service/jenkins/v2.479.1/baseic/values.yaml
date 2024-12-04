@@ -1,0 +1,49 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "jenkins"
+image:
+  registry: registry.lingo.local
+  repository: bitnami/jenkins
+  tag: "2.479.1"
+  pullPolicy: IfNotPresent
+  debug: false
+jenkinsUser: admin
+jenkinsPassword: "Admin@123"
+jenkinsHost: ""
+javaOpts:
+  - "-Xms128m -Xmx4096m"
+disableInitialization: "no"
+latestPlugins: true
+latestSpecifiedPlugins: false
+skipImagePlugins: false
+overridePlugins: false
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+terminationGracePeriodSeconds: "10"
+resourcesPreset: "none"
+resources: {}
+affinity: {}
+nodeSelector: {}
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: "1Gi"
+#   requests:
+#     cpu: "500m"
+#     memory: "512Mi"
+# ## Allowed values: `soft` or `hard`
+# #podAffinityPreset: "soft"  ## 调度到同一节点
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/jenkins="true"
+  type: "soft"
+  key: "kubernetes.service/jenkins"
+  values:
+    - "true"
+service:
+  type: NodePort
+  ports:
+    http: 80
+    https: 443
+persistence:
+  size: 50Gi

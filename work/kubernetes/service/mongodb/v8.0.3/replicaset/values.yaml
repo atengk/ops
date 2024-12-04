@@ -1,0 +1,101 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "mongodb"
+image:
+  registry: registry.lingo.local
+  repository: bitnami/mongodb
+  tag: "8.0.3"
+  pullPolicy: IfNotPresent
+  debug: false
+architecture: replicaset
+useStatefulSet: true
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: "Admin@123"
+  usernames: [kongyu01,kongyu02]
+  passwords: [kongyu01,kongyu02]
+  databases: [kongyu01,kongyu02]
+automountServiceAccountToken: true
+replicaSetName: rs0
+replicaSetHostnames: true
+enableIPv6: false
+directoryPerDB: false
+systemLogVerbosity: 0
+disableSystemLog: false
+disableJavascript: false
+enableJournal: true
+replicaCount: 3
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+replicaSetConfigurationSettings:
+  enabled: true
+  configuration:
+    chainingAllowed : false
+    heartbeatTimeoutSecs : 10
+    heartbeatIntervalMillis : 2000
+    electionTimeoutMillis : 10000
+    catchUpTimeoutMillis : 30000
+resourcesPreset: "none"
+resources: {}
+affinity: {}
+nodeSelector: {}
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: "1Gi"
+#   requests:
+#     cpu: "500m"
+#     memory: "512Mi"
+# ## Allowed values: `soft` or `hard`
+# #podAffinityPreset: "soft"  ## 调度到同一节点
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/mongodb="true"
+  type: "soft"
+  key: "kubernetes.service/mongodb"
+  values:
+    - "true"
+containerPorts:
+  mongodb: 27017
+service:
+  type: NodePort
+  portName: mongodb
+  ports:
+    mongodb: 27017
+  nodePorts:
+    mongodb: ""
+rbac:
+  create: true
+externalAccess:
+  enabled: true
+  autoDiscovery:
+    enabled: true
+    image:
+      registry: registry.lingo.local
+      repository: bitnami/kubectl
+      tag: "1.31.2"
+      digest: ""
+      pullPolicy: IfNotPresent
+  externalMaster:
+    enabled: false
+    host: ""
+    port: 27017
+  service:
+    type: NodePort
+    portName: "mongodb"
+    ports:
+      mongodb: 27017
+    nodePorts:
+      - 30701
+      - 30702
+      - 30703
+    externalTrafficPolicy: Local
+persistence:
+  enabled: true
+  size: 100Gi
+arbiter:
+  enabled: true
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai

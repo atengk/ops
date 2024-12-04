@@ -196,7 +196,7 @@ cfssl certinfo -cert etcd-server.pem | grep not
     ```bash
     tee etcd-client-csr.json <<EOF
     {
-        "CN": "etcd.kongyu.local",
+        "CN": "etcd.ateng.local",
         "hosts": [
             ""
         ],

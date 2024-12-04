@@ -3,7 +3,7 @@ global:
 fullnameOverride: "postgresql"
 image:
   registry: registry.lingo.local
-  repository: service/postgresql
+  repository: bitnami/postgresql
   tag: "17.2.0"
   pullPolicy: IfNotPresent
   debug: false

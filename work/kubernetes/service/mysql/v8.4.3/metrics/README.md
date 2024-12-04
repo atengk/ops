@@ -15,12 +15,17 @@ helm search repo bitnami/mysql -l
 **下载chart**
 
 ```
-helm pull bitnami/mysql --version 11.1.19
+helm pull bitnami/mysql --version 11.1.20
 ```
 
 **修改配置**
 
-根据环境做出相应的修改
+values.yaml是修改后的配置，可以根据环境做出适当修改
+
+- 存储类：defaultStorageClass（不填为默认）
+- 认证配置：auth.rootPassword
+- 镜像地址：image.registry
+- 其他配置：...
 
 ```
 cat values.yaml
@@ -35,7 +40,7 @@ kubectl label nodes server02.lingo.local kubernetes.service/mysql="true"
 **创建服务**
 
 ```
-helm install mysql -n kongyu -f values.yaml mysql-11.1.19.tgz
+helm install mysql -n kongyu -f values.yaml mysql-11.1.20.tgz
 ```
 
 **查看服务**
@@ -50,7 +55,7 @@ kubectl logs -f -n kongyu -l app.kubernetes.io/instance=mysql
 创建客户端容器
 
 ```
-kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/mysql:8.4.3 --namespace kongyu --command -- bash
+kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/mysql:8.4.3 --namespace kongyu --command -- bash
 ```
 
 内部网络访问-headless

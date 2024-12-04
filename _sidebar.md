@@ -52,7 +52,7 @@
         - Nginx
             - [安装1.23.4版本](/work/service/nginx/v1.23.4/)
             - [安装1.26.2版本](/work/service/nginx/v1.26.2/)
-            - [配置HTTPS证书](/work/service/nginx/v1.23.4/tls/)
+            - [使用文档](/work/service/nginx/OPS.md)
         - TLS证书
             - [cfssl创建证书](/work/service/tls/tls-cfssl/)
             - [openssl创建证书](/work/service/tls/tls-openssl/)
@@ -96,9 +96,9 @@
             - Mariadb Galera
                 - [Galera集群](/work/kubernetes/service/mariadb/v11.4.3/)
             - PostgreSQL
-                - [单机模式](/work/kubernetes/service/postgresql/v16.4.0/standalone/)
-                - [主从模式](/work/kubernetes/service/postgresql/v16.4.0/replication/)
-                - [集群模式](/work/kubernetes/service/postgresql/v16.4.0/ha/)
+                - [单机模式](/work/kubernetes/service/postgresql/v17.2.0/standalone/)
+                - [主从模式](/work/kubernetes/service/postgresql/v17.2.0/replication/)
+                - [集群模式](/work/kubernetes/service/postgresql/v17.2.0/ha/)
             - MongoDB
                 - [单机模式](/work/kubernetes/service/mongodb/v8.0.1/standalone/)
                 - [副本集群模式](/work/kubernetes/service/mongodb/v8.0.1/replicaset/)
@@ -123,29 +123,33 @@
                 - [单机模式](/work/kubernetes/service/opensearch/v2.15.0/all-in-one/)
                 - [认证模式](/work/kubernetes/service/opensearch/v2.15.0/auth/)
             - ETCD
-                - [集群模式](/work/kubernetes/service/etcd/v3.5.14/basic/)
-                - [认证模式](/work/kubernetes/service/etcd/v3.5.14/http-auth/)
+                - [集群模式](/work/kubernetes/service/etcd/v3.5.17/basic/)
+                - [认证模式](/work/kubernetes/service/etcd/v3.5.17/http-auth/)
+                - [认证模式](/work/kubernetes/service/etcd/v3.5.17/https/)
         - 消息队列
             - RabbitMQ
-                - [集群模式](/work/kubernetes/service/rabbitmq/v3.13.4/)
+                - [集群模式](/work/kubernetes/service/rabbitmq/v4.0.2/)
             - Kafka
-                - [单机模式](/work/kubernetes/service/kafka/v3.8.0/standalone/)
-                - [集群模式](/work/kubernetes/service/kafka/v3.8.0/cluster/)
-                - [认证模式](/work/kubernetes/service/kafka/v3.8.0/auth/)
+                - [单机模式](/work/kubernetes/service/kafka/v3.8.1/standalone/)
+                - [集群模式](/work/kubernetes/service/kafka/v3.8.1/cluster/)
+                - [高可用集群模式](/work/kubernetes/service/kafka/v3.8.1/cluster-ha/)
+                - [认证模式](/work/kubernetes/service/kafka/v3.8.1/auth/)
             - Kafka UI
-                - [Kafka可视化](/work/kubernetes/service/kafka-ui/)
+                - [Kafka可视化](/work/kubernetes/service/kafka-ui/v0.7.2/)
         - 存储服务
             - MinIO
                 - [单机模式](/work/kubernetes/service/minio/v2024.10.13/standalone/)
                 - [集群模式](/work/kubernetes/service/minio/v2024.10.13/distributed/)
             - Harbor
-                - [http模式](/work/kubernetes/service/harbor/v2.11.0/http/)
-                - [ingress模式](/work/kubernetes/service/harbor/v2.11.0/ingress-http/)
+                - [http模式](/work/kubernetes/service/harbor/v2.12.0/http/)
+                - [ingress模式](/work/kubernetes/service/harbor/v2.12.0/ingress-http/)
+                - [https模式](/work/kubernetes/service/harbor/v2.12.0/https/)
+                - [https模式(自定义证书)](/work/kubernetes/service/harbor/v2.12.0/https-custom/)
         - 开发工具
             - [Spring Boot应用](/work/kubernetes/service/springboot-app/v1.0/)
-            - [Gitlab](/work/kubernetes/service/gitlab/v17.4.2/)
-            - [Gitea](/work/kubernetes/service/gitea/v1.22.1/)
-            - [Jenkins](/work/kubernetes/service/jenkins/v2.452.3/baseic/)
+            - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
+            - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
+            - [Jenkins](/work/kubernetes/service/jenkins/v2.479.1/baseic/)
             - [Snail-Job](/work/kubernetes/service/snail-job/v1.2.0/)
             - [PowerJob](/work/kubernetes/service/powerjob/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)

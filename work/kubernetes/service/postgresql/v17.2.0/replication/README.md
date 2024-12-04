@@ -11,12 +11,17 @@ helm search repo bitnami/postgresql -l
 **下载chart**
 
 ```
-helm pull bitnami/postgresql --version 16.2.2
+helm pull bitnami/postgresql --version 16.2.1
 ```
 
 **修改配置**
 
 values.yaml是修改后的配置，可以根据环境做出适当修改
+
+- 存储类：defaultStorageClass（不填为默认）
+- 认证配置：auth.postgresPassword
+- 镜像地址：image.registry
+- 其他配置：...
 
 ```
 cat values.yaml
@@ -32,7 +37,7 @@ kubectl label nodes server03.lingo.local kubernetes.service/postgresql="true"
 **创建服务**
 
 ```shell
-helm install postgresql -n kongyu -f values.yaml postgresql-16.2.2.tgz
+helm install postgresql -n kongyu -f values.yaml postgresql-16.2.1.tgz
 ```
 
 **查看服务**
@@ -47,7 +52,7 @@ kubectl logs -f -n kongyu postgresql-primary-0
 创建客户端容器
 
 ```
-kubectl run postgresql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/postgresql:17.2.0 --namespace kongyu --env="PGPASSWORD=Admin@123" --command -- bash
+kubectl run postgresql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/postgresql:17.2.0 --namespace kongyu --env="PGPASSWORD=Admin@123" --command -- bash
 ```
 
 内部网络访问-headless
