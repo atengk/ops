@@ -1,0 +1,94 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "opensearch"
+clusterName: opensearch
+containerPorts:
+  restAPI: 9200
+  transport: 9300
+plugins: ""
+snapshotRepoPath: ""
+extraConfig:
+  http:
+    cors:
+      enabled: true
+      allow-origin: "*"
+      allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      allow-credentials: true
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+image:
+  registry: registry.lingo.local
+  repository: bitnami/opensearch
+  tag: "2.18.0"
+  pullPolicy: IfNotPresent
+  debug: false
+security:
+  enabled: false
+  adminPassword: ""
+  logstashPassword: ""
+service:
+  type: NodePort
+  ports:
+    restAPI: 9200
+    transport: 9300
+  nodePorts:
+    restAPI: ""
+    transport: ""
+master:
+  masterOnly: false
+  replicaCount: 2
+  extraRoles: []
+  persistence:
+    enabled: true
+    size: 100Gi
+  heapSize: 2048m
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/opensearch="true"
+    type: "soft"
+    key: "kubernetes.service/opensearch"
+    values:
+      - "true"
+data:
+  replicaCount: 0
+coordinating:
+  replicaCount: 0
+ingest:
+  enabled: false
+  replicaCount: 0
+dashboards:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/opensearch-dashboards
+    tag: "2.17.1"
+    pullPolicy: IfNotPresent
+    debug: false
+  service:
+    type: NodePort
+    ports:
+      http: 5601
+    nodePorts:
+      http: ""
+  resourcesPreset: "none"
+  resources: {}
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  heapSize: 1024m
+  persistence:
+    enabled: true
+    size: 10Gi

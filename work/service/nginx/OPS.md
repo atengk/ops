@@ -157,42 +157,18 @@ http://192.168.1.112:8001
 
 ## 配置HTTPS
 
-### 1. 使用 OpenSSL 创建自签名证书
+### 1. 创建自签名证书
 
-首先，我们需要生成 SSL 证书和私钥。以下是使用 OpenSSL 创建自签名证书的步骤和命令：
+以下是使用 OpenSSL 创建自签名证书的步骤和命令：
 
 详细的生成证书参考：https://kongyu666.github.io/work/#/work/service/tls/tls-openssl/
 
-```bash
-# 创建目录
-mkdir -p /etc/nginx/ssl
+最终得到：`ca.crt`、 `server.crt` 、`server.key`
 
-# 生成私钥
-openssl genrsa -out /etc/nginx/ssl/nginx.key 2048
-
-# 生成自签名证书
-openssl req -new -x509 -key /etc/nginx/ssl/nginx.key \
-  -out /etc/nginx/ssl/nginx.crt -days 36500 -utf8 \
-  -subj "/C=CN/ST=Chongqing/L=Chongqing/O=Ateng/OU=Ateng/CN=nginx.ateng.local"
 ```
-
-这些命令将生成一个私钥文件 `nginx.key` 和一个自签名证书文件 `nginx.crt`，有效期为 365 天。
-
-- `openssl genrsa`：生成一个 RSA 私钥。
-
-- `openssl req -new -x509`：创建一个新的 X.509 证书请求，并使用私钥签名生成自签名证书。
-
-    - `/C=AU`: 国家代码（2 个字母），例如 AU 表示澳大利亚。
-
-    - `/ST=Some-State`: 州或省的名称。
-
-    - `/L=Some-City`: 城市名称。
-
-    - `/O=My-Company`: 组织名称（公司名）。
-
-    - `/OU=My-Department`: 组织单位名称（部门）。
-
-    - `/CN=your_domain.com`: 通用名称（通常是服务器的 FQDN 或者域名），替换为你的域名。
+mkdir -p /etc/nginx/ssl/
+cp ca.crt server.crt server.key /etc/nginx/ssl/
+```
 
 ### 2. 配置 Nginx 使用 HTTPS
 
@@ -210,8 +186,8 @@ server {
 
     server_name nginx.ateng.local;  # 替换为你的域名
 
-    ssl_certificate /etc/nginx/ssl/nginx.crt;  # SSL 证书路径
-    ssl_certificate_key /etc/nginx/ssl/nginx.key;  # SSL 私钥路径
+    ssl_certificate /etc/nginx/ssl/server.crt;  # SSL 证书路径
+    ssl_certificate_key /etc/nginx/ssl/server.key;  # SSL 私钥路径
 
     ssl_protocols TLSv1.2 TLSv1.3;  # 启用的 SSL 协议
     ssl_ciphers HIGH:!aNULL:!MD5;   # 安全加密算法配置
@@ -250,11 +226,9 @@ echo "hello world https" > /data/service/frontend/demo-https/index.html
 sudo systemctl reload nginx
 ```
 
-通过上述配置，Nginx 将启用 HTTPS 并使用生成的自签名证书。请注意，自签名证书通常用于开发和测试环境，而不是生产环境。在生产环境中，建议使用受信任的证书颁发机构（CA）签发的证书。
-
 ### 5. 访问服务
 
 ```
-curl --cacert /etc/nginx/ssl/nginx.crt https://nginx.ateng.local
+curl -L --cacert /etc/nginx/ssl/ca.crt nginx.ateng.local
 ```
 
