@@ -1,53 +1,80 @@
-# MinIO 2023-12-09
+# MinIO
 
-使用docker运行minio集群，针对服务器没有多余的硬盘的情况。
+MinIO 是一个高性能的对象存储系统，兼容 Amazon S3 API，专为存储海量非结构化数据而设计。它使用 Golang 编写，支持本地部署和云环境，适用于私有云、混合云和边缘计算等场景。MinIO 提供数据冗余、加密和高可用性，是构建数据湖、备份与恢复等解决方案的理想选择。
 
-这里示例两台服务器，分别在两台服务器上执行一下命令。
+- [官网地址](https://min.io/)
 
-
-
-## 环境准备
-
-准备数据目录
+**下载镜像**
 
 ```
-mkdir -p /data/service/minio/{01,02}
-chown -R 1001 /data/service/minio
+docker pull bitnami/minio:2024.11.7
 ```
 
-
-
-## 启动容器
+**推送到仓库**
 
 ```
-docker run -d --restart=always --network host --name kongyu-minio \
-    -v /data/service/minio/01:/data01 \
-    -v /data/service/minio/02:/data02 \
-    registry.lingo.local/service/minio:my_custom \
-    minio server --address :9000 --console-address :9001 http://192.168.1.101:9000/data0{1...2} http://192.168.1.102:9000/data0{1...2}
+docker tag bitnami/minio:2024.11.7 registry.lingo.local/bitnami/minio:2024.11.7
+docker push registry.lingo.local/bitnami/minio:2024.11.7
 ```
 
-
-
-## 访问服务
-
-登录服务查看
+**保存镜像**
 
 ```
-URL: http://192.168.1.101:9001
+docker save registry.lingo.local/bitnami/minio:2024.11.7 | gzip -c > image-minio_2024.11.7.tar.gz
+```
+
+**创建目录**
+
+```
+sudo mkdir -p /data/container/minio/data
+sudo chown -R 1001 /data/container/minio
+```
+
+**运行服务**
+
+```
+docker run -d --name ateng-minio \
+  -p 20006:9000 -p 20007:9001 --restart=always \
+  -v /data/container/minio:/bitnami/minio/data \
+  -e MINIO_ROOT_USER=admin \
+  -e MINIO_ROOT_PASSWORD=Admin@123 \
+  -e MINIO_DEFAULT_BUCKETS="bucket01:public,bucket02" \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/minio:2024.11.7
+```
+
+**查看日志**
+
+```
+docker logs -f ateng-minio
+```
+
+**使用服务**
+
+```
+API URL: http://192.168.1.114:20006
+Web URL: http://192.168.1.114:20007
 Username: admin
 Password: Admin@123
 ```
 
+**删除服务**
 
-
-## 删除服务
-
+停止服务
 
 ```
-docker rm -f kongyu-minio
-rm -rf /data/service/minio
+docker stop ateng-minio
 ```
 
+删除服务
 
+```
+docker rm ateng-minio
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/minio
+```
 

@@ -74,7 +74,7 @@ dashboards:
   image:
     registry: registry.lingo.local
     repository: bitnami/opensearch-dashboards
-    tag: "2.17.1"
+    tag: "2.18.0"
     pullPolicy: IfNotPresent
     debug: false
   service:

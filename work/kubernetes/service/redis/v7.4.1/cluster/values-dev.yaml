@@ -4,8 +4,8 @@ fullnameOverride: "redis"
 image:
   debug: false
   registry: registry.lingo.local
-  repository: service/redis-cluster
-  tag: 7.4.1
+  repository: bitnami/redis-cluster
+  tag: "7.4.1"
   pullPolicy: IfNotPresent
 usePassword: true
 password: "Admin@123"
@@ -27,7 +27,7 @@ redis:
     - name: REDIS_IO_THREADS_DO_READS
       value: "yes"
     - name: REDIS_MAXCLIENTS
-      value: "10000"
+      value: "1024"
   resourcesPreset: "none"
   resources: {}
   affinity: {}

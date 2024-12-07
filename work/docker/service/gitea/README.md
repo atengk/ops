@@ -1,123 +1,99 @@
-# gitea 1.20.5
+# Gitea
 
+Gitea 是一个轻量级、开源的 Git 代码托管平台，提供类似 GitHub 的功能，如代码托管、版本控制、问题追踪和持续集成等。它易于安装和自托管，适合个人和小型团队使用。Gitea 支持多种语言，具有简洁的界面和高性能的特点。
 
+- [官网链接](https://about.gitea.com/)
 
-## 环境准备
+**前提条件**
 
-创建网络，将容器运行在该网络下，若已创建则忽略
+- 需要 `postgresql` 数据库
 
-```
-docker network create --subnet 10.188.0.1/24 kongyu
-```
-
-准备目录
+**下载镜像**
 
 ```
-mkdir -p /data/service/gitea/data
-chown -R 1001 /data/service/gitea
+docker pull bitnami/gitea:1.22.3
 ```
 
-
-
-## 启动容器
-
-gitea需要postgresql数据库，首先创建数据库
+**推送到仓库**
 
 ```
-docker run -it --rm --network kongyu --env PGPASSWORD=Admin@123 registry.lingo.local/service/postgresql:15.3.0 psql --host kongyu-postgresql -U postgres -d kongyu -p 5432 -c "CREATE DATABASE gitea;"
+docker tag bitnami/gitea:1.22.3 registry.lingo.local/bitnami/gitea:1.22.3
+docker push registry.lingo.local/bitnami/gitea:1.22.3
 ```
 
-- 使用docker run的方式
-
+**保存镜像**
 
 ```
-docker run -d --name kongyu-gitea --network kongyu \
-  -p 20002:3000 --restart=always \
-  -v /data/service/gitea/data:/bitnami/gitea \
+docker save registry.lingo.local/bitnami/gitea:1.22.3 | gzip -c > image-gitea_1.22.3.tar.gz
+```
+
+**创建目录**
+
+```
+sudo mkdir -p /data/container/gitea/data
+sudo chown -R 1001 /data/container/gitea
+```
+
+**运行服务**
+
+注意以下配置
+
+- Gitea账号密码
+- 修改PostgreSQL的认证信息
+- HTTP地址：GITEA_ROOT_URL
+- SSH地址：GITEA_DOMAIN GITEA_SSH_PORT
+
+```
+docker run -d --name ateng-gitea \
+  -p 20011:3000 -p 20012:2222 --restart=always \
+  -v /data/container/gitea/data:/bitnami/gitea \
   -e GITEA_ADMIN_USER=root \
   -e GITEA_ADMIN_PASSWORD=Admin@123 \
   -e GITEA_ADMIN_EMAIL=2385569970@qq.com \
-  -e GITEA_DATABASE_HOST=kongyu-postgresql \
-  -e GITEA_DATABASE_NAME=gitea \
-  -e GITEA_DATABASE_USERNAME=postgres \
-  -e GITEA_DATABASE_PASSWORD=Admin@123 \
+  -e GITEA_DATABASE_HOST=192.168.1.114 \
+  -e GITEA_DATABASE_PORT_NUMBER=20002 \
+  -e GITEA_DATABASE_NAME=ateng_gitea \
+  -e GITEA_DATABASE_USERNAME=gitea \
+  -e GITEA_DATABASE_PASSWORD=Gitea@123 \
+  -e GITEA_ROOT_URL=http://192.168.1.114:20011 \
+  -e GITEA_DOMAIN=192.168.1.114 \
+  -e GITEA_SSH_PORT=20012 \
   -e TZ=Asia/Shanghai \
-  registry.lingo.local/service/gitea:1.20.5_bitnami
-docker logs -f kongyu-gitea
+  registry.lingo.local/bitnami/gitea:1.22.3
 ```
 
-- 使用docker-compose的方式
-
-
-```
-cat > /data/service/gitea/docker-compose.yaml <<"EOF"
-version: '3'
-
-services:
-  gitea:
-    image: registry.lingo.local/service/gitea:1.20.5_bitnami
-    container_name: kongyu-gitea
-    depends_on:
-      - kongyu-postgresql
-    networks:
-      - kongyu
-    ports:
-      - "20002:3000"
-    restart: always
-    volumes:
-      - /data/service/gitea/data:/bitnami/gitea
-    environment:
-      - GITEA_ADMIN_USER=root
-      - GITEA_ADMIN_PASSWORD=Admin@123
-      - GITEA_ADMIN_EMAIL=2385569970@qq.com
-      - GITEA_DATABASE_HOST=kongyu-postgresql
-      - GITEA_DATABASE_NAME=gitea
-      - GITEA_DATABASE_USERNAME=postgres
-      - GITEA_DATABASE_PASSWORD=Admin@123
-      - TZ=Asia/Shanghai
-
-networks:
-  kongyu:
-    external: true
-
-EOF
-
-docker-compose -f /data/service/gitea/docker-compose.yaml up -d 
-docker-compose -f /data/service/gitea/docker-compose.yaml logs -f
-```
-
-
-
-## 访问服务
-
-登录服务查看
+**查看日志**
 
 ```
-http://192.168.1.101:20002/user/login
+docker logs -f ateng-gitea
 ```
 
-
-
-## 删除服务
-
-- 使用docker run的方式
-
+**使用服务**
 
 ```
-docker rm -f kongyu-gitea
+HTTP Address: http://192.168.1.114:20011
+SSH Address: ssh://gitea@192.168.1.114:20012
+Username: root
+Password: Admin@123
 ```
 
-- 使用docker-compose的方式
+**删除服务**
 
-
-```
-docker-compose -f /data/service/gitea/docker-compose.yaml down
-```
-
-删除数据
+停止服务
 
 ```
-rm -rf /data/service/gitea
-docker run -it --rm --network kongyu --env PGPASSWORD=Admin@123 registry.lingo.local/service/postgresql:15.3.0 psql --host kongyu-postgresql -U postgres -d kongyu -p 5432 -c "DROP DATABASE gitea;"
+docker stop ateng-gitea
+```
+
+删除服务
+
+```
+docker rm ateng-gitea
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/gitea
 ```
 

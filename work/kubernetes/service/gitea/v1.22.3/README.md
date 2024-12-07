@@ -23,6 +23,7 @@ values.yaml是修改后的配置，可以根据环境做出适当修改
 - 存储类：defaultStorageClass（不填为默认）
 - 认证配置：adminUsername adminPassword
 - PostgreSQL信息：externalDatabase.*
+- HTTP和SSH端口的信息：环境变量GITEA_DOMAIN、GITEA_SSH_PORT，nodePorts
 - 镜像地址：image.registry
 - 其他配置：...
 
@@ -38,7 +39,7 @@ kubectl label nodes server03.lingo.local kubernetes.service/gitea="true"
 
 **创建服务**
 
-```shell
+```
 helm install gitea -n kongyu -f values.yaml gitea-3.0.2.tgz
 ```
 
@@ -55,11 +56,11 @@ kubectl logs -f -n kongyu -l app.kubernetes.io/instance=gitea
 
 ```
 [HTTP]
-Address: http://192.168.1.10:37600/
+Address: http://192.168.1.10:33000
 Username: root
 Password: Admin@123
 [SSH]
-Address: ssh://git@192.168.1.10:30721
+Address: ssh://git@192.168.1.10:32222
 ```
 
 ![image-20241203202501805](./assets/image-20241203202501805.png)

@@ -1,109 +1,110 @@
-# RabbitMQ 3.11.2
+# RabbitMQ
 
+RabbitMQ 是一个开源的消息中间件，基于 AMQP（高级消息队列协议）协议，提供可靠的消息传递、异步处理和分布式系统的解耦。它支持多种消息传输模式，如点对点、发布/订阅等，适用于分布式应用程序、微服务架构和高并发环境。RabbitMQ 提供了高可用性、消息确认、死信队列等功能，广泛应用于数据交换和任务调度。
 
+- [官网链接](https://www.rabbitmq.com/)
 
-## 环境准备
-
-创建网络，将容器运行在该网络下，若已创建则忽略
-
-```
-docker network create --subnet 10.188.0.1/24 kongyu
-```
-
-准备目录
+**下载镜像**
 
 ```
-mkdir -p /data/service/rabbitmq/data
-chown -R 1001 /data/service/rabbitmq
+docker pull bitnami/rabbitmq:4.0.2
 ```
 
+**下载插件（可选）**
 
+如果不安装插件可以跳过此步骤。
 
-## 启动容器
-
-- 使用docker run的方式
-
-
-```
-docker run -d --name kongyu-rabbitmq --network kongyu \
-    -p 20001:5672 -p 20002:15672 --restart=always \
-    -v /data/service/rabbitmq/data:/bitnami/rabbitmq/mnesia \
-    -e RABBITMQ_VHOST=/ \
-    -e RABBITMQ_USERNAME=admin \
-    -e RABBITMQ_PASSWORD=Admin@123 \
-    -e TZ=Asia/Shanghai \
-    registry.lingo.local/service/rabbitmq:3.11.2
-docker logs -f kongyu-rabbitmq
-```
-
-- 使用docker-compose的方式
-
+将下载的插件上传到本地的HTTP服务上面，方便后续安装的时候加载插件。
 
 ```
-cat > /data/service/rabbitmq/docker-compose.yaml <<"EOF"
-version: '3'
-
-services:
-  rabbitmq:
-    image: registry.lingo.local/service/rabbitmq:3.11.2
-    container_name: kongyu-rabbitmq
-    networks:
-      - kongyu
-    ports:
-      - "20001:5672"
-      - "20002:15672"
-    restart: always
-    volumes:
-      - /data/service/rabbitmq/data:/bitnami/rabbitmq/mnesia
-    environment:
-      - RABBITMQ_VHOST=/
-      - RABBITMQ_USERNAME=admin
-      - RABBITMQ_PASSWORD=Admin@123
-      - TZ=Asia/Shanghai
-
-networks:
-  kongyu:
-    external: true
-
-EOF
-
-docker-compose -f /data/service/rabbitmq/docker-compose.yaml up -d 
-docker-compose -f /data/service/rabbitmq/docker-compose.yaml logs -f
+mkdir plugins
+wget -P plugins https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v4.0.2/rabbitmq_delayed_message_exchange-4.0.2.ez
 ```
 
-
-
-## 访问服务
-
-登录服务查看
+**推送到仓库**
 
 ```
-URL: http://192.168.1.101:20002/
+docker tag bitnami/rabbitmq:4.0.2 registry.lingo.local/bitnami/rabbitmq:4.0.2
+docker push registry.lingo.local/bitnami/rabbitmq:4.0.2
+```
+
+**保存镜像**
+
+```
+docker save registry.lingo.local/bitnami/rabbitmq:4.0.2 | gzip -c > image-rabbitmq_4.0.2.tar.gz
+```
+
+**创建目录**
+
+```
+sudo mkdir -p /data/container/rabbitmq/data
+sudo chown -R 1001 /data/container/rabbitmq
+```
+
+**运行服务**
+
+普通模式
+
+```
+docker run -d --name ateng-rabbitmq \
+  -p 20009:5672 -p 20010:15672 --restart=always \
+  -v /data/container/rabbitmq/data:/bitnami/rabbitmq/mnesia \
+  -e RABBITMQ_USERNAME=admin \
+  -e RABBITMQ_PASSWORD=Admin@123 \
+  -e RABBITMQ_MANAGEMENT_ALLOW_WEB_ACCESS=true \
+  -e RABBITMQ_ERL_COOKIE=u8B1rlnzSckNvtkNr7kRAU4NVt8F6OtU \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/rabbitmq:4.0.2
+```
+
+插件模式
+
+```
+docker run -d --name ateng-rabbitmq \
+  -p 20009:5672 -p 20010:15672 --restart=always \
+  -v /data/container/rabbitmq/data:/bitnami/rabbitmq/mnesia \
+  -e RABBITMQ_USERNAME=admin \
+  -e RABBITMQ_PASSWORD=Admin@123 \
+  -e RABBITMQ_MANAGEMENT_ALLOW_WEB_ACCESS=true \
+  -e RABBITMQ_PLUGINS="rabbitmq_management, rabbitmq_web_stomp, rabbitmq_auth_backend_ldap, rabbitmq_delayed_message_exchange" \
+  -e RABBITMQ_COMMUNITY_PLUGINS="http://miniserve.lingo.local/rabbitmq-plugins/rabbitmq_delayed_message_exchange-4.0.2.ez" \
+  -e RABBITMQ_ERL_COOKIE=u8B1rlnzSckNvtkNr7kRAU4NVt8F6OtU \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/rabbitmq:4.0.2
+```
+
+**查看日志**
+
+```
+docker logs -f ateng-rabbitmq
+```
+
+**使用服务**
+
+```
+AMQP URL: 192.168.1.114:20009
+Web URL: http://192.168.1.114:20010/
 Username: admin
 Password: Admin@123
 ```
 
+**删除服务**
 
-
-## 删除服务
-
-- 使用docker run的方式
-
+停止服务
 
 ```
-docker rm -f kongyu-rabbitmq
+docker stop ateng-rabbitmq
 ```
 
-- 使用docker-compose的方式
-
-
-```
-docker-compose -f /data/service/rabbitmq/docker-compose.yaml down
-```
-
-删除数据目录
+删除服务
 
 ```
-rm -rf /data/service/rabbitmq
+docker rm ateng-rabbitmq
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/rabbitmq
 ```
 

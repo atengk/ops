@@ -40,7 +40,7 @@ kubectl label nodes server03.lingo.local kubernetes.service/rabbitmq="true"
 
 > 如果需要装插件，参考文件 `values-plugins.yaml`
 
-```shell
+```
 helm install rabbitmq -n kongyu -f values.yaml rabbitmq-15.0.4.tgz
 ```
 
@@ -73,8 +73,8 @@ Web访问
 > Web: 15672
 
 ```
-AMQP URL: http://192.168.1.10:26822/
-WebURL: http://192.168.1.10:48887/
+AMQP URL: 192.168.1.10:26822
+Web URL: http://192.168.1.10:48887/
 Username: admin
 Password: Admin@123
 ```

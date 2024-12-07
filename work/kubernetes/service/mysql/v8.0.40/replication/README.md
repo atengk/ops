@@ -54,7 +54,7 @@ kubectl logs -f -n kongyu -l app.kubernetes.io/instance=mysql
 创建客户端容器
 
 ```
-kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/mysql:8.0.40 --namespace kongyu --command -- bash
+kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/mysql:8.0.40 --namespace kongyu --env MYSQL_PWD=Admin@123 --command -- bash
 ```
 
 访问主节点
@@ -62,7 +62,7 @@ kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo
 > read/write: mysql-primary
 
 ```
-$ mysql -hmysql-primary -uroot -pAdmin@123
+$ mysql -hmysql-primary -uroot
 mysql> SHOW REPLICAS;
 ```
 
@@ -71,7 +71,7 @@ mysql> SHOW REPLICAS;
 > read-only: mysql-secondary
 
 ```
-$ mysql -hmysql-secondary -uroot -pAdmin@123
+$ mysql -hmysql-secondary -uroot
 mysql> SHOW REPLICA STATUS\G;
 ```
 

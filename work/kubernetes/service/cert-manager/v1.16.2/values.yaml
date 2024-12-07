@@ -1,0 +1,58 @@
+fullnameOverride: "cert-manager"
+logLevel: 2
+leaderElection:
+  namespace: "cert-manager"
+installCRDs: true
+replicaCount: 1
+controller:
+  replicaCount: 1
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/cert-manager
+    tag: "1.16.2"
+    pullPolicy: IfNotPresent
+    debug: false
+  acmesolver:
+    image:
+      registry: registry.lingo.local
+      repository: bitnami/acmesolver
+      tag: "1.16.2"
+      pullPolicy: IfNotPresent
+      debug: false
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+webhook:
+  replicaCount: 1
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/cert-manager-webhook
+    tag: "1.16.2"
+    pullPolicy: IfNotPresent
+    debug: false
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+cainjector:
+  replicaCount: 1
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/cainjector
+    tag: "1.16.2"
+    pullPolicy: IfNotPresent
+    debug: false
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai

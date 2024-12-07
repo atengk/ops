@@ -55,19 +55,19 @@ kubectl logs -f -n kongyu -l app.kubernetes.io/instance=mysql
 创建客户端容器
 
 ```
-kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/mysql:8.0.40 --namespace kongyu --command -- bash
+kubectl run mysql-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/mysql:8.0.40 --namespace kongyu --env MYSQL_PWD=Admin@123 --command -- bash
 ```
 
 内部网络访问-headless
 
 ```
-mysqladmin status -hmysql-0.mysql-headless.kongyu -uroot -pAdmin@123
+
 ```
 
 内部网络访问
 
 ```
-mysqladmin status -hmysql.kongyu -uroot -pAdmin@123
+mysqladmin status -hmysql.kongyu -uroot
 ```
 
 集群网络访问
@@ -75,7 +75,7 @@ mysqladmin status -hmysql.kongyu -uroot -pAdmin@123
 > 使用集群+NodePort访问
 
 ```
-mysqladmin status -h192.168.1.10 -P21237 -uroot -pAdmin@123
+mysqladmin status -h192.168.1.10 -P21237 -uroot
 ```
 
 **删除服务以及数据**

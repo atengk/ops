@@ -1,89 +1,86 @@
 # Kafka UI
 
+用于管理 Apache Kafka® 集群的多功能、快速且轻量级的 Web UI。
 
+- [官网链接](https://github.com/provectus/kafka-ui)
 
-## 环境准备
-
-创建网络，将容器运行在该网络下，若已创建则忽略
-
-```
-docker network create --subnet 10.188.0.1/24 kongyu
-```
-
-
-
-## 启动容器
-
-- 使用docker run的方式
-
+**下载镜像**
 
 ```
-docker run -d --name kongyu-kafka-ui --network kongyu \
-    -p 20003:8080 --restart=always \
-    -e KAFKA_CLUSTERS_0_NAME=local-kafka \
-    -e KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kongyu-kafka:9092 \
-    -e TZ=Asia/Shanghai \
-    registry.lingo.local/service/kafka-ui:latest
-docker logs -f kongyu-kafka-ui
+docker pull provectuslabs/kafka-ui:v0.7.2
 ```
 
-- 使用docker-compose的方式
-
+**推送到仓库**
 
 ```
-mkdir -p /data/service/kafka-ui
-cat > /data/service/kafka-ui/docker-compose.yaml <<"EOF"
-version: '3'
+docker tag provectuslabs/kafka-ui:v0.7.2 registry.lingo.local/service/kafka-ui:v0.7.2
+docker push registry.lingo.local/service/kafka-ui:v0.7.2
+```
 
-services:
-  kafka-ui:
-    image: registry.lingo.local/service/kafka-ui:latest
-    container_name: kongyu-kafka-ui
-    networks:
-      - kongyu
-    ports:
-      - "20003:8080"
-    restart: always
-    environment:
-      - KAFKA_CLUSTERS_0_NAME=local-kafka
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kongyu-kafka:9092
-      - TZ=Asia/Shanghai
+**保存镜像**
 
-networks:
-  kongyu:
-    external: true
+```
+docker save registry.lingo.local/service/kafka-ui:v0.7.2 | gzip -c > image-kafka-ui_v0.7.2.tar.gz
+```
 
+**创建目录**
+
+```
+sudo mkdir -p /data/container/kafka-ui/config
+```
+
+**创建配置文件**
+
+```
+sudo tee /data/container/kafka-ui/config/dynamic_config.yaml <<"EOF"
+kafka:
+  clusters:
+  - bootstrapServers: 192.168.1.114:20004
+    name: local-kafka
 EOF
-
-docker-compose -f /data/service/kafka-ui/docker-compose.yaml up -d 
-docker-compose -f /data/service/kafka-ui/docker-compose.yaml logs -f
+sudo chown 100 -R /data/container/kafka-ui/config
 ```
 
-
-
-## 访问服务
-
-登录服务查看
+**运行服务**
 
 ```
-http://192.168.1.101:20003/
+docker run -d --name ateng-kafka-ui \
+  -p 20005:8080 --restart=always \
+  -v /data/container/kafka-ui/config/dynamic_config.yaml:/etc/kafkaui/dynamic_config.yaml:rw\
+  -e DYNAMIC_CONFIG_ENABLED=true \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/service/kafka-ui:v0.7.2
 ```
 
-
-
-## 删除服务
-
-- 使用docker run的方式
-
+**查看日志**
 
 ```
-docker rm -f kongyu-kafka-ui
+docker logs -f ateng-kafka-ui
 ```
 
-- 使用docker-compose的方式
-
+**使用服务**
 
 ```
-docker-compose -f /data/service/kafka-ui/docker-compose.yaml down
+URL: http://192.168.1.114:20005
+```
+
+**删除服务**
+
+停止服务
+
+```
+docker stop ateng-kafka-ui
+```
+
+删除服务
+
+```
+docker rm ateng-kafka-ui
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/kafka-ui
 ```
 

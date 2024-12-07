@@ -85,11 +85,7 @@ make install
 配置环境变量
 
 ```
-sudo tee /etc/profile.d/00-nginx.sh <<"EOF"
-export NGINX_HOME=/usr/local/software/nginx
-export PATH=$PATH:$NGINX_HOME/sbin
-EOF
-source /etc/profile
+sudo ln -s /usr/local/software/nginx/sbin/nginx /usr/bin/nginx
 ```
 
 查看版本

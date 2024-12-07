@@ -1,127 +1,110 @@
-# MySQL 8.0.34
+# MySQL
 
+MySQL 是一个流行的开源关系型数据库管理系统（RDBMS），广泛用于Web应用、企业系统和数据仓库等场景。它采用结构化查询语言（SQL）进行数据管理，支持多种存储引擎、事务处理和复杂查询操作。MySQL 以高性能、可靠性和易用性著称，同时具有强大的社区支持和广泛的第三方工具兼容性，适合各种规模的应用程序。
 
+- [官网链接](https://www.mysql.com/)
 
-## 环境准备
-
-创建网络，将容器运行在该网络下，若已创建则忽略
-
-```
-docker network create --subnet 10.188.0.1/24 kongyu
-```
-
-准备目录和配置文件
+**下载镜像**
 
 ```
-mkdir -p /data/service/mysql/{data,config}
-chown -R 1001 /data/service/mysql
-cat > /data/service/mysql/config/my_custom.cnf <<"EOF"
+docker pull bitnami/mysql:8.4.3
+```
+
+**推送到仓库**
+
+```
+docker tag bitnami/mysql:8.4.3 registry.lingo.local/bitnami/mysql:8.4.3
+docker push registry.lingo.local/bitnami/mysql:8.4.3
+```
+
+**保存镜像**
+
+```
+docker save registry.lingo.local/bitnami/mysql:8.4.3 | gzip -c > image-mysql_8.4.3.tar.gz
+```
+
+**创建目录**
+
+```
+sudo mkdir -p /data/container/mysql/{data,config}
+sudo chown -R 1001 /data/container/mysql
+```
+
+**创建配置文件**
+
+```
+sudo tee /data/container/mysql/config/my_custom.cnf <<"EOF"
 [mysqld]
-max_allowed_packet=1G
+authentication_policy=caching_sha2_password
+max_allowed_packet=100M
+character-set-server=utf8mb4
+collation-server=utf8mb4_general_ci
+init_connect='SET NAMES utf8mb4'
+slow_query_log=1
+slow_query_log_file=/bitnami/mysql/data/slow_query.log
+long_query_time=10.0
 default_time_zone = "+8:00"
-lower_case_table_names = 1
-max_connections = 10240
+lower_case_table_names = 0
+max_connections = 1024
 max_connect_errors = 1024
 server-id=1
 log-bin=mysql-bin
-max_binlog_size=1G
-binlog_expire_logs_seconds=604800
+max_binlog_size=1024M
+binlog_expire_logs_seconds=2592000
 EOF
 ```
 
-
-
-## 启动容器
-
-- 使用docker run的方式
-
+**运行服务**
 
 ```
-docker run -d --name kongyu-mysql --network kongyu \
+docker run -d --name ateng-mysql \
   -p 20001:3306 --restart=always \
-  -v /data/service/mysql/config/my_custom.cnf:/opt/bitnami/mysql/conf/my_custom.cnf:ro \
-  -v /data/service/mysql/data:/bitnami/mysql/data \
+  -v /data/container/mysql/config/my_custom.cnf:/opt/bitnami/mysql/conf/my_custom.cnf:ro \
+  -v /data/container/mysql/data:/bitnami/mysql/data \
   -e MYSQL_ROOT_USER=root \
   -e MYSQL_ROOT_PASSWORD=Admin@123 \
-  -e MYSQL_AUTHENTICATION_PLUGIN=caching_sha2_password \
-  -e MYSQL_CHARACTER_SET=utf8mb4 \
-  -e MYSQL_COLLATE=utf8mb4_general_ci \
-  -e MYSQL_ENABLE_SLOW_QUERY=1 \
-  -e MYSQL_LONG_QUERY_TIME=10 \
   -e TZ=Asia/Shanghai \
-  registry.lingo.local/service/mysql:8.0.34
-docker logs -f kongyu-mysql
+  registry.lingo.local/bitnami/mysql:8.4.3
 ```
 
-- 使用docker-compose的方式
-
-
-```
-cat > /data/service/mysql/docker-compose.yaml <<"EOF"
-version: '3'
-
-services:
-  mysql:
-    image: registry.lingo.local/service/mysql:8.0.34
-    container_name: kongyu-mysql
-    networks:
-      - kongyu
-    ports:
-      - "20001:3306"
-    restart: always
-    volumes:
-      - /data/service/mysql/config/my_custom.cnf:/opt/bitnami/mysql/conf/my_custom.cnf:ro
-      - /data/service/mysql/data:/bitnami/mysql/data
-    environment:
-      - MYSQL_ROOT_USER=root
-      - MYSQL_ROOT_PASSWORD=Admin@123
-      - MYSQL_AUTHENTICATION_PLUGIN=caching_sha2_password
-      - MYSQL_CHARACTER_SET=utf8mb4
-      - MYSQL_COLLATE=utf8mb4_general_ci
-      - MYSQL_ENABLE_SLOW_QUERY=1
-      - MYSQL_LONG_QUERY_TIME=10
-      - TZ=Asia/Shanghai
-
-networks:
-  kongyu:
-    external: true
-
-EOF
-docker-compose -f /data/service/mysql/docker-compose.yaml up -d 
-docker-compose -f /data/service/mysql/docker-compose.yaml logs -f
-```
-
-
-
-## 访问服务
-
-登录服务查看
+**查看日志**
 
 ```
-docker run -it --rm --network kongyu registry.lingo.local/service/mysql:8.0.34 mysql -hkongyu-mysql -uroot -pAdmin@123 -e status
+docker logs -f ateng-mysql
 ```
 
+**使用服务**
 
-
-## 删除服务
-
-- 使用docker run的方式
-
+进入容器
 
 ```
-docker rm -f kongyu-mysql
+docker exec -it ateng-mysql bash
 ```
 
-- 使用docker-compose的方式
-
-
-```
-docker-compose -f /data/service/mysql/docker-compose.yaml down
-```
-
-删除数据目录
+访问服务
 
 ```
-rm -rf /data/service/mysql
+export MYSQL_PWD=Admin@123
+mysql -h192.168.1.114 -P20001 -uroot
+```
+
+**删除服务**
+
+停止服务
+
+```
+docker stop ateng-mysql
+```
+
+删除服务
+
+```
+docker rm ateng-mysql
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/mysql
 ```
 

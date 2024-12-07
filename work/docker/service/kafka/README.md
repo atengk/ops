@@ -1,152 +1,129 @@
-# Kafka 3.3.1
+# Kafka
 
+Kafka是一个开源的分布式流处理平台，主要用于处理实时数据流。它可以高效地发布和订阅消息，存储数据流，并处理这些数据。Kafka通常用于构建数据管道和流应用，能够保证高吞吐量、低延迟和高可扩展性。
 
+- [官网链接](https://kafka.apache.org/)
 
-## 环境准备
-
-创建网络，将容器运行在该网络下，若已创建则忽略
-
-```
-docker network create --subnet 10.188.0.1/24 kongyu
-```
-
-准备目录
+**下载镜像**
 
 ```
-mkdir -p /data/service/kafka/data
-chown -R 1001 /data/service/kafka
+docker pull bitnami/kafka:3.8.1
 ```
 
-
-
-## 启动容器
-
-- 使用docker run的方式
-
+**推送到仓库**
 
 ```
-docker run -d --name kongyu-kafka --network kongyu \
-    -p 20002:9094 --restart=always \
-    -v /data/service/kafka/data:/bitnami/kafka \
-    -e ALLOW_ANONYMOUS_LOGIN=yes \
-    -e KAFKA_HEAP_OPTS="-Xmx4g -Xms2g" \
-    -e KAFKA_CFG_ZOOKEEPER_CONNECT=kongyu-zookeeper:2181 \
-    -e ALLOW_PLAINTEXT_LISTENER=yes \
-    -e KAFKA_ZOOKEEPER_PROTOCOL=PLAINTEXT \
-    -e KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL \
-    -e KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP="INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT" \
-    -e KAFKA_CFG_LISTENERS="INTERNAL://:9093,CLIENT://:9092,EXTERNAL://:9094" \
-    -e KAFKA_CFG_ADVERTISED_LISTENERS="INTERNAL://:9093,CLIENT://:9092,EXTERNAL://:9094" \
-    -e KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true \
-    -e KAFKA_CFG_DELETE_TOPIC_ENABLE=true \
-    -e KAFKA_CFG_LOG_RETENTION_BYTES=1073741824 \
-    -e KAFKA_CFG_LOG_RETENTION_HOURS=36 \
-    -e KAFKA_CFG_MESSAGE_MAX_BYTES=104857600 \
-    -e KAFKA_CFG_LOG_SEGMENT_BYTES=1073741824 \
-    -e KAFKA_CFG_SOCKET_REQUEST_MAX_BYTES=104857600 \
-    -e KAFKA_CFG_MAX_REQUEST_SIZE=104857600 \
-    -e KAFKA_CFG_MAX_PARTITION_FETCH_BYTES=104857600 \
-    -e TZ=Asia/Shanghai \
-    registry.lingo.local/service/kafka:3.3.1
-docker logs -f kongyu-kafka
+docker tag bitnami/kafka:3.8.1 registry.lingo.local/bitnami/kafka:3.8.1
+docker push registry.lingo.local/bitnami/kafka:3.8.1
 ```
 
-- 使用docker-compose的方式
-
+**保存镜像**
 
 ```
-cat > /data/service/kafka/docker-compose.yaml <<"EOF"
-version: '3'
+docker save registry.lingo.local/bitnami/kafka:3.8.1 | gzip -c > image-kafka_3.8.1.tar.gz
+```
 
-services:
-  kafka:
-    image: registry.lingo.local/service/kafka:3.3.1
-    container_name: kongyu-kafka
-    depends_on:
-      - kongyu-zookeeper
-    networks:
-      - kongyu
-    ports:
-      - "20002:9094"
-    restart: always
-    volumes:
-      - /data/service/kafka/data:/bitnami/kafka
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-      - KAFKA_HEAP_OPTS=-Xmx4g -Xms2g
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=kongyu-zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
-      - KAFKA_ZOOKEEPER_PROTOCOL=PLAINTEXT
-      - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
-      - KAFKA_CFG_LISTENERS=INTERNAL://:9093,CLIENT://:9092,EXTERNAL://:9094
-      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://:9093,CLIENT://:9092,EXTERNAL://:9094
-      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
-      - KAFKA_CFG_DELETE_TOPIC_ENABLE=true
-      - KAFKA_CFG_LOG_RETENTION_BYTES=1073741824
-      - KAFKA_CFG_LOG_RETENTION_HOURS=36
-      - KAFKA_CFG_MESSAGE_MAX_BYTES=104857600
-      - KAFKA_CFG_LOG_SEGMENT_BYTES=1073741824
-      - KAFKA_CFG_SOCKET_REQUEST_MAX_BYTES=104857600
-      - KAFKA_CFG_MAX_REQUEST_SIZE=104857600
-      - KAFKA_CFG_MAX_PARTITION_FETCH_BYTES=104857600
-      - TZ=Asia/Shanghai
+**创建目录**
 
-networks:
-  kongyu:
-    external: true
+```
+sudo mkdir -p /data/container/kafka/{data,config}
+sudo chown -R 1001 /data/container/kafka
+```
 
+**创建配置文件**
+
+注意advertised.listeners的EXTERNAL的值需要和最终外部访问的地址一致
+
+```
+sudo tee /data/container/kafka/config/server.properties <<"EOF"
+listeners=CLIENT://:9092,INTERNAL://:9094,EXTERNAL://:9095,CONTROLLER://:9093
+advertised.listeners=CLIENT://:9092,INTERNAL://:9094,EXTERNAL://192.168.1.114:20004
+listener.security.protocol.map=CLIENT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+node.id=0
+process.roles=controller,broker
+controller.listener.names=CONTROLLER
+controller.quorum.voters=0@localhost:9093
+log.dir=/bitnami/kafka/data
+logs.dir=/opt/bitnami/kafka/logs
+inter.broker.listener.name=INTERNAL
+num.io.threads=3
+num.network.threads=3
+num.partitions=1
+num.recovery.threads.per.data.dir=1
+offsets.topic.replication.factor=1
+default.replication.factor=1
+transaction.state.log.replication.factor=1
+transaction.state.log.min.isr=1
+auto.create.topics.enable=true
+delete.topic.enable=true
+log.retention.hours=8
+log.retention.bytes=1073741824
+log.retention.check.interval.ms=300000
+log.segment.bytes=1073741824
+max.partition.fetch.bytes=104857600
+max.request.size=104857600
+message.max.bytes=104857600
+fetch.max.bytes=104857600
+replica.fetch.max.bytes=104857600
 EOF
-
-docker-compose -f /data/service/kafka/docker-compose.yaml up -d 
-docker-compose -f /data/service/kafka/docker-compose.yaml logs -f
 ```
 
-
-
-## 访问服务
-
-登录服务查看
+**运行服务**
 
 ```
-docker run -it --rm --network kongyu registry.lingo.local/service/kafka:3.3.1 bash
+docker run -d --name ateng-kafka \
+  -p 20004:9095 --restart=always \
+  -v /data/container/kafka/config/server.properties:/opt/bitnami/kafka/config/server.properties:ro \
+  -v /data/container/kafka/data:/bitnami/kafka \
+  -e KAFKA_ENABLE_KRAFT=true \
+  -e KAFKA_KRAFT_CLUSTER_ID=WQxMl2IwSEOq3qDG66N4VQ \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/kafka:3.8.1
 ```
 
-内部访问
+**查看日志**
 
 ```
-kafka-console-producer.sh --broker-list kongyu-kafka:9092 --topic test
-kafka-console-consumer.sh --bootstrap-server kongyu-kafka:9092 --topic test --from-beginning
+docker logs -f ateng-kafka
 ```
 
-外部访问
+**使用服务**
+
+进入容器
 
 ```
-kafka-console-producer.sh --broker-list 192.168.1.101:20002 --topic test
-kafka-console-consumer.sh --bootstrap-server 192.168.1.101:20002 --topic test --from-beginning
+docker exec -it ateng-kafka bash
 ```
 
-
-
-## 删除服务
-
-- 使用docker run的方式
-
+生产消息
 
 ```
-docker rm -f kongyu-kafka
+kafka-console-producer.sh --broker-list 192.168.1.114:20004 --topic test
 ```
 
-- 使用docker-compose的方式
-
-
-```
-docker-compose -f /data/service/kafka/docker-compose.yaml down
-```
-
-删除数据目录
+消费消息
 
 ```
-rm -rf /data/service/kafka
+kafka-console-consumer.sh --bootstrap-server 192.168.1.114:20004 --topic test --from-beginning
+```
+
+**删除服务**
+
+停止服务
+
+```
+docker stop ateng-kafka
+```
+
+删除服务
+
+```
+docker rm ateng-kafka
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/kafka
 ```
 

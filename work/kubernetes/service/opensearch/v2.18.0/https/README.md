@@ -74,6 +74,16 @@ kubectl exec -it -n kongyu opensearch-master-0 -- bash
 curl --cacert /opt/bitnami/opensearch/config/certs/ca.crt -u admin:Admin@123 https://opensearch:9200/
 ```
 
+集群网络访问
+
+> 使用集群+NodePort访问
+>
+> 自动生成的证书没有添加集群相关的SAN(域名和ip)，只能跳过证书验证
+
+```
+curl -k -u elastic:Admin@123 https://192.168.1.10:17600/
+```
+
 查看集群节点信息
 
 ```

@@ -13,10 +13,11 @@ adminEmail: 2385569970@qq.com
 appName: gitea
 runMode: prod
 exposeSSH: true
-rootURL: "http://gitea.ateng.local"
 extraEnvVars:
-- name: TZ
-  value: "Asia/Shanghai"
+  - name: TZ
+    value: "Asia/Shanghai"
+  - name: GITEA_DOMAIN
+    value: "192.168.1.10"
 smtpHost: ""
 smtpPort: ""
 smtpUser: ""
@@ -31,7 +32,10 @@ service:
   type: NodePort
   ports:
     http: 80
-    ssh: 22
+    ssh: 32222
+  nodePorts:
+    http: "33000"
+    ssh: "32222"
 resourcesPreset: "none"
 resources: {}
 affinity: {}

@@ -1,112 +1,104 @@
-# PostgreSQL 15.3.0
+# PostgreSQL
 
+PostgreSQL 是一个功能强大的开源关系型数据库，支持标准 SQL 和面向对象特性，具备高扩展性、数据完整性和并发控制能力。通过 PostGIS 扩展，它还能处理地理空间数据，适用于企业级应用、数据分析和地理信息系统（GIS）等多种场景。
 
+- [官网链接](https://www.postgresql.org/)
 
-## 环境准备
-
-创建网络，将容器运行在该网络下，若已创建则忽略
-
-```
-docker network create --subnet 10.188.0.1/24 kongyu
-```
-
-准备目录
+**下载镜像**
 
 ```
-mkdir -p /data/service/postgresql/data
-chown -R 1001 /data/service/postgresql
+docker pull bitnami/postgresql:17.2.0
 ```
 
-
-
-## 启动容器
-
-- 使用docker run的方式
-
+**推送到仓库**
 
 ```
-docker run -d --name kongyu-postgresql --network kongyu \
-  -p 20001:5432 --restart=always \
-  -v /data/service/postgresql/data:/bitnami/postgresql \
+docker tag bitnami/postgresql:17.2.0 registry.lingo.local/bitnami/postgresql:17.2.0
+docker push registry.lingo.local/bitnami/postgresql:17.2.0
+```
+
+**保存镜像**
+
+```
+docker save registry.lingo.local/bitnami/postgresql:17.2.0 | gzip -c > image-postgresql_17.2.0.tar.gz
+```
+
+**创建目录**
+
+```
+sudo mkdir -p /data/container/postgresql/{data,config}
+sudo chown -R 1001 /data/container/postgresql
+```
+
+**创建配置文件**
+
+```
+sudo tee /data/container/postgresql/config/override.conf <<"EOF"
+max_connections = 1024
+shared_buffers = 4GB
+work_mem = 64MB
+max_parallel_workers_per_gather = 4
+max_parallel_maintenance_workers = 2
+max_parallel_workers = 8
+wal_level = logical
+log_timezone = Asia/Shanghai
+timezone = Asia/Shanghai
+EOF
+```
+
+**运行服务**
+
+```
+docker run -d --name ateng-postgresql \
+  -p 20002:5432 --restart=always \
+  -v /data/container/postgresql/config/override.conf:/opt/bitnami/postgresql/conf/conf.d/override.conf:ro \
+  -v /data/container/postgresql/data:/bitnami/postgresql \
   -e POSTGRESQL_POSTGRES_PASSWORD=Admin@123 \
   -e POSTGRESQL_USERNAME=kongyu \
   -e POSTGRESQL_PASSWORD=kongyu \
   -e POSTGRESQL_DATABASE=kongyu \
-  -e POSTGRESQL_TIMEZONE=Asia/Shanghai \
-  -e POSTGRESQL_LOG_TIMEZONE=Asia/Shanghai \
   -e TZ=Asia/Shanghai \
-  registry.lingo.local/service/postgresql:15.3.0
-docker logs -f kongyu-postgresql
+  registry.lingo.local/bitnami/postgresql:17.2.0
 ```
 
-- 使用docker-compose的方式
-
-
-```
-cat > /data/service/postgresql/docker-compose.yaml <<"EOF"
-version: '3'
-
-services:
-  postgresql:
-    image: registry.lingo.local/service/postgresql:15.3.0
-    container_name: kongyu-postgresql
-    networks:
-      - kongyu
-    ports:
-      - "20001:5432"
-    restart: always
-    volumes:
-      - /data/service/postgresql/data:/bitnami/postgresql
-    environment:
-      - POSTGRESQL_POSTGRES_PASSWORD=Admin@123
-      - POSTGRESQL_USERNAME=kongyu
-      - POSTGRESQL_PASSWORD=kongyu
-      - POSTGRESQL_DATABASE=kongyu
-      - POSTGRESQL_TIMEZONE=Asia/Shanghai
-      - POSTGRESQL_LOG_TIMEZONE=Asia/Shanghai
-      - TZ=Asia/Shanghai
-
-networks:
-  kongyu:
-    external: true
-
-EOF
-
-docker-compose -f /data/service/postgresql/docker-compose.yaml up -d 
-docker-compose -f /data/service/postgresql/docker-compose.yaml logs -f
-```
-
-
-
-## 访问服务
-
-登录服务查看
+**查看日志**
 
 ```
-docker run -it --rm --network kongyu --env PGPASSWORD=Admin@123 registry.lingo.local/service/postgresql:15.3.0 psql --host kongyu-postgresql -U postgres -d kongyu -p 5432 -c "\l"
+docker logs -f ateng-postgresql
 ```
 
+**使用服务**
 
-
-## 删除服务
-
-- 使用docker run的方式
-
+进入容器
 
 ```
-docker rm -f kongyu-postgresql
+docker exec -it ateng-postgresql bash
 ```
 
-- 使用docker-compose的方式
-
-
-```
-docker-compose -f /data/service/postgresql/docker-compose.yaml down
-```
-
-删除数据目录
+访问服务
 
 ```
-rm -rf /data/service/postgresql
+export PGPASSWORD=Admin@123
+psql --host 192.168.1.114 -U postgres -d kongyu -p 20002 -c "\l"
+```
+
+**删除服务**
+
+停止服务
+
+```
+docker stop ateng-postgresql
+```
+
+删除服务
+
+```
+docker rm ateng-postgresql
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/postgresql
 ```
 

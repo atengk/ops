@@ -124,9 +124,9 @@ work_mem = 64MB
 max_parallel_workers_per_gather = 4
 max_parallel_maintenance_workers = 2
 max_parallel_workers = 8
-wal_level = 'logical'
-log_timezone = 'Asia/Shanghai'
-timezone = 'Asia/Shanghai'
+wal_level = logical
+log_timezone = Asia/Shanghai
+timezone = Asia/Shanghai
 EOF
 ```
 

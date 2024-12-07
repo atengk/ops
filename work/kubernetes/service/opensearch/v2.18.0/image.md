@@ -8,7 +8,7 @@ version=2.18.0
 cat > images-list.txt <<EOF
 bitnami/os-shell:12
 bitnami/opensearch:${version}
-bitnami/opensearch-dashboards:2.17.1
+bitnami/opensearch-dashboards:${version}
 EOF
 ```
 

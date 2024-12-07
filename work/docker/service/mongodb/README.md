@@ -1,117 +1,88 @@
-# MongoDB 6.0.2
+# MongoDB
 
+MongoDB 是一种基于文档的 NoSQL 数据库，以高性能、易扩展和灵活的文档存储而著称。它由 C++ 语言编写，于 2009 年首次发布。与传统的关系型数据库（如 MySQL、PostgreSQL）不同，MongoDB 采用非结构化的数据存储方式，不使用表和行，而是通过集合（Collection）和文档（Document）来组织数据。
 
+- [官网链接](https://www.mongodb.com/zh-cn/)
 
-## 环境准备
-
-创建网络，将容器运行在该网络下，若已创建则忽略
-
-```
-docker network create --subnet 10.188.0.1/24 kongyu
-```
-
-准备目录
+**下载镜像**
 
 ```
-mkdir -p /data/service/mongodb/data
-chown -R 1001 /data/service/mongodb
+docker pull bitnami/mongodb:8.0.3
 ```
 
-
-
-## 启动容器
-
-- 使用docker run的方式
-
+**推送到仓库**
 
 ```
-docker run -d --name kongyu-mongodb --network kongyu \
-    -p 20001:27017 --restart=always \
-    -v /data/service/mongodb/data:/bitnami/mongodb \
-    -e MONGODB_ROOT_USER=root \
-    -e MONGODB_ROOT_PASSWORD=Admin@123 \
-    -e MONGODB_USERNAME=kongyu \
-    -e MONGODB_PASSWORD=kongyu \
-    -e MONGODB_DATABASE=kongyu \
-    -e MONGODB_DISABLE_SYSTEM_LOG=true \
-    -e MONGODB_SYSTEM_LOG_VERBOSITY='0' \
-    -e MONGODB_ENABLE_JOURNAL=false \
-    -e MONGODB_EXTRA_FLAGS='--wiredTigerCacheSizeGB=2' \
-    -e TZ=Asia/Shanghai \
-    registry.lingo.local/service/mongodb:6.0.2
-docker logs -f kongyu-mongodb
+docker tag bitnami/mongodb:8.0.3 registry.lingo.local/bitnami/mongodb:8.0.3
+docker push registry.lingo.local/bitnami/mongodb:8.0.3
 ```
 
-- 使用docker-compose的方式
-
-
-```
-cat > /data/service/mongodb/docker-compose.yaml <<"EOF"
-version: '3'
-
-services:
-  mongodb:
-    image: registry.lingo.local/service/mongodb:6.0.2
-    container_name: kongyu-mongodb
-    networks:
-      - kongyu
-    ports:
-      - "20001:27017"
-    restart: always
-    volumes:
-      - /data/service/mongodb/data:/bitnami/mongodb
-    environment:
-      - MONGODB_ROOT_USER=root
-      - MONGODB_ROOT_PASSWORD=Admin@123
-      - MONGODB_USERNAME=kongyu
-      - MONGODB_PASSWORD=kongyu
-      - MONGODB_DATABASE=kongyu
-      - MONGODB_DISABLE_SYSTEM_LOG=true
-      - MONGODB_SYSTEM_LOG_VERBOSITY=0
-      - MONGODB_ENABLE_JOURNAL=false
-      - TZ=Asia/Shanghai
-
-networks:
-  kongyu:
-    external: true
-
-EOF
-
-docker-compose -f /data/service/mongodb/docker-compose.yaml up -d 
-docker-compose -f /data/service/mongodb/docker-compose.yaml logs -f
-```
-
-
-
-## 访问服务
-
-登录服务查看
+**保存镜像**
 
 ```
-docker run -it --rm --network kongyu registry.lingo.local/service/mongodb:6.0.2 mongosh --host kongyu-mongodb --username root --password Admin@123 --authenticationDatabase admin --eval "show databases"
+docker save registry.lingo.local/bitnami/mongodb:8.0.3 | gzip -c > image-mongodb_8.0.3.tar.gz
 ```
 
-
-
-## 删除服务
-
-- 使用docker run的方式
-
+**创建目录**
 
 ```
-docker rm -f kongyu-mongodb
+sudo mkdir -p /data/container/mongodb/data
+sudo chown -R 1001 /data/container/mongodb
 ```
 
-- 使用docker-compose的方式
-
-
-```
-docker-compose -f /data/service/mongodb/docker-compose.yaml down
-```
-
-删除数据目录
+**运行服务**
 
 ```
-rm -rf /data/service/mongodb
+docker run -d --name ateng-mongodb \
+  -p 20008:27017 --restart=always \
+  -v /data/container/mongodb/data:/bitnami/mongodb \
+  -e MONGODB_ROOT_USER=root \
+  -e MONGODB_ROOT_PASSWORD=Admin@123 \
+  -e MONGODB_EXTRA_USERNAMES="kongyu01,kongyu02" \
+  -e MONGODB_EXTRA_DATABASES="kongyu01,kongyu02" \
+  -e MONGODB_EXTRA_PASSWORDS="kongyu01,kongyu02" \
+  -e MONGODB_EXTRA_FLAGS='--wiredTigerCacheSizeGB=2' \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/mongodb:8.0.3
+```
+
+**查看日志**
+
+```
+docker logs -f ateng-mongodb
+```
+
+**使用服务**
+
+进入容器
+
+```
+docker exec -it ateng-mongodb bash
+```
+
+访问服务
+
+```
+mongosh --host 192.168.1.114:20008 --username root --password Admin@123 --authenticationDatabase admin --eval "db.serverStatus().connections"
+```
+
+**删除服务**
+
+停止服务
+
+```
+docker stop ateng-mongodb
+```
+
+删除服务
+
+```
+docker rm ateng-mongodb
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/mongodb
 ```
 

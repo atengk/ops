@@ -93,15 +93,15 @@
                 - [哨兵模式](/work/kubernetes/service/redis/v7.4.1/sentinel/)
                 - [集群模式](/work/kubernetes/service/redis/v7.4.1/cluster/)
             - Mariadb Galera
-                - [Galera集群](/work/kubernetes/service/mariadb/v11.4.3/)
+                - [Galera集群](/work/kubernetes/service/mariadb/v11.4.4/)
             - PostgreSQL
                 - [单机模式](/work/kubernetes/service/postgresql/v17.2.0/standalone/)
                 - [主从模式](/work/kubernetes/service/postgresql/v17.2.0/replication/)
                 - [集群模式](/work/kubernetes/service/postgresql/v17.2.0/ha/)
             - MongoDB
-                - [单机模式](/work/kubernetes/service/mongodb/v8.0.1/standalone/)
-                - [副本集群模式](/work/kubernetes/service/mongodb/v8.0.1/replicaset/)
-                - [分配集群模式](/work/kubernetes/service/mongodb/v8.0.1/sharded/)
+                - [单机模式](/work/kubernetes/service/mongodb/v8.0.3/standalone/)
+                - [副本集群模式](/work/kubernetes/service/mongodb/v8.0.3/replicaset/)
+                - [分配集群模式](/work/kubernetes/service/mongodb/v8.0.3/sharded/)
             - MySQL
                 - [单机模式](/work/kubernetes/service/mysql/v8.4.3/standalone/)
                 - [主从模式](/work/kubernetes/service/mysql/v8.4.3/replication/)
@@ -112,19 +112,34 @@
                 - [集群模式All](/work/kubernetes/service/doris/v2.1.6/cluster-all/)
             - Clickhouse
                 - [集群模式](/work/kubernetes/service/clickhouse/v23.12.2/)
-            - ElasticSearch
-                - [单机模式](/work/kubernetes/service/elasticsearch/v7.17.16/all-in-one/)
-                - [认证模式](/work/kubernetes/service/elasticsearch/v7.17.16/auth/)
-                - [SSL模式](/work/kubernetes/service/elasticsearch/v7.17.16/https-custom/)
-                - [集群模式](/work/kubernetes/service/elasticsearch/v7.17.16/cluster/)
-                - [Kibana](/work/kubernetes/service/kibana/v7.17.16/)
-            - OpenSearch
-                - [单机模式](/work/kubernetes/service/opensearch/v2.15.0/all-in-one/)
-                - [认证模式](/work/kubernetes/service/opensearch/v2.15.0/auth/)
+            - ElasticSearch7
+                - [单机模式](/work/kubernetes/service/elasticsearch/v7.17.26/all-in-one/)
+                - [认证模式](/work/kubernetes/service/elasticsearch/v7.17.26/auth/)
+                - [HTTPS模式](/work/kubernetes/service/elasticsearch/v7.17.26/https/)
+                - [HTTPS模式(自定义证书)](/work/kubernetes/service/elasticsearch/v7.17.26/https-custom/)
+                - [Kibana](/work/kubernetes/service/kibana/v7.17.26/)
+                - [Elastic View可视化](/work/kubernetes/service/elasticsearch/elastic-view/)
+            - ElasticSearch8
+                - [单机模式](/work/kubernetes/service/elasticsearch/v8.16.1/all-in-one/)
+                - [认证模式](/work/kubernetes/service/elasticsearch/v8.16.1/auth/)
+                - [HTTPS模式](/work/kubernetes/service/elasticsearch/v8.16.1/https/)
+                - [HTTPS模式(自定义证书)](/work/kubernetes/service/elasticsearch/v8.16.1/https-custom/)
+                - [Kibana](/work/kubernetes/service/kibana/v7.17.26/)
+                - [Elastic View可视化](/work/kubernetes/service/elasticsearch/elastic-view/)
+            - OpenSearch1
+                - [单机模式](/work/kubernetes/service/opensearch/v1.3.19/all-in-one/)
+                - [HTTPS模式](/work/kubernetes/service/opensearch/v1.3.19/https/)
+                - [HTTPS模式(自定义证书)](/work/kubernetes/service/opensearch/v1.3.19/https-custom/)
+                - [Elastic View可视化](/work/kubernetes/service/opensearch/elastic-view/)
+            - OpenSearch2
+                - [单机模式](/work/kubernetes/service/opensearch/v2.18.0/all-in-one/)
+                - [HTTPS模式](/work/kubernetes/service/opensearch/v2.18.0/https/)
+                - [HTTPS模式(自定义证书)](/work/kubernetes/service/opensearch/v2.18.0/https-custom/)
+                - [Elastic View可视化](/work/kubernetes/service/opensearch/elastic-view/)
             - ETCD
                 - [集群模式](/work/kubernetes/service/etcd/v3.5.17/basic/)
                 - [认证模式](/work/kubernetes/service/etcd/v3.5.17/http-auth/)
-                - [认证模式](/work/kubernetes/service/etcd/v3.5.17/https/)
+                - [HTTPS模式](/work/kubernetes/service/etcd/v3.5.17/https/)
         - 消息队列
             - RabbitMQ
                 - [集群模式](/work/kubernetes/service/rabbitmq/v4.0.2/)
@@ -159,7 +174,7 @@
             - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
             - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
         - 大数据
-            - [Flink](/work/kubernetes/service/zookeeper/v3.9.2/)
+            - [Zookeeper](/work/kubernetes/service/zookeeper/v3.9.3/)
             - [Flink](/work/kubernetes/service/flink/v1.19.1/)
             - [Spark](/work/kubernetes/service/spark/v3.5.1/)
             - [DolphinScheduler](/work/kubernetes/service/dolphinscheduler/)
@@ -174,7 +189,7 @@
             - [Nginx](/work/kubernetes/service/nginx/v1.27.0/)
             - [Multus-CNI](/work/kubernetes/service/multus-cni/)
         - 其他
-            - [Cert-Manager](/work/kubernetes/service/cert-manager/v1.15.1/)
+            - [Cert-Manager](/work/kubernetes/service/cert-manager/v1.16.2/)
             - [安装Windows系统](/work/kubernetes/service/windows/)
             - [Stirling-PDF](/work/kubernetes/service/Stirling-PDF/)
         - KubeBlocks

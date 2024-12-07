@@ -6,8 +6,8 @@ fullnameOverride: "redis"
 image:
   debug: false
   registry: registry.lingo.local
-  repository: service/redis
-  tag: 7.4.1
+  repository: bitnami/redis
+  tag: "7.4.1"
   pullPolicy: IfNotPresent
 architecture: standalone
 auth:
@@ -17,7 +17,7 @@ commonConfiguration: |-
   appendonly yes
   appendfsync always
   save ""
-  maxclients 10000
+  maxclients 1024
   maxmemory 8GB
   auto-aof-rewrite-percentage 100
   auto-aof-rewrite-min-size 64mb

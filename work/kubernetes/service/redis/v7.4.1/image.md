@@ -6,7 +6,7 @@
 app=redis
 version=7.4.1
 cat > images-list.txt <<EOF
-bitnami/redis-exporter:1.63.0
+bitnami/redis-exporter:1.66.0
 bitnami/redis:${version}
 bitnami/redis-sentinel:${version}
 bitnami/redis-cluster:${version}
@@ -26,7 +26,7 @@ done
 设置镜像仓库和命名空间
 
 ```
-registry_address="registry.lingo.local/service"
+registry_address="registry.lingo.local/bitnami"
 ```
 
 设置镜像标签并推送到本地仓库
