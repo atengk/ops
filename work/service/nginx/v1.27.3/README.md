@@ -79,7 +79,7 @@ make -j$(nproc)
 接着，执行安装：
 
 ```bash
-make install
+sudo make install
 ```
 
 配置环境变量

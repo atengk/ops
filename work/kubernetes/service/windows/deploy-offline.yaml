@@ -1,24 +1,34 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: win7-offline
+  name: win10
+  labels:
+    app: win10
 spec:
-  serviceName: "win7-offline"
+  serviceName: "win10"
   replicas: 1
   selector:
     matchLabels:
-      app: win7-offline
+      app: win10
   template:
     metadata:
       labels:
-        app: win7-offline
+        app: win10
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: "server03.lingo.local"
-      terminationGracePeriodSeconds: 120 # the Kubernetes default is 30 seconds and it may be not enough
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/win10
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+      terminationGracePeriodSeconds: 120
       containers:
-      - name: win7-offline
-        image: dockurr/windows
+      - name: win10
+        image: registry.lingo.local/service/windows:4.06
         ports:
         - containerPort: 8006
           protocol: TCP
@@ -28,7 +38,7 @@ spec:
           protocol: UDP
         env:
         - name: VERSION
-          value: "http://192.168.1.12:9000/public-bucket/images/cn_windows_7_ultimate_with_sp1_x64_dvd_u_677408.iso"
+          value: "http://192.168.1.12:9000/public-bucket/images/zh-cn_windows_10_business_editions_version_22h2_updated_sep_2024_x64_dvd_1be03898.iso"
         - name: LANGUAGE
           value: "Chinese"
         - name: REGION
@@ -69,10 +79,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: win7-offline
+  name: win10
+  labels:
+    app: win10
 spec:
   selector:
-    app: win7-offline
+    app: win10
   ports:
     - name: tcp-8006
       protocol: TCP
@@ -87,4 +99,3 @@ spec:
       port: 3389
       targetPort: 3389
   type: NodePort
-

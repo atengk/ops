@@ -1,24 +1,35 @@
+# cat win10/win10.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: win11-core
+  name: win10
+  labels:
+    app: win10
 spec:
-  serviceName: "win11-core"
+  serviceName: "win10"
   replicas: 1
   selector:
     matchLabels:
-      app: win11-core
+      app: win10
   template:
     metadata:
       labels:
-        app: win11-core
+        app: win10
     spec:
-      nodeSelector:
-        kubernetes.io/hostname: "server03.lingo.local"
-      terminationGracePeriodSeconds: 120 # the Kubernetes default is 30 seconds and it may be not enough
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/win10
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+      terminationGracePeriodSeconds: 120
       containers:
-      - name: win11-core
-        image: dockurr/windows
+      - name: win10
+        image: dockurr/windows:4.06
         ports:
         - containerPort: 8006
           protocol: TCP
@@ -28,7 +39,7 @@ spec:
           protocol: UDP
         env:
         - name: VERSION
-          value: "http://192.168.1.12:9000/public-bucket/images/tiny11_core_x64_beta_1.iso"
+          value: "10"
         - name: LANGUAGE
           value: "Chinese"
         - name: REGION
@@ -69,10 +80,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: win11-core
+  name: win10
+  labels:
+    app: win10
 spec:
   selector:
-    app: win11-core
+    app: win10
   ports:
     - name: tcp-8006
       protocol: TCP

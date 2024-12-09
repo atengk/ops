@@ -57,10 +57,35 @@
             - [openssl创建证书](/work/service/tls/tls-openssl/)
     - 内网远程访问
         - [内网穿透FRP](/work/service/frp/)
+- Docker
+    - 使用文档
+        - [Docker使用文档](/work/docker/OPS.md)
+    - 安装文档
+        - [Docker安装文档](/work/docker/deploy/v27.3.1/)
+    - Dockerfile
+        - [jdk21](/work/docker/dockerfile/java/debian/jdk21/)
+        - [springboot app](/work/docker/dockerfile/java/debian/application/jdk21/)
+    - 服务安装文档
+        - [mysql](/work/docker/service/mysql/)
+        - [postgresql](/work/docker/service/postgresql/)
+        - [redis](/work/docker/service/redis/)
+        - [kafka](/work/docker/service/kafka/)
+        - [kafka-ui](/work/docker/service/kafka-ui/)
+        - [minio](/work/docker/service/minio/)
+        - [mongodb](/work/docker/service/mongodb/)
+        - [rabbitmq](/work/docker/service/rabbitmq/)
+        - [gitea](/work/docker/service/gitea/)
+        - [gitlab](/work/docker/service/gitlab/)
+        - [zookeeper](/work/docker/service/zookeeper/)
+        - [windows](/work/docker/service/windows/)
+        - [elasticsearch](/work/docker/service/elasticsearch/)
+        - [opensearch](/work/docker/service/opensearch/)
+        - [jenkins](/work/docker/service/jenkins/)
+    
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
-    - 基础设施安装
+    - 安装文档
         - [kubekey](/work/kubernetes/deploy/kubekey/v3.1.7/)
         - [kubesphere3](/work/kubernetes/deploy/kubesphere/v3.4.1/)
         - [kubesphere4](/work/kubernetes/deploy/kubesphere/v4.1.2/)
