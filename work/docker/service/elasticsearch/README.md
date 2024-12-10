@@ -1,176 +1,419 @@
-# elasticsearch 7.17.16
+# ElasticSearch
 
+Elasticsearch 是一个开源的分布式搜索和分析引擎，基于 Apache Lucene 构建，支持全文搜索、结构化数据查询和实时分析。它以高性能和可扩展性著称，广泛应用于日志管理、网站搜索、实时监控和大数据分析场景。Elasticsearch 提供 RESTful API，易于集成和扩展。
 
+- [官网链接](https://www.elastic.co/elasticsearch/)
 
-## 环境准备
+## ElasticSearch 7
 
-创建网络，将容器运行在该网络下，若已创建则忽略
-
-```
-docker network create --subnet 10.188.0.1/24 kongyu
-```
-
-准备目录
+**下载镜像**
 
 ```
-mkdir -p /data/service/elasticsearch/{data,config,plugins}
-chown -R 1001 /data/service/elasticsearch
+docker pull bitnami/elasticsearch:7.17.26
 ```
 
-编辑配置文件
+**下载插件（可选）**
+
+如果不安装插件可以跳过此步骤。
+
+将以下下载的插件上传到本地的HTTP服务上面，方便后续安装的时候加载插件。
 
 ```
-cat > /data/service/elasticsearch/config/my_elasticsearch.yml <<"EOF"
+mkdir -p plugins
+export version=7.17.26
+wget -P plugins https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-phonetic/analysis-phonetic-${version}.zip
+wget -P plugins https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-icu/analysis-icu-${version}.zip
+wget -P plugins https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-smartcn/analysis-smartcn-${version}.zip
+```
+
+**推送到仓库**
+
+```
+docker tag bitnami/elasticsearch:7.17.26 registry.lingo.local/bitnami/elasticsearch:7.17.26
+docker push registry.lingo.local/bitnami/elasticsearch:7.17.26
+```
+
+**保存镜像**
+
+```
+docker save registry.lingo.local/bitnami/elasticsearch:7.17.26 | gzip -c > image-elasticsearch_7.17.26.tar.gz
+```
+
+**创建目录**
+
+```
+sudo mkdir -p /data/container/elasticsearch7/{data,config}
+sudo chown -R 1001 /data/container/elasticsearch7
+```
+
+**创建配置文件**
+
+```
+sudo tee /data/container/elasticsearch7/config/my_elasticsearch.yml <<"EOF"
 http:
   cors:
     allow-headers: Authorization,X-Requested-With,Content-Length,Content-Type
     allow-origin: '*'
     enabled: true
 EOF
-chown -R 1001 /data/service/elasticsearch/config
 ```
 
-配置插件
+**运行服务**
 
-> 将相应的插件解压到plugins目录下
-
-```
-unzip plugins/analysis-ik.zip -d /data/service/elasticsearch/plugins
-unzip plugins/analysis-icu.zip -d /data/service/elasticsearch/plugins
-unzip plugins/analysis-phonetic.zip -d /data/service/elasticsearch/plugins
-unzip plugins/analysis-smartcn.zip -d /data/service/elasticsearch/plugins
-unzip plugins/repository-s3.zip -d /data/service/elasticsearch/plugins
-chown -R 1001 /data/service/elasticsearch/plugins
-```
-
-编辑内核参数
+普通模式
 
 ```
-cat > /etc/sysctl.d/99-elasticsearch.conf <<"EOF"
-vm.max_map_count=262144
-fs.file-max=65536
+docker run -d --name ateng-elasticsearch7 \
+  -p 20018:9200 --restart=always \
+  -v /data/container/elasticsearch7/config/my_elasticsearch.yml:/opt/bitnami/elasticsearch/config/my_elasticsearch.yml:ro \
+  -v /data/container/elasticsearch7/data:/bitnami/elasticsearch/data \
+  -e ELASTICSEARCH_HEAP_SIZE=2g \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/elasticsearch:7.17.26
+```
+
+插件模式
+
+```
+docker run -d --name ateng-elasticsearch7 \
+  -p 20018:9200 --restart=always \
+  -v /data/container/elasticsearch7/config/my_elasticsearch.yml:/opt/bitnami/elasticsearch/config/my_elasticsearch.yml:ro \
+  -v /data/container/elasticsearch7/data:/bitnami/elasticsearch/data \
+  -e ELASTICSEARCH_HEAP_SIZE=2g \
+  -e ELASTICSEARCH_PLUGINS="http://miniserve.lingo.local/elasticsearch-plugins/v7.17.26/analysis-icu-7.17.26.zip http://miniserve.lingo.local/elasticsearch-plugins/v7.17.26/analysis-phonetic-7.17.26.zip http://miniserve.lingo.local/elasticsearch-plugins/v7.17.26/analysis-smartcn-7.17.26.zip" \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/elasticsearch:7.17.26
+```
+
+**查看日志**
+
+```
+docker logs -f ateng-elasticsearch7
+```
+
+**使用服务**
+
+访问服务
+
+```
+curl http://192.168.1.12:20018/
+```
+
+查看集群节点信息
+
+```
+curl http://192.168.1.12:20018/_cat/nodes?v
+```
+
+查看集群健康状态
+
+```
+curl http://192.168.1.12:20018/_cluster/health?pretty
+```
+
+查看已安装的插件
+
+```
+curl http://192.168.1.12:20018/_cat/plugins?v
+```
+
+**删除服务**
+
+停止服务
+
+```
+docker stop ateng-elasticsearch7
+```
+
+删除服务
+
+```
+docker rm ateng-elasticsearch7
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/elasticsearch7
+```
+
+
+
+## Kibana 7
+
+**下载镜像**
+
+```
+docker pull bitnami/kibana:7.17.26
+```
+
+**推送到仓库**
+
+```
+docker tag bitnami/kibana:7.17.26 registry.lingo.local/bitnami/kibana:7.17.26
+docker push registry.lingo.local/bitnami/kibana:7.17.26
+```
+
+**保存镜像**
+
+```
+docker save registry.lingo.local/bitnami/kibana:7.17.26 | gzip -c > image-kibana_7.17.26.tar.gz
+```
+
+**创建目录**
+
+```
+sudo mkdir -p /data/container/kibana7
+sudo chown -R 1001 /data/container/kibana7
+```
+
+**运行服务**
+
+```
+docker run -d --name ateng-kibana7 \
+  -p 20019:5601 --restart=always \
+  -v /data/container/kibana7:/bitnami/kibana \
+  -e KIBANA_ELASTICSEARCH_URL=http://192.168.1.12:20018 \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/kibana:7.17.26
+```
+
+**查看日志**
+
+```
+docker logs -f ateng-kibana7
+```
+
+**使用服务**
+
+```
+URL: http://192.168.1.12:20019
+```
+
+**删除服务**
+
+停止服务
+
+```
+docker stop ateng-kibana7
+```
+
+删除服务
+
+```
+docker rm ateng-kibana7
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/kibana7
+```
+
+
+
+## ElasticSearch 8
+
+**下载镜像**
+
+```
+docker pull bitnami/elasticsearch:8.16.1
+```
+
+**下载插件（可选）**
+
+如果不安装插件可以跳过此步骤。
+
+将以下下载的插件上传到本地的HTTP服务上面，方便后续安装的时候加载插件。
+
+```
+mkdir -p plugins
+export version=8.16.1
+wget -P plugins https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-phonetic/analysis-phonetic-${version}.zip
+wget -P plugins https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-icu/analysis-icu-${version}.zip
+wget -P plugins https://artifacts.elastic.co/downloads/elasticsearch-plugins/analysis-smartcn/analysis-smartcn-${version}.zip
+```
+
+**推送到仓库**
+
+```
+docker tag bitnami/elasticsearch:8.16.1 registry.lingo.local/bitnami/elasticsearch:8.16.1
+docker push registry.lingo.local/bitnami/elasticsearch:8.16.1
+```
+
+**保存镜像**
+
+```
+docker save registry.lingo.local/bitnami/elasticsearch:8.16.1 | gzip -c > image-elasticsearch_8.16.1.tar.gz
+```
+
+**创建目录**
+
+```
+sudo mkdir -p /data/container/elasticsearch8/{data,config}
+sudo chown -R 1001 /data/container/elasticsearch8
+```
+
+**创建配置文件**
+
+```
+sudo tee /data/container/elasticsearch8/config/my_elasticsearch.yml <<"EOF"
+http:
+  cors:
+    allow-headers: Authorization,X-Requested-With,Content-Length,Content-Type
+    allow-origin: '*'
+    enabled: true
 EOF
-sysctl -f /etc/sysctl.d/99-elasticsearch.conf
+```
+
+**运行服务**
+
+普通模式
+
+```
+docker run -d --name ateng-elasticsearch8 \
+  -p 20018:9200 --restart=always \
+  -v /data/container/elasticsearch8/config/my_elasticsearch.yml:/opt/bitnami/elasticsearch/config/my_elasticsearch.yml:ro \
+  -v /data/container/elasticsearch8/data:/bitnami/elasticsearch/data \
+  -e ELASTICSEARCH_HEAP_SIZE=2g \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/elasticsearch:8.16.1
+```
+
+插件模式
+
+```
+docker run -d --name ateng-elasticsearch8 \
+  -p 20018:9200 --restart=always \
+  -v /data/container/elasticsearch8/config/my_elasticsearch.yml:/opt/bitnami/elasticsearch/config/my_elasticsearch.yml:ro \
+  -v /data/container/elasticsearch8/data:/bitnami/elasticsearch/data \
+  -e ELASTICSEARCH_HEAP_SIZE=2g \
+  -e ELASTICSEARCH_PLUGINS="http://miniserve.lingo.local/elasticsearch-plugins/v8.16.1/analysis-icu-8.16.1.zip http://miniserve.lingo.local/elasticsearch-plugins/v8.16.1/analysis-phonetic-8.16.1.zip http://miniserve.lingo.local/elasticsearch-plugins/v8.16.1/analysis-smartcn-8.16.1.zip" \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/elasticsearch:8.16.1
+```
+
+**查看日志**
+
+```
+docker logs -f ateng-elasticsearch8
+```
+
+**使用服务**
+
+访问服务
+
+```
+curl http://192.168.1.12:20018/
+```
+
+查看集群节点信息
+
+```
+curl http://192.168.1.12:20018/_cat/nodes?v
+```
+
+查看集群健康状态
+
+```
+curl http://192.168.1.12:20018/_cluster/health?pretty
+```
+
+查看已安装的插件
+
+```
+curl http://192.168.1.12:20018/_cat/plugins?v
+```
+
+**删除服务**
+
+停止服务
+
+```
+docker stop ateng-elasticsearch8
+```
+
+删除服务
+
+```
+docker rm ateng-elasticsearch8
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/elasticsearch8
 ```
 
 
 
-## 启动容器
+## Kibana 8
 
-- 使用docker run的方式
-
-
-```
-docker run -d --name kongyu-elasticsearch \
-    -p 20001:9200 --restart=always \
-    -v /data/service/elasticsearch/config/my_elasticsearch.yml:/opt/bitnami/elasticsearch/config/my_elasticsearch.yml \
-    -v /data/service/elasticsearch/data:/bitnami/elasticsearch/data \
-    -v /data/service/elasticsearch/plugins:/opt/bitnami/elasticsearch/plugins \
-    -e ELASTICSEARCH_HEAP_SIZE=2g \
-    -e ELASTICSEARCH_NODE_NAME=es-standalone \
-    -e TZ=Asia/Shanghai \
-    registry.lingo.local/service/elasticsearch:7.17.16
-docker logs -f kongyu-elasticsearch
-```
-
-- 使用docker-compose的方式
-
+**下载镜像**
 
 ```
-cat > /data/service/elasticsearch/docker-compose.yaml <<"EOF"
-version: '3'
-
-services:
-  elasticsearch:
-    image: registry.lingo.local/service/elasticsearch:7.17.16
-    container_name: kongyu-elasticsearch
-    networks:
-      - kongyu
-    ports:
-      - "20001:9200"
-    restart: always
-    volumes:
-      - /data/service/elasticsearch/config/my_elasticsearch.yml:/opt/bitnami/elasticsearch/config/my_elasticsearch.yml
-      - /data/service/elasticsearch/data:/bitnami/elasticsearch/data
-      - /data/service/elasticsearch/plugins:/opt/bitnami/elasticsearch/plugins
-    environment:
-      - ELASTICSEARCH_HEAP_SIZE=2g
-      - ELASTICSEARCH_NODE_NAME=es-standalone
-      - TZ=Asia/Shanghai
-
-networks:
-  kongyu:
-    external: true
-
-EOF
-
-docker-compose -f /data/service/elasticsearch/docker-compose.yaml up -d 
-docker-compose -f /data/service/elasticsearch/docker-compose.yaml logs -f
+docker pull bitnami/kibana:8.16.1
 ```
 
-
-
-## 访问服务
-
-登录服务查看
+**推送到仓库**
 
 ```
-URL: http://192.168.1.101:20001/
+docker tag bitnami/kibana:8.16.1 registry.lingo.local/bitnami/kibana:8.16.1
+docker push registry.lingo.local/bitnami/kibana:8.16.1
 ```
 
-
-
-## 可视化工具
-
-[ElasticView](https://github.com/1340691923/ElasticView)
+**保存镜像**
 
 ```
-docker run --name kongyu-elasticview \
-    --restart=unless-stopped -d -p 20002:8090 \
-    -v /data/service/elastic_view/data:/data \
-    -v /data/service/elastic_view/logs:/logs \
-    registry.lingo.local/service/elastic_view:latest
-docker logs -f kongyu-elasticview
-## 访问
-URL: http://192.168.1.101:20002/
-Username: admin
-Password: Admin@123
+docker save registry.lingo.local/bitnami/kibana:8.16.1 | gzip -c > image-kibana_8.16.1.tar.gz
 ```
 
-[elasticsearch-head](https://github.com/mobz/elasticsearch-head)
+**创建目录**
 
 ```
-docker run --name kongyu-elastichead \
-    --restart=unless-stopped -d -p 20003:9100 \
-    registry.lingo.local/service/elasticsearch-head:kongyu
-docker logs -f kongyu-elastichead
-## 访问。如果有账号密码，需要在URL上加上参数：auth_user=elastic&auth_password=Admin@123
-URL: http://192.168.1.101:20003/?base_uri=http://192.168.1.101:20001
+sudo mkdir -p /data/container/kibana8
+sudo chown -R 1001 /data/container/kibana8
 ```
 
-
-
-## 删除服务
-
-- 使用docker run的方式
-
+**运行服务**
 
 ```
-docker rm -f kongyu-elasticsearch
-docker rm -f kongyu-elasticview
-docker rm -f kongyu-elastichead
+docker run -d --name ateng-kibana8 \
+  -p 20019:5601 --restart=always \
+  -v /data/container/kibana8:/bitnami/kibana \
+  -e KIBANA_ELASTICSEARCH_URL=http://192.168.1.12:20018 \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/kibana:8.16.1
 ```
 
-- 使用docker-compose的方式
-
-
-```
-docker-compose -f /data/service/elasticsearch/docker-compose.yaml down
-```
-
-删除数据目录
+**查看日志**
 
 ```
-rm -rf /data/service/elasticsearch
+docker logs -f ateng-kibana8
 ```
 
+**使用服务**
+
+```
+URL: http://192.168.1.12:20019
+```
+
+**删除服务**
+
+停止服务
+
+```
+docker stop ateng-kibana8
+```
+
+删除服务
+
+```
+docker rm ateng-kibana8
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/kibana8
+```

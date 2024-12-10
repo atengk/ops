@@ -93,6 +93,12 @@ curl http://opensearch:9200/_cat/nodes?v
 curl http://opensearch:9200/_cluster/health?pretty
 ```
 
+查看已安装的插件
+
+```
+curl http://opensearch:9200/_cat/plugins?v
+```
+
 创建索引
 
 ```

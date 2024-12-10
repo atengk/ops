@@ -45,12 +45,13 @@ data:
         secert: ""
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: elastic-view
   labels:
     app: elastic-view
 spec:
+  serviceName: "elastic-view"
   replicas: 1
   selector:
     matchLabels:
@@ -76,6 +77,10 @@ spec:
         - name: config-volume
           mountPath: /app/config/config.yml
           subPath: config.yml
+        - name: data-volume
+          mountPath: /app/data
+        - name: plugins-volume
+          mountPath: /app/plugins
       volumes:
       - name: host-time
         hostPath:
@@ -84,6 +89,23 @@ spec:
       - name: config-volume
         configMap:
           name: elastic-view-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data-volume
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "openebs-hostpath"
+        resources:
+          requests:
+            storage: 10Gi  # 根据需求调整存储大小
+    - metadata:
+        name: plugins-volume
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "openebs-hostpath"
+        resources:
+          requests:
+            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service

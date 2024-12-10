@@ -28,7 +28,7 @@ docker save registry.lingo.local/service/elastic_view:v0.0.7 | gzip -c > image-e
 修改 `deploy.yaml`
 
 - ConfigMap中的**rootUrl**需要和最终访问的URL一致
-- Deployment中的镜像地址
+- Deployment中的镜像地址和存储类
 
 **创建服务**
 
@@ -39,8 +39,8 @@ kubectl apply -n kongyu -f deploy.yaml
 **查看服务**
 
 ```
-kubectl get -n kongyu pod,svc -l app=elastic-view
-kubectl logs -n kongyu -f deploy/elastic-view
+kubectl get -n kongyu pod,svc,pvc -l app=elastic-view
+kubectl logs -n kongyu -f elastic-view-0
 ```
 
 **访问服务**
@@ -85,5 +85,6 @@ Password: admin
 
 ```
 kubectl delete -n kongyu -f deploy.yaml
+kubectl delete -n kongyu pvc -l app=elastic-view
 ```
 

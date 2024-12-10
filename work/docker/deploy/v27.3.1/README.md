@@ -193,9 +193,3 @@ $ docker-compose version
 Docker Compose version v2.31.0
 ```
 
-**配置自动补全**
-
-```
-sudo cp docker_bash_completion /etc/bash_completion.d/docker
-source <(cat /etc/bash_completion.d/docker)
-```
