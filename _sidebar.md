@@ -48,6 +48,17 @@
             - [openssl创建证书](/work/service/tls/tls-openssl/)
     - 内网远程访问
         - [内网穿透FRP](/work/service/frp/)
+- Shell
+    - Spring
+        - [应用管理脚本](work/shell/java/)
+
+    - 服务备份脚本
+        - [mysql](work/shell/backups/mysql/)
+        - [postgresql](work/shell/backups/postgresql/)
+        - [etcd](work/shell/backups/etcd/)
+        - [minio](work/shell/backups/minio/)
+        - [mongodb](work/shell/backups/mongodb/)
+
 - Docker
     - 使用文档
         - [Docker使用文档](/work/docker/OPS.md)
@@ -236,7 +247,6 @@
         - [网络测试](/work/kubernetes/deploy/test/network/)
 - KVM
     - [使用文档](work/kvm/)
-
 - 大数据
     - 基础配置
         - [基础配置](work/bigdata/00-basic/)

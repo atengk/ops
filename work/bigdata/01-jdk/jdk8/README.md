@@ -1,10 +1,14 @@
-## 安装JDK1.8
+## 安装OpenJDK8
+
+下载地址
+
+https://adoptium.net/zh-CN/temurin/releases/?os=linux&arch=x64&package=jdk&version=8
 
 解压软件包
 
 ```
-tar -zxvf jdk-8u391-linux-x64.tar.gz -C /usr/local/software/
-ln -s /usr/local/software/jdk1.8.0_391 /usr/local/software/jdk1.8.0
+tar -zxvf OpenJDK8U-jdk_x64_linux_hotspot_8u432b06.tar.gz -C /usr/local/software/
+ln -s /usr/local/software/jdk8u432-b06 /usr/local/software/jdk1.8.0
 ```
 
 配置环境变量

@@ -7,8 +7,8 @@ https://adoptium.net/zh-CN/temurin/releases/?os=linux&arch=x64&package=jdk&versi
 解压软件包
 
 ```
-tar -zxvf OpenJDK21U-jdk_x64_linux_hotspot_21.0.4_7.tar.gz -C /usr/local/software/
-ln -s /usr/local/software/jdk-21.0.4+7 /usr/local/software/jdk21
+tar -zxvf OpenJDK21U-jdk_x64_linux_hotspot_21.0.5_11.tar.gz -C /usr/local/software/
+ln -s /usr/local/software/jdk-21.0.5+11 /usr/local/software/jdk21
 ```
 
 配置环境变量

@@ -26,36 +26,37 @@ fi
 
 # 自动推断应用名称和日志目录
 APP_NAME=$(basename "$JAR_PATH" .jar)
+APP_HOME=$(dirname "$JAR_PATH")
 LOG_DIR="$(dirname "$JAR_PATH")/logs"
 
 # 日志配置
-LOG_ENABLED=true
+LOG_ENABLED=${LOG_ENABLED:-false}
 LOG_DATE_FORMAT='%Y-%m-%d'
 LOG_FILE_BASE="$LOG_DIR/$APP_NAME-$(date +$LOG_DATE_FORMAT)"
 LOG_FILE="$LOG_FILE_BASE.log"
 LOG_LINK="$LOG_DIR/$APP_NAME-current.log"
 
 # PID文件
-PID_FILE="$LOG_DIR/$APP_NAME.pid"
+PID_FILE="$APP_HOME/$APP_NAME.pid"
 
 # JVM参数
-JVM_OPTS="-Xms512m -Xmx1024m"
+JVM_OPTS=${JVM_OPTS:--server}
 
 # Spring Boot应用参数
-SPRING_OPTS="--spring.profiles.active=prod"
+SPRING_OPTS=${SPRING_OPTS:-}
 
 # 优雅关闭的最大等待时间（秒）
-GRACEFUL_SHUTDOWN_TIMEOUT=30
+GRACEFUL_SHUTDOWN_TIMEOUT=${GRACEFUL_SHUTDOWN_TIMEOUT:-30}
 
 # 日志清理配置
-LOG_CLEANUP_ENABLED=true
-LOG_RETENTION_DAYS=7
+LOG_CLEANUP_ENABLED=${LOG_ENABLED:-false}
+LOG_RETENTION_DAYS=${LOG_RETENTION_DAYS:-7}
 
 # 健康检查配置
-HEALTH_CHECK_METHOD="none" # 可选：none, log, tcp, url
-LOG_KEYWORD="Started $APP_NAME" # 日志关键字
-HEALTH_CHECK_TCP_PORT=8080 # 用于TCP端口检查的端口
-HEALTH_CHECK_URL="http://localhost:8080/actuator/health" # 用于URL检查的健康检查URL
+HEALTH_CHECK_METHOD=${HEALTH_CHECK_METHOD:-none} # 可选：none, log, tcp, url
+LOG_KEYWORD=${LOG_KEYWORD:-JVM running for} # 日志关键字
+HEALTH_CHECK_TCP_PORT=${HEALTH_CHECK_TCP_PORT:-8888} # 用于TCP端口检查的端口
+HEALTH_CHECK_URL=${HEALTH_CHECK_URL:-http://localhost:8888/actuator/health} # 用于URL检查的健康检查URL
 # -----------------------------------------------------------------------------
 
 # 颜色定义
@@ -111,35 +112,39 @@ init_logs() {
 # 启动应用程序
 start() {
   if [ -f "$PID_FILE" ]; then
-    log_message "ERROR" "应用程序已经在运行 (PID: $(cat $PID_FILE))"
+    log_message "WARN" "应用程序已经在运行 (PID: $(cat $PID_FILE))"
     exit 1
   fi
 
+  init_logs
   log_message "INFO" "启动 $APP_NAME..."
 
   if [ "$LOG_ENABLED" = true ]; then
     nohup java $JVM_OPTS -jar $JAR_PATH $SPRING_OPTS >> "$LOG_FILE" 2>&1 &
+    # 更新日志链接
+    ln -sf "$LOG_FILE" "$LOG_LINK"
   else
     nohup java $JVM_OPTS -jar $JAR_PATH $SPRING_OPTS > /dev/null 2>&1 &
   fi
-
+  
   echo $! > "$PID_FILE"
 
-  # 更新日志链接
-  ln -sf "$LOG_FILE" "$LOG_LINK"
-
-  log_message "INFO" "进行健康检查..."
-  for (( i=1; i<=$GRACEFUL_SHUTDOWN_TIMEOUT; i++ )); do
-    sleep 1
-    if health_check; then
-      log_message "INFO" "$APP_NAME 启动成功"
-      return
-    fi
-  done
-
-  log_message "ERROR" "$APP_NAME 启动失败，请检查日志或健康检查配置"
-  stop
-  exit 1
+  # 判断是否进行健康检查
+  if [ "$HEALTH_CHECK_METHOD" != "none" ]; then
+    log_message "INFO" "进行健康检查 [$HEALTH_CHECK_METHOD]..."
+    for (( i=1; i<=$GRACEFUL_SHUTDOWN_TIMEOUT; i++ )); do
+      sleep 1
+      if health_check; then
+        log_message "INFO" "$APP_NAME 启动成功 (PID: $(cat $PID_FILE))"
+        return
+      fi
+    done
+	log_message "ERROR" "$APP_NAME 启动失败，请检查日志或健康检查配置"
+    stop
+    exit 1
+  fi
+  log_message "INFO" "$APP_NAME 启动成功 (PID: $(cat $PID_FILE))"
+  return
 }
 
 # 健康检查函数
@@ -150,7 +155,7 @@ health_check() {
       return $?
       ;;
     tcp)
-      nc -z localhost $HEALTH_CHECK_TCP_PORT
+	  ss -tuln | grep $HEALTH_CHECK_TCP_PORT &> /dev/null
       return $?
       ;;
     url)
@@ -169,11 +174,23 @@ health_check() {
 
 # 停止应用程序
 stop() {
-  if [ ! -f "$PID_FILE" ]; then
-    log_message "WARN" "应用程序未运行"
-    return
+  log_message "INFO" "准备停止 $APP_NAME..."
+  
+  if [ -f "$PID_FILE" ]; then
+    PID=$(cat "$PID_FILE")
+    # 判断进程是否存在
+    ps -p $PID &> /dev/null
+    if [ "$?" != "0" ]
+    then
+      log_message "WARN" "$APP_NAME 未运行"
+      rm -f "$PID_FILE"
+      return
+    fi
+  else
+    log_message "WARN" "$APP_NAME 未运行"
+	return
   fi
-
+  
   PID=$(cat "$PID_FILE")
   log_message "INFO" "停止 $APP_NAME (PID: $PID)..."
 
@@ -198,9 +215,20 @@ stop() {
 # 检查应用程序状态
 status() {
   if [ -f "$PID_FILE" ]; then
-    log_message "INFO" "$APP_NAME 正在运行 (PID: $(cat $PID_FILE))"
+    # 判断PID文件夹存在，应用程序进程是否存在
+	PID=$(cat "$PID_FILE")
+	ps -p $PID &> /dev/null
+	if [ "$?" = "0" ]
+	then
+	  log_message "INFO" "$APP_NAME 正在运行 (PID: $(cat $PID_FILE))"
+	else
+      log_message "WARN" "$APP_NAME 未运行"
+	  rm -f $PID_FILE
+	  exit 1
+	fi
   else
     log_message "WARN" "$APP_NAME 未运行"
+	exit 1
   fi
 }
 
@@ -214,7 +242,7 @@ restart() {
 show_log() {
   if [ "$LOG_ENABLED" = true ]; then
     if [ -f "$LOG_LINK" ]; then
-      tail -f "$LOG_LINK"
+      tail -300f "$LOG_LINK"
     else
       log_message "WARN" "日志文件不存在: $LOG_LINK"
     fi
@@ -249,14 +277,12 @@ usage() {
 # 解析命令行参数
 case "$1" in
   start)
-    init_logs
     start
     ;;
   stop)
     stop
     ;;
   restart)
-    init_logs
     restart
     ;;
   status)
