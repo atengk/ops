@@ -1,110 +1,80 @@
-# Jenkins 2.387.3
+# Jenkins
 
+Jenkins 是一个开源的自动化服务器，广泛用于实现持续集成（CI）和持续交付（CD）。它支持通过插件扩展，能够自动化构建、测试、部署等软件开发流程。Jenkins 提供了图形化的用户界面、分布式构建功能、丰富的插件生态以及强大的集成能力，帮助开发团队提高开发效率和交付速度。
 
+- [官网链接](https://www.jenkins.io/)
 
-## 环境准备
-
-创建网络，将容器运行在该网络下，若已创建则忽略
-
-```
-docker network create --subnet 10.188.0.1/24 kongyu
-```
-
-准备目录
+**下载镜像**
 
 ```
-mkdir -p /data/service/jenkins/data
-chown -R 1001 /data/service/jenkins
+docker pull bitnami/jenkins:2.479.1
 ```
 
-
-
-## 启动容器
-
-- 使用docker run的方式
-
+**推送到仓库**
 
 ```
-docker run -d --name kongyu-jenkins --network kongyu \
-    -p 20001:8080 --restart=always \
-    -v /data/service/jenkins/data:/bitnami/jenkins \
-    -e JENKINS_USERNAME=admin \
-    -e JENKINS_PASSWORD=Admin@123 \
-    -e JENKINS_EMAIL=2385569970@qq.com \
-    -e JAVA_OPTS="-server -Xms1g -Xmx2g" \
-    -e TZ=Asia/Shanghai \
-    registry.lingo.local/service/jenkins:2.387.3
-docker logs -f kongyu-jenkins
+docker tag bitnami/jenkins:2.479.1 registry.lingo.local/bitnami/jenkins:2.479.1
+docker push registry.lingo.local/bitnami/jenkins:2.479.1
 ```
 
-- 使用docker-compose的方式
-
-
-```
-cat > /data/service/jenkins/docker-compose.yaml <<"EOF"
-version: '3'
-
-services:
-  jenkins:
-    image: registry.lingo.local/service/jenkins:2.387.3
-    container_name: kongyu-jenkins
-    networks:
-      - kongyu
-    ports:
-      - "20001:8080"
-    restart: always
-    volumes:
-      - /data/service/jenkins/data:/bitnami/jenkins
-    environment:
-      - JENKINS_USERNAME=admin
-      - JENKINS_PASSWORD=Admin@123
-      - JENKINS_EMAIL=2385569970@qq.com
-      - JAVA_OPTS=-server -Xms1g -Xmx2g
-      - TZ=Asia/Shanghai
-
-networks:
-  kongyu:
-    external: true
-
-EOF
-
-docker-compose -f /data/service/jenkins/docker-compose.yaml up -d 
-docker-compose -f /data/service/jenkins/docker-compose.yaml logs -f
-```
-
-
-
-## 访问服务
-
-登录服务查看
+**保存镜像**
 
 ```
-URL: http://192.168.1.101:20001/
+docker save registry.lingo.local/bitnami/jenkins:2.479.1 | gzip -c > image-jenkins_2.479.1.tar.gz
+```
+
+**创建目录**
+
+```
+sudo mkdir -p /data/container/jenkins/data
+sudo chown -R 1001 /data/container/jenkins
+```
+
+**运行服务**
+
+```
+docker run -d --name ateng-jenkins \
+  -p 20022:8080 --restart=always \
+  -v /data/container/jenkins:/bitnami/jenkins \
+  -e JENKINS_USERNAME=admin \
+  -e JENKINS_PASSWORD=Admin@123 \
+  -e JENKINS_EMAIL=2385569970@qq.com \
+  -e JAVA_OPTS="-server -Xms1g -Xmx2g" \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/jenkins:2.479.1
+```
+
+**查看日志**
+
+```
+docker logs -f ateng-jenkins
+```
+
+**使用服务**
+
+```
+URL: http://192.168.1.12:20022
 Username: admin
 Password: Admin@123
 ```
 
+**删除服务**
 
-
-## 删除服务
-
-- 使用docker run的方式
-
+停止服务
 
 ```
-docker rm -f kongyu-jenkins
+docker stop ateng-jenkins
 ```
 
-- 使用docker-compose的方式
-
-
-```
-docker-compose -f /data/service/jenkins/docker-compose.yaml down
-```
-
-删除数据目录
+删除服务
 
 ```
-rm -rf /data/service/jenkins
+docker rm ateng-jenkins
+```
+
+删除目录
+
+```
+sudo rm -rf /data/container/jenkins
 ```
 

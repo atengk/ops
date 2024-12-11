@@ -40,7 +40,7 @@ log:
   logDir: "logs"          # 日志保留文件夹
 port: 8090                # 启动端口
 pluginRpcPort: 8091       # 插件内网访问端口
-rootUrl: http://192.168.1.12:20011/  # 项目访问根目录
+rootUrl: http://192.168.1.12:20021/  # 项目访问根目录
 dbType: "sqlite3"         # 数据保留类型 分为 sqlite3 和 mysql
 enableLogEs: false        # 是否记录 es 请求记录
 enableLogEsRes: false     # 是否记录 es 请求记录中返回的响应体
@@ -81,7 +81,7 @@ EOF
 
 ```
 docker run -d --name ateng-elastic-view \
-  -p 20011:8090 --restart=always \
+  -p 20021:8090 --restart=always \
   -v /data/container/elastic-view/config/config.yml:/app/config/config.yml:ro \
   -v /data/container/elastic-view/data:/app/data \
   -v /data/container/elastic-view/plugins:/app/plugins \
@@ -98,7 +98,7 @@ docker logs -f ateng-elastic-view
 **访问服务**
 
 ```
-URL: http://192.168.1.12:20011/
+URL: http://192.168.1.12:20021/
 Username: admin
 Password: admin
 ```

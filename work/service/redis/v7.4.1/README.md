@@ -8,6 +8,8 @@ Redis 是一个开源的高性能内存数据库，支持多种数据结构，�
 
 ## 编译安装 Redis
 
+**安装前先参考[前置条件](https://kongyu666.github.io/work/#/work/service/00-basic/)**
+
 ### 1. 安装依赖
 
 首先安装编译所需的软件：
@@ -76,7 +78,7 @@ protected-mode no
 daemonize no
 save ""
 appendonly yes
-maxclients 10000
+maxclients 1024
 maxmemory 8GB
 maxmemory-policy volatile-lru
 io-threads 10
@@ -159,7 +161,8 @@ sudo systemctl enable redis
 验证 Redis 是否正常运行：
 
 ```bash
-REDISCLI_AUTH=Admin@123 redis-cli info server
+export REDISCLI_AUTH=Admin@123
+redis-cli info server
 ```
 
 ---
@@ -195,7 +198,8 @@ sudo systemctl restart redis
 ### 3. 验证主从复制状态
 
 ```bash
-REDISCLI_AUTH=Admin@123 redis-cli info replication
+export REDISCLI_AUTH=Admin@123 
+redis-cli info replication
 ```
 
 
@@ -237,7 +241,7 @@ protected-mode no
 daemonize no
 save ""
 appendonly yes
-maxclients 10000
+maxclients 1024
 maxmemory 8GB
 maxmemory-policy volatile-lru
 io-threads 10
@@ -265,7 +269,7 @@ protected-mode no
 daemonize no
 save ""
 appendonly yes
-maxclients 10000
+maxclients 1024
 maxmemory 8GB
 maxmemory-policy volatile-lru
 io-threads 10

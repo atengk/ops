@@ -16,41 +16,32 @@
         - [备份工具 Restic](/work/service/restic/)
     - 数据库
         - MySQL
-            - [安装8.0.39版本](/work/service/mysql/v8.0.39/)
-            - [安装8.4.2版本](/work/service/mysql/v8.4.2-lts/)
-            - [编译安装](/work/service/mysql/make/)
-            - [OpenEuler编译安装](/work/service/mysql/make/README_OpenEuler.md)
-            - [OpenEuler dnf安装](/work/service/mysql/openeuler/v8.0.37/)
+            - [安装文档](/work/service/mysql/v8.4.3/)
+            - [编译安装文档](/work/service/mysql/v8.4.3/make/)
             - [使用文档](/work/service/mysql/OPS.md)
         - MariaDB Galera
-            - [安装11.4.2版本](/work/service/mariadb/v11.4.2/)
+            - [安装文档](/work/service/mariadb/v11.4.4/)
         - Redis
-            - [安装6.2.14版本](/work/service/redis/v6.2.14/)
-            - [安装7.2.5版本](/work/service/redis/v7.2.5/)
-            - [安装7.4.1版本](/work/service/redis/v7.4.1/)
+            - [安装文档](/work/service/redis/v7.4.1/)
             - [使用文档](/work/service/redis/OPS.md)
         - PostgreSQL
-            - [编译安装PostgreSQL](/work/service/postgresql/)
-            - [编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
-            - [OpenEuler编译安装PostgreSQL和PostGIS](/work/service/postgresql/README_OpenEuler.md)
-            - [OpenEuler安装PostgreSQL](/work/service/postgresql/openeuler/v15.6/)
+            - [编译安装文档](/work/service/postgresql/v17.2.0/)
+            - [编译PostGIS](/work/service/postgresql/v17.2.0/postgis/)
             - [使用文档](/work/service/postgresql/OPS.md)
-            - [其他](/work/service/postgresql/README_Test.md)
         - ETCD
-            - [安装3.5.1版本](/work/service/etcd/v3.5.1/)
-            - [安装3.5.16版本](/work/service/etcd/v3.5.16/)
+            - [安装文档](/work/service/etcd/v3.5.17/)
             - [使用文档](/work/service/etcd/OPS.md)
         - FoundationDB
-            - [安装7.1.38版本](/work/service/foundationdb/v7.1.38/)
-            - [安装7.3.43版本](/work/service/foundationdb/v7.3.43/)
+            - [安装文档](/work/service/foundationdb/v7.1.38/)
             - [使用文档](/work/service/foundationdb/OPS.md)
         - ElasticSearch
             - [安装单机模式](/work/service/elastic/elasticsearch/standalone/)
             - [安装集群模式](/work/service/elastic/elasticsearch/cluster/)
-        - [CoreDNS](/work/service/coredns/)
+        - CoreDNS
+            - [安装文档](/work/service/coredns/)
     - Web服务
         - Nginx
-            - [安装Nginx](/work/service/nginx/v1.27.3/)
+            - [安装文档](/work/service/nginx/v1.27.3/)
             - [使用文档](/work/service/nginx/OPS.md)
         - TLS证书
             - [cfssl创建证书](/work/service/tls/tls-cfssl/v1.6.5/)
@@ -81,7 +72,6 @@
         - [elasticsearch](/work/docker/service/elasticsearch/)
         - [opensearch](/work/docker/service/opensearch/)
         - [jenkins](/work/docker/service/jenkins/)
-    
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
@@ -244,6 +234,9 @@
     - 服务测试
         - [存储测试](/work/kubernetes/deploy/test/storage/)
         - [网络测试](/work/kubernetes/deploy/test/network/)
+- KVM
+    - [使用文档](work/kvm/)
+
 - 大数据
     - 基础配置
         - [基础配置](work/bigdata/00-basic/)
@@ -290,14 +283,14 @@
         - [Flink CDC](work/bigdata/05-flink/cdc/)
         - [运维](work/bigdata/05-flink/OPS.md)
     - Doris
-        - Doris v2.1.5
-            - [单机](work/bigdata/05-doris/v2.1.4/standalone/)
-            - [集群](work/bigdata/05-doris/v2.1.4/cluster/)
-            - [高可用集群](work/bigdata/05-doris/v2.1.4/cluster-ha/)
-        - Doris v3.0.1
-            - [单机](work/bigdata/05-doris/v3.0.1/standalone/)
-            - [集群](work/bigdata/05-doris/v3.0.1/cluster/)
-            - [高可用集群](work/bigdata/05-doris/v3.0.1/cluster-ha/)
+        - Doris v2.1.7
+            - [单机](work/bigdata/05-doris/v2.1.7/standalone/)
+            - [集群](work/bigdata/05-doris/v2.1.7/cluster/)
+            - [高可用集群](work/bigdata/05-doris/v2.1.7/cluster-ha/)
+        - Doris v3.0.2
+            - [单机](work/bigdata/05-doris/v3.0.2/standalone/)
+            - [集群](work/bigdata/05-doris/v3.0.2/cluster/)
+            - [高可用集群](work/bigdata/05-doris/v3.0.2/cluster-ha/)
         - [运维](work/bigdata/05-doris/OPS.md)
     - Iceberg
         - [iceberg表格式](work/bigdata/06-iceberg/)
