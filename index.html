@@ -15,7 +15,7 @@
 <body>
   <div id="app">加载中...</div>
   <!-- 在每个页面上生成一个编辑github按钮。点击按钮，打开相应的github上的md编辑页面 -->
-  <script src="//cdn.jsdelivr.net/npm/docsify-edit-on-github"></script>
+  <script src="js/docsify-edit-on-github.js"></script>
   <script>
     window.$docsify = {
         // 项目名称
@@ -87,11 +87,11 @@
         busuanzi: true,
         plugins: [
             EditOnGithubPlugin.create(
-            'https://github.com/kongyu666/work/tree/main/work/',
+            'https://github.com/kongyu666/work/tree/main/',
             null,
             function(file) {
                 if (file.indexOf('en') === -1) {
-                return '编辑'
+                return '去Gitgub源查看'
                 } else {
                 return 'edit on git'
                 }
