@@ -84,6 +84,17 @@
         // 一个 docsify 插件，用于启用busuanzi，显示您的网站访问数据
         busuanzi: true,
         plugins: [
+            EditOnGithubPlugin.create(
+            'https://github.com/kongyu666/work/tree/main/work/',
+            null,
+            function(file) {
+                if (file.indexOf('en') === -1) {
+                return '编辑'
+                } else {
+                return 'edit on git'
+                }
+            }
+            )
         ],
     }
   </script>
