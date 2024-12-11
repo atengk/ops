@@ -18,7 +18,7 @@ helm pull bitnami/mysql --version 11.1.20
 
 **修改配置**
 
-[values.yaml](./values.yaml)是修改后的配置，可以根据环境做出适当修改
+values.yaml是修改后的配置，可以根据环境做出适当修改
 
 - 存储类：defaultStorageClass（不填为默认）
 - 认证配置：auth.rootPassword
