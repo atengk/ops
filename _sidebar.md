@@ -50,7 +50,7 @@
         - [内网穿透FRP](/work/service/frp/)
 - Shell
     - Spring
-        - [应用管理脚本](work/shell/java/)
+        - [应用管理](work/shell/java/)
 
     - 服务备份脚本
         - [mysql](work/shell/backups/mysql/)
