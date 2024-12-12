@@ -8,7 +8,7 @@
         - [网络文件共享 Samba](work/service/samba/)
         - [网络文件共享 VSFTP](work/service/ftp/)
         - 对象存储服务 MinIO
-            - [安装文档](/work/service/minio/v20241013/)
+            - [安装文档](/work/service/minio/v20241107/)
             - [使用文档](/work/service/minio/OPS.md)
         - 分布式存储 JuiceFS
             - [安装文档](/work/service/juicefs/v1.2.1/)
@@ -43,6 +43,9 @@
         - Nginx
             - [安装文档](/work/service/nginx/v1.27.3/)
             - [使用文档](/work/service/nginx/OPS.md)
+        - Haproxy
+            - [安装文档](/work/service/haproxy/)
+            - [使用文档](/work/service/haproxy/OPS.md)
         - TLS证书
             - [cfssl创建证书](/work/service/tls/tls-cfssl/v1.6.5/)
             - [openssl创建证书](/work/service/tls/tls-openssl/)
@@ -51,14 +54,12 @@
 - Shell
     - Spring
         - [应用管理](work/shell/java/)
-
     - 服务备份脚本
         - [mysql](work/shell/backups/mysql/)
         - [postgresql](work/shell/backups/postgresql/)
         - [etcd](work/shell/backups/etcd/)
         - [minio](work/shell/backups/minio/)
         - [mongodb](work/shell/backups/mongodb/)
-
 - Docker
     - 使用文档
         - [Docker使用文档](/work/docker/OPS.md)
@@ -178,8 +179,8 @@
                 - [Kafka可视化](/work/kubernetes/service/kafka-ui/v0.7.2/)
         - 存储服务
             - MinIO
-                - [单机模式](/work/kubernetes/service/minio/v2024.10.13/standalone/)
-                - [集群模式](/work/kubernetes/service/minio/v2024.10.13/distributed/)
+                - [单机模式](/work/kubernetes/service/minio/v2024.11.7/standalone/)
+                - [集群模式](/work/kubernetes/service/minio/v2024.11.7/distributed/)
             - Harbor
                 - [http模式](/work/kubernetes/service/harbor/v2.12.0/http/)
                 - [ingress模式](/work/kubernetes/service/harbor/v2.12.0/ingress-http/)

@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: vm-openeuler
+  name: vmr-openeuler
   labels:
     kubevirt.io/vm: vmr-openeuler
 spec:
   selector:
-    kubevirt.io/vm: vm-openeuler
+    kubevirt.io/vm: vmr-openeuler
   ports:
   - protocol: TCP
     port: 22
@@ -14,26 +14,38 @@ spec:
   type: NodePort
 ---
 apiVersion: kubevirt.io/v1
-kind: VirtualMachine
+kind: VirtualMachineInstanceReplicaSet
 metadata:
-  name: vm-openeuler
+  name: vmr-openeuler
   labels:
     kubevirt.io/vm: vmr-openeuler
 spec:
-  running: true
+  replicas: 3
+  selector:
+    matchLabels:
+      kubevirt.io/vm: vmr-openeuler
   template:
     metadata:
+      name: vmr-openeuler
       labels:
-        kubevirt.io/vm: vm-openeuler
+        kubevirt.io/vm: vmr-openeuler
     spec:
-      #nodeSelector:
-      #  kubernetes.io/hostname: k8s-worker-node2
+      hostname: "openeuler"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    kubevirt.io/vm: vmr-openeuler
+                topologyKey: kubernetes.io/hostname
+              weight: 1
       domain:
         cpu:
-          cores: 2
+          cores: 8
           model: host-passthrough
         memory:
-          guest: 4Gi
+          guest: 16Gi
         resources:
           overcommitGuestOverhead: true
         devices:
@@ -60,7 +72,7 @@ spec:
           image: swr.cn-north-1.myhuaweicloud.com/kongyu/kubevirt/linux:openeuler-24.03-lts-x86_64
       - name: emptydisk
         emptyDisk:
-          capacity: 20Gi
+          capacity: 100Gi
       - name: cloudinitdisk
         cloudInitNoCloud:
           userData: |
