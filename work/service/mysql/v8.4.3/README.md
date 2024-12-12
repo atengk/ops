@@ -5,7 +5,9 @@ MySQL 是一个流行的开源关系型数据库管理系统（RDBMS），广泛
 - [官网链接](https://www.mysql.com/)
 - [二进制安装文档](https://dev.mysql.com/doc/refman/8.4/en/binary-installation.html)
 
+## 前置条件
 
+- 参考：[基础配置](/work/service/00-basic/)
 
 ## 安装MySQL
 
@@ -412,5 +414,4 @@ UNLOCK TABLES;
 ```
 jdbc:mysql:loadbalance://192.168.1.112:3306,192.168.1.113:3306/kongyu
 ```
-
 
