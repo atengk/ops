@@ -37,6 +37,9 @@
         - ElasticSearch
             - [安装单机模式](/work/service/elastic/elasticsearch/standalone/)
             - [安装集群模式](/work/service/elastic/elasticsearch/cluster/)
+        - OpenSearch
+            - [安装文档](/work/service/opensearch/)
+            - [使用文档](/work/service/opensearch/OPS.md)
         - CoreDNS
             - [安装文档](/work/service/coredns/)
     - Web服务
