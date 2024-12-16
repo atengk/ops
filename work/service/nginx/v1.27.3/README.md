@@ -4,6 +4,10 @@ Nginx 是一个高性能的开源 Web 服务器、反向代理服务器和负载
 
 - [官网链接](https://nginx.org/)
 
+## 前置条件
+
+- 参考：[基础配置](/work/service/00-basic/)
+
 ## 安装Nginx
 
 ### 1. 下载 Nginx 源代码

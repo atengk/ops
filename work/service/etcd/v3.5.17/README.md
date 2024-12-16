@@ -296,13 +296,13 @@ scp -r /etc/ssl/etcd/* etcd03.ateng.local:/etc/ssl/etcd/
 
 ##### 1.1 下载和解压ETCD软件包
 ```bash
-wget https://github.com/etcd-io/etcd/releases/download/v3.5.16/etcd-v3.5.16-linux-amd64.tar.gz
-tar -zxvf etcd-v3.5.16-linux-amd64.tar.gz
+wget https://github.com/etcd-io/etcd/releases/download/v3.5.17/etcd-v3.5.17-linux-amd64.tar.gz
+tar -zxvf etcd-v3.5.17-linux-amd64.tar.gz
 ```
 
 ##### 1.2 将ETCD安装到系统路径
 ```bash
-sudo cp etcd-v3.5.16-linux-amd64/etcd* /usr/bin
+sudo cp etcd-v3.5.17-linux-amd64/etcd* /usr/bin
 ```
 > 以上命令将`etcd`的二进制文件复制到系统可执行路径中。
 
@@ -312,7 +312,7 @@ etcdctl version
 ```
 > 命令输出应类似以下内容，表示安装成功：
 ```
-etcdctl version: 3.5.16
+etcdctl version: 3.5.17
 API version: 3.5
 ```
 
@@ -486,14 +486,14 @@ etcdctl member list --write-out=table
 ##### 1.1 下载和解压ETCD软件包
 
 ```bash
-wget http://github.com/etcd-io/etcd/releases/download/v3.5.16/etcd-v3.5.16-linux-amd64.tar.gz
-tar -zxvf etcd-v3.5.16-linux-amd64.tar.gz
+wget http://github.com/etcd-io/etcd/releases/download/v3.5.17/etcd-v3.5.17-linux-amd64.tar.gz
+tar -zxvf etcd-v3.5.17-linux-amd64.tar.gz
 ```
 
 ##### 1.2 将ETCD安装到系统路径
 
 ```bash
-sudo cp etcd-v3.5.16-linux-amd64/etcd* /usr/bin
+sudo cp etcd-v3.5.17-linux-amd64/etcd* /usr/bin
 ```
 
 > 以上命令将`etcd`的二进制文件复制到系统可执行路径中。
@@ -507,7 +507,7 @@ etcdctl version
 > 命令输出应类似以下内容，表示安装成功：
 
 ```
-etcdctl version: 3.5.16
+etcdctl version: 3.5.17
 API version: 3.5
 ```
 

@@ -163,11 +163,11 @@ http://192.168.1.112:8001
 
 详细的生成证书参考：https://kongyu666.github.io/work/#/work/service/tls/tls-openssl/
 
-最终得到：`ca.crt`、 `server.crt` 、`server.key`
+最终得到：`ateng-ca.crt`、 `ateng-server.crt` 、`ateng-server.key`
 
-```
+```bash
 mkdir -p /etc/nginx/ssl/
-cp ca.crt server.crt server.key /etc/nginx/ssl/
+cp ateng-ca.crt ateng-server.crt ateng-server.key /etc/nginx/ssl/
 ```
 
 ### 2. 配置 Nginx 使用 HTTPS
@@ -186,8 +186,8 @@ server {
 
     server_name nginx.ateng.local;  # 替换为你的域名
 
-    ssl_certificate /etc/nginx/ssl/server.crt;  # SSL 证书路径
-    ssl_certificate_key /etc/nginx/ssl/server.key;  # SSL 私钥路径
+    ssl_certificate /etc/nginx/ssl/ateng-server.crt;  # SSL 证书路径
+    ssl_certificate_key /etc/nginx/ssl/ateng-server.key;  # SSL 私钥路径
 
     ssl_protocols TLSv1.2 TLSv1.3;  # 启用的 SSL 协议
     ssl_ciphers HIGH:!aNULL:!MD5;   # 安全加密算法配置
@@ -213,7 +213,7 @@ EOF
 
 ### 3. 创建文件
 
-```
+```bash
 mkdir -p /data/service/frontend/demo-https
 echo "hello world https" > /data/service/frontend/demo-https/index.html
 ```
@@ -228,7 +228,20 @@ sudo systemctl reload nginx
 
 ### 5. 访问服务
 
+已配置域名解析的命令
+
+```bash
+curl -L \
+  --cacert /etc/nginx/ssl/ateng-ca.crt \
+  nginx.ateng.local
 ```
-curl -L --cacert /etc/nginx/ssl/ca.crt nginx.ateng.local
+
+未配置域名解析的命令
+
+```bash
+curl -L \
+  --cacert /etc/nginx/ssl/ateng-ca.crt \
+  --resolve nginx.ateng.local:443:10.244.172.143 \
+  https://nginx.ateng.local
 ```
 

@@ -81,7 +81,7 @@ curl --cacert /opt/bitnami/opensearch/config/certs/ca.crt -u admin:Admin@123 htt
 > 自动生成的证书没有添加集群相关的SAN(域名和ip)，只能跳过证书验证
 
 ```
-curl -k -u elastic:Admin@123 https://192.168.1.10:17600/
+curl -k -u admin:Admin@123 https://192.168.1.10:17600/
 ```
 
 查看集群节点信息

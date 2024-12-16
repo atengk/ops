@@ -5,8 +5,9 @@ clusterName: opensearch
 containerPorts:
   restAPI: 9200
   transport: 9300
+#plugins: "http://miniserve.lingo.local/opensearch-plugins/analysis-ik-2.18.0.zip"
 plugins: ""
-snapshotRepoPath: ""
+snapshotRepoPath: "/bitnami/opensearch/data/snap"
 extraConfig:
   http:
     cors:

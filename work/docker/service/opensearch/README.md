@@ -12,6 +12,17 @@ OpenSearch 是一个开源的分布式搜索和分析引擎，基于 Apache 2.0 
 docker pull bitnami/opensearch:1.3.19
 ```
 
+**下载插件（可选）**
+
+如果不安装插件可以跳过此步骤。
+
+将下载的插件上传到本地的HTTP服务上面，方便后续安装的时候加载插件。
+
+```
+mkdir plugins
+wget -O plugins/analysis-ik-1.3.19.zip https://release.infinilabs.com/analysis-ik/stable/opensearch-analysis-ik-1.3.19.zip
+```
+
 **推送到仓库**
 
 ```
@@ -47,12 +58,27 @@ EOF
 
 **运行服务**
 
+普通模式
+
 ```
 docker run -d --name ateng-opensearch1 \
   -p 20019:9200 --restart=always \
   -v /data/container/opensearch1/config/my_opensearch.yml:/opt/bitnami/opensearch/conf/my_opensearch.yml:ro \
   -v /data/container/opensearch1/data:/bitnami/opensearch/data \
   -e OPENSEARCH_HEAP_SIZE=2g \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/opensearch:1.3.19
+```
+
+插件模式
+
+```
+docker run -d --name ateng-opensearch1 \
+  -p 20019:9200 --restart=always \
+  -v /data/container/opensearch1/config/my_opensearch.yml:/opt/bitnami/opensearch/conf/my_opensearch.yml:ro \
+  -v /data/container/opensearch1/data:/bitnami/opensearch/data \
+  -e OPENSEARCH_HEAP_SIZE=2g \
+  -e OPENSEARCH_PLUGINS="http://miniserve.lingo.local/opensearch-plugins/analysis-ik-1.3.19.zip" \
   -e TZ=Asia/Shanghai \
   registry.lingo.local/bitnami/opensearch:1.3.19
 ```
@@ -192,6 +218,17 @@ sudo rm -rf /data/container/opensearch-dashboards1
 docker pull bitnami/opensearch:2.18.0
 ```
 
+**下载插件（可选）**
+
+如果不安装插件可以跳过此步骤。
+
+将下载的插件上传到本地的HTTP服务上面，方便后续安装的时候加载插件。
+
+```
+mkdir plugins
+wget -O plugins/analysis-ik-2.18.0.zip https://release.infinilabs.com/analysis-ik/stable/opensearch-analysis-ik-2.18.0.zip
+```
+
 **推送到仓库**
 
 ```
@@ -226,12 +263,27 @@ EOF
 
 **运行服务**
 
+普通模式
+
 ```
 docker run -d --name ateng-opensearch2 \
   -p 20019:9200 --restart=always \
   -v /data/container/opensearch2/config/my_opensearch.yml:/opt/bitnami/opensearch/conf/my_opensearch.yml:ro \
   -v /data/container/opensearch2/data:/bitnami/opensearch/data \
   -e OPENSEARCH_HEAP_SIZE=2g \
+  -e TZ=Asia/Shanghai \
+  registry.lingo.local/bitnami/opensearch:2.18.0
+```
+
+插件模式
+
+```
+docker run -d --name ateng-opensearch2 \
+  -p 20019:9200 --restart=always \
+  -v /data/container/opensearch2/config/my_opensearch.yml:/opt/bitnami/opensearch/conf/my_opensearch.yml:ro \
+  -v /data/container/opensearch2/data:/bitnami/opensearch/data \
+  -e OPENSEARCH_HEAP_SIZE=2g \
+  -e OPENSEARCH_PLUGINS="http://miniserve.lingo.local/opensearch-plugins/analysis-ik-2.18.0.zip" \
   -e TZ=Asia/Shanghai \
   registry.lingo.local/bitnami/opensearch:2.18.0
 ```

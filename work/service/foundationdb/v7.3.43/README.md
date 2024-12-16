@@ -1,10 +1,14 @@
-# FoundationDB 安装与配置指南
+# FoundationDB
 
 FoundationDB 是一个开源的分布式数据库系统，最初由 FoundationDB 公司开发，后被 Apple 收购并开源。它的设计目标是高性能、可扩展性和强一致性，并且支持多种数据模型。通过其独特的架构，FoundationDB 提供了一个统一的、键值对存储的底层数据库，其他数据模型（如文档、关系型等）都可以基于它构建。
 
-https://github.com/apple/foundationdb
+- [GitHub地址](https://github.com/apple/foundationdb)
 
-https://apple.github.io/foundationdb/configuration.html?highlight=fdbserver#fdbserver-section
+- [官方文档](https://apple.github.io/foundationdb/configuration.html?highlight=fdbserver#fdbserver-section)
+
+## 前置条件
+
+- 参考：[基础配置](/work/service/00-basic/)
 
 ## 单节点安装
 
