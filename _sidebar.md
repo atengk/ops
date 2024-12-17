@@ -38,7 +38,8 @@
             - [安装单机模式](/work/service/elastic/elasticsearch/standalone/)
             - [安装集群模式](/work/service/elastic/elasticsearch/cluster/)
         - OpenSearch
-            - [安装文档](/work/service/opensearch/)
+            - [1.x安装文档](/work/service/opensearch/v1.3.19/)
+            - [2.x安装文档](/work/service/opensearch/v2.18.0/)
             - [使用文档](/work/service/opensearch/OPS.md)
         - CoreDNS
             - [安装文档](/work/service/coredns/)
@@ -97,7 +98,7 @@
         - [kubeadm](/work/kubernetes/deploy/kubeadm/v1.23.12/)
         - [kubevirt](/work/kubernetes/deploy/kubevirt/deploy/v1.3.0/)
     - 镜像仓库
-        - [Harbor](/work/kubernetes/deploy/harbor/v2.11.1/)
+        - [Harbor](/work/kubernetes/deploy/harbor/v2.12.0/)
         - [Registry](/work/kubernetes/deploy/harbor/registry/)
     - 存储服务
         - openebs
@@ -158,7 +159,6 @@
                 - [Elastic View可视化](/work/kubernetes/service/elasticsearch/elastic-view/)
             - OpenSearch1
                 - [单机模式](/work/kubernetes/service/opensearch/v1.3.19/all-in-one/)
-                - [HTTPS模式](/work/kubernetes/service/opensearch/v1.3.19/https/)
                 - [HTTPS模式(自定义证书)](/work/kubernetes/service/opensearch/v1.3.19/https-custom/)
                 - [Elastic View可视化](/work/kubernetes/service/opensearch/elastic-view/)
             - OpenSearch2
