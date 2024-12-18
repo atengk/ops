@@ -127,8 +127,8 @@ FE的Follower
 > https://dev.mysql.com/downloads/mysql/
 
 ```
-tar -xvf mysql-8.4.2-linux-glibc2.28-x86_64.tar.xz -C /usr/local/software/
-ln -s /usr/local/software/mysql-8.4.2-linux-glibc2.28-x86_64 /usr/local/software/mysql
+tar -xvf mysql-8.4.3-linux-glibc2.28-x86_64.tar.xz -C /usr/local/software/
+ln -s /usr/local/software/mysql-8.4.3-linux-glibc2.28-x86_64 /usr/local/software/mysql
 ```
 
 配置环境变量
@@ -146,7 +146,7 @@ source ~/.bash_profile
 
 ```
 $ mysql --version
-mysql  Ver 8.4.2 for Linux on x86_64 (MySQL Community Server - GPL)
+mysql  Ver 8.4.3 for Linux on x86_64 (MySQL Community Server - GPL)
 ```
 
 连接FE
