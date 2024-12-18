@@ -319,3 +319,18 @@
         - [单机](work/bigdata/06-dolphinscheduler/standalone/)
         - [集群](work/bigdata/06-dolphinscheduler/cluster/)
 
+- 系统和软件
+    - 操作系统
+        - [Windows](/work/syssoft/os/windows/)
+        - [OpenEuler](/work/syssoft/os/openeuler/)
+        - [CentOS](/work/syssoft/os/centos/)
+    - 开发软件
+        - [JDK](/work/syssoft/dev/jdk/)
+        - [Maven](/work/syssoft/dev/maven/)
+        - [Git](/work/syssoft/dev/git/)
+        - [IntelliJ IDEA ](/work/syssoft/dev/idea/)
+        - [DataGrip](/work/syssoft/dev/datagrip/)
+    - 系统软件
+        - [常用软件](/work/syssoft/software/primary/)
+        - [其他软件](/work/syssoft/software/others/)
+
