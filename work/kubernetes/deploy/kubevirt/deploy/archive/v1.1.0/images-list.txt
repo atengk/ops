@@ -1,0 +1,5 @@
+quay.io/kubevirt/virt-launcher:v1.1.0
+quay.io/kubevirt/virt-api:v1.1.0
+quay.io/kubevirt/virt-operator:v1.1.0
+quay.io/kubevirt/virt-handler:v1.1.0
+quay.io/kubevirt/virt-controller:v1.1.0

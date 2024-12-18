@@ -1,0 +1,6 @@
+selectdb/doris.fe-ubuntu:3.0.3
+selectdb/doris.be-ubuntu:3.0.3
+selectdb/doris.ms-ubuntu:3.0.3
+selectdb/doris.k8s-operator:24.1.0
+selectdb/alpine:latest
+bitnami/mysql:8.4.3

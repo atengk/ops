@@ -1,0 +1,14 @@
+##kubevirt
+registry.lingo.local/kubevirt/virt-launcher:v0.59.2
+registry.lingo.local/kubevirt/virt-api:v0.59.2
+registry.lingo.local/kubevirt/virt-operator:v0.59.2
+registry.lingo.local/kubevirt/virt-handler:v0.59.2
+registry.lingo.local/kubevirt/virt-controller:v0.59.2
+registry.lingo.local/kubevirt/cdi-apiserver:v1.56.0
+registry.lingo.local/kubevirt/cdi-cloner:v1.56.0
+registry.lingo.local/kubevirt/cdi-controller:v1.56.0
+registry.lingo.local/kubevirt/cdi-importer:v1.56.0
+registry.lingo.local/kubevirt/cdi-operator:v1.56.0
+registry.lingo.local/kubevirt/cdi-uploadproxy:v1.56.0
+registry.lingo.local/kubevirt/cdi-uploadserver:v1.56.0
+

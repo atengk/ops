@@ -1,0 +1,3 @@
+foundationdb/fdb-kubernetes-operator:v1.52.0
+foundationdb/foundationdb:7.1.38
+foundationdb/foundationdb-kubernetes-sidecar:7.1.38-1

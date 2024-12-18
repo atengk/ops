@@ -1,0 +1,1 @@
+kubelet-1.23.12 kubeadm-1.23.12 kubectl-1.23.12

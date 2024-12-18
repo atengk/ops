@@ -1,0 +1,2 @@
+bitnami/rabbitmq:4.0.2
+bitnami/os-shell:12

@@ -1,0 +1,6 @@
+##juicefs-images
+registry.lingo.local/kubernetes/juicefs-csi-driver:v0.17.1
+registry.lingo.local/kubernetes/juicefs-mount:v1.0.0-4.8.0
+registry.lingo.local/kubernetes/k8scsi-livenessprobe:v1.1.0
+registry.lingo.local/kubernetes/k8scsi-csi-node-driver-registrar:v2.1.0
+registry.lingo.local/kubernetes/k8scsi-csi-provisioner:v1.6.0

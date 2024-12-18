@@ -1,0 +1,2 @@
+bitnami/etcd:3.5.17
+bitnami/os-shell:12

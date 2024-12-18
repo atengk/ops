@@ -1,0 +1,4 @@
+bitnami/redis-exporter:1.66.0
+bitnami/redis:7.4.1
+bitnami/redis-sentinel:7.4.1
+bitnami/redis-cluster:7.4.1

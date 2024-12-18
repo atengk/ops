@@ -1,0 +1,6 @@
+bitnami/kubectl:1.31.2
+bitnami/nginx:1.27.2
+bitnami/os-shell:12
+bitnami/mongodb-exporter:0.41.2
+bitnami/mongodb:8.0.3
+bitnami/mongodb-sharded:8.0.3

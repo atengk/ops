@@ -1,0 +1,5 @@
+bitnami/os-shell:12
+bitnami/pgpool:4.5.4
+bitnami/postgres-exporter:0.16.0
+bitnami/postgresql:17.2.0
+bitnami/postgresql-repmgr:17.2.0

@@ -1,0 +1,3 @@
+9a0d5dcd74442213bd2eca0211abae051f444861ccdd1be814dfb9bc75341c30  ventoy-1.0.88-linux.tar.gz
+00e6bca25c17a97b92b22aa876ea56e92f8a9216fa92ab2e1c93373498509f1e  ventoy-1.0.88-livecd.iso
+be6ea0c14d89a47d8f6e158bcfd43efdc1580dcff9c2e0d249a1a1085b5a2548  ventoy-1.0.88-windows.zip

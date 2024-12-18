@@ -1,0 +1,3 @@
+bitnami/os-shell:12
+bitnami/opensearch:2.18.0
+bitnami/opensearch-dashboards:2.18.0

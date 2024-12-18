@@ -1,0 +1,3 @@
+bitnami/mysqld-exporter:0.15.1
+bitnami/os-shell:12
+bitnami/mysql:8.4.3

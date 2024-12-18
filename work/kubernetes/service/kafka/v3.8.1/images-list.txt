@@ -1,0 +1,4 @@
+bitnami/kubectl:1.31.2
+bitnami/kafka:3.8.1
+bitnami/jmx-exporter:1.0.1
+bitnami/os-shell:12

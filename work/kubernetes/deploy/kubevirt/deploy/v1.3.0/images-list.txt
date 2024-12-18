@@ -1,0 +1,6 @@
+quay.io/kubevirt/virt-launcher:v1.3.0
+quay.io/kubevirt/virt-api:v1.3.0
+quay.io/kubevirt/virt-operator:v1.3.0
+quay.io/kubevirt/virt-handler:v1.3.0
+quay.io/kubevirt/virt-controller:v1.3.0
+registry.lingo.local/kubevirt/virtvnc:latest

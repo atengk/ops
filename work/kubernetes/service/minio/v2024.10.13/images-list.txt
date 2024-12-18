@@ -1,0 +1,2 @@
+bitnami/minio-client:2024.10.8
+bitnami/minio:2024.10.13

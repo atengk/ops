@@ -21,7 +21,7 @@
 !*.md
 !*.yaml
 !*.sh
-!*.text
+!*.txt
 !*Dockerfile*
 !/work/
  

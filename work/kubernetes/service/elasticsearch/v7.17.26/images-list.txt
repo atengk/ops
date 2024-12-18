@@ -1,0 +1,4 @@
+bitnami/os-shell:12
+bitnami/elasticsearch:7.17.26
+bitnami/kibana:7.17.26
+bitnami/elasticsearch-exporter:1.8.0

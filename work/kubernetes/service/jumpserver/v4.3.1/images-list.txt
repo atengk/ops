@@ -1,0 +1,5 @@
+docker.io/jumpserver/core:v4.3.1-ce
+docker.io/jumpserver/koko:v4.3.1-ce
+docker.io/jumpserver/lion:v4.3.1-ce
+docker.io/jumpserver/chen:v4.3.1-ce
+docker.io/jumpserver/web:v4.3.1-ce

@@ -1,0 +1,11 @@
+bitnami/os-shell:12
+bitnami/nginx:1.27.2
+bitnami/harbor-portal:2.12.0
+bitnami/harbor-core:2.12.0
+bitnami/harbor-jobservice:2.12.0
+bitnami/harbor-registry:2.12.0
+bitnami/harbor-registryctl:2.12.0
+bitnami/harbor-adapter-trivy:2.12.0
+bitnami/harbor-exporter:2.12.0
+bitnami/postgresql:14.13.0
+bitnami/redis:7.4.1

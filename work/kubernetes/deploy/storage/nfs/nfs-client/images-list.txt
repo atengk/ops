@@ -1,0 +1,4 @@
+#registry.k8s.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2
+## 上面的无法下载，使用镜像下面的镜像代理
+k8s.m.daocloud.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2
+busybox:1.35.0

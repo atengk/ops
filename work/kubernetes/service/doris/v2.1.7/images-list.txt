@@ -1,0 +1,5 @@
+selectdb/doris.fe-ubuntu:2.1.7
+selectdb/doris.be-ubuntu:2.1.7
+selectdb/doris.broker-ubuntu:2.1.5
+selectdb/doris.k8s-operator:1.6.1
+selectdb/alpine:latest

@@ -1,0 +1,2 @@
+bitnami/gitea:1.22.3
+bitnami/os-shell:12

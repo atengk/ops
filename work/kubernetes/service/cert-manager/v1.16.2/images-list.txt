@@ -1,0 +1,5 @@
+bitnami/cert-manager:1.16.2
+bitnami/acmesolver:1.16.2
+bitnami/cert-manager-webhook:1.16.2
+bitnami/cainjector:1.16.2
+bitnami/acmesolver:1.16.2

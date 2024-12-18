@@ -1,0 +1,7 @@
+quay.io/kubevirt/cdi-apiserver:v1.59.0
+quay.io/kubevirt/cdi-cloner:v1.59.0
+quay.io/kubevirt/cdi-controller:v1.59.0
+quay.io/kubevirt/cdi-importer:v1.59.0
+quay.io/kubevirt/cdi-operator:v1.59.0
+quay.io/kubevirt/cdi-uploadproxy:v1.59.0
+quay.io/kubevirt/cdi-uploadserver:v1.59.0
