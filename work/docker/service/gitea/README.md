@@ -6,7 +6,7 @@ Gitea 是一个轻量级、开源的 Git 代码托管平台，提供类似 GitHu
 
 **前提条件**
 
-- 需要 `postgresql` 数据库
+- 需要 [postgresql](/work/docker/service/postgresql/) 数据库
 
 **下载镜像**
 
@@ -32,6 +32,18 @@ docker save registry.lingo.local/bitnami/gitea:1.22.3 | gzip -c > image-gitea_1.
 ```
 sudo mkdir -p /data/container/gitea/data
 sudo chown -R 1001 /data/container/gitea
+```
+
+**创建数据库**
+
+该步骤仅供参考，具体根据实际情况而定
+
+```
+docker exec -it ateng-postgresql bash
+export PGPASSWORD=Admin@123
+psql --host 10.244.172.143 -U postgres -d postgres -p 20002
+CREATE USER gitea WITH PASSWORD 'Gitea@123';
+CREATE DATABASE ateng_gitea OWNER gitea;
 ```
 
 **运行服务**

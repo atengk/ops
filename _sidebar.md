@@ -87,6 +87,7 @@
         - [windows](/work/docker/service/windows/)
         - [elasticsearch](/work/docker/service/elasticsearch/)
         - [opensearch](/work/docker/service/opensearch/)
+        - [elastic-view](/work/docker/service/elastic-view/)
         - [jenkins](/work/docker/service/jenkins/)
 - Kubernetes
     - 使用文档
@@ -170,6 +171,8 @@
                 - [集群模式](/work/kubernetes/service/etcd/v3.5.17/basic/)
                 - [认证模式](/work/kubernetes/service/etcd/v3.5.17/http-auth/)
                 - [HTTPS模式](/work/kubernetes/service/etcd/v3.5.17/https/)
+            - FoundationDB
+                - [安装文档](/work/kubernetes/service/foundationdb/v7.1.38/)
         - 消息队列
             - RabbitMQ
                 - [集群模式](/work/kubernetes/service/rabbitmq/v4.0.2/)
@@ -208,10 +211,14 @@
             - [Flink](/work/kubernetes/service/flink/v1.19.1/)
             - [Spark](/work/kubernetes/service/spark/v3.5.1/)
             - [DolphinScheduler](/work/kubernetes/service/dolphinscheduler/)
-            - Doris
-                - [单机模式](/work/kubernetes/service/doris/v2.1.6/standalone/)
-                - [集群模式](/work/kubernetes/service/doris/v2.1.6/cluster/)
-                - [集群模式All](/work/kubernetes/service/doris/v2.1.6/cluster-all/)
+            - Doris2
+                - [单机模式](/work/kubernetes/service/doris/v2.1.7/standalone/)
+                - [集群模式](/work/kubernetes/service/doris/v2.1.7/cluster/)
+                - [集群模式All](/work/kubernetes/service/doris/v2.1.7/cluster-all/)
+            - Doris3
+                - [单机模式](/work/kubernetes/service/doris/v3.0.3/standalone/)
+                - [集群模式](/work/kubernetes/service/doris/v3.0.3/cluster/)
+                - [集群模式All](/work/kubernetes/service/doris/v3.0.3/cluster-all/)
         - 负载均衡和网络
             - [MetalLB](/work/kubernetes/service/metallb/v0.14.8/)
             - [External-DNS](/work/kubernetes/service/external-dns/v0.15.0/)
