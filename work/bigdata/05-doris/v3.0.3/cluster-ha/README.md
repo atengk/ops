@@ -59,7 +59,7 @@ mycluster:abcd1234abcd5678@bigdata01:4500,bigdata02:4500,bigdata03:4500
 
 **检查JDK版本**
 
-Doris3要求JDK版本`>=17`
+需要JDK17版本，如果有多个JDK版本，不用配置全局环境变量也可以，后面会在FE、BE的配置文件指定JAVA_HOEM。
 
 ```
 $ java -version
@@ -242,15 +242,7 @@ $DORIS_FE_HOME/bin/start_fe.sh --daemon
 **检查服务**
 
 ```
-curl http://bigdata01:9040/api/bootstrap
-```
-
-**访问FE**
-
-```
-URL: http://bigdata01:9040/
-Username: root
-Password: 密码为空
+curl http://127.0.0.1:9040/api/bootstrap
 ```
 
 **启动FE的Follower**
@@ -626,6 +618,8 @@ sudo systemctl status doris-backend.service
 
 ## 设置用户密码
 
+Root 用户和 Admin 用户都属于 Apache Doris 安装完默认存在的 2 个账户。其中 Root 用户拥有整个集群的超级权限，可以对集群完成各种管理操作，比如添加节点，去除节点。Admin 用户没有管理权限，是集群中的 Superuser，拥有除集群管理相关以外的所有权限。建议只有在需要对集群进行运维管理超级权限时才使用 Root 权限。
+
 **连接FE**
 
 ```
@@ -660,12 +654,12 @@ SHOW ALL GRANTS;
 
 
 
-## 使用服务
+## 创建数据
 
 **连接FE**
 
 ```
-mysql -uroot -P9030 -h127.0.0.1
+mysql -uroot -P9030 -h127.0.0.1 -p
 ```
 
 **查看计算组**
@@ -762,7 +756,7 @@ sudo systemctl reload nginx
 **访问服务**
 
 ```
-mysql -uroot -P9031 -hbigdata01 -p
+mysql -uadmin -pAdmin@123 -h192.168.1.113 -P9031
 ```
 
 
@@ -799,6 +793,27 @@ sudo systemctl reload haproxy
 **访问服务**
 
 ```
-mysql -uroot -P9031 -hbigdata01 -p
+mysql -uadmin -pAdmin@123 -h192.168.1.113 -P9031
 ```
 
+
+
+## 使用服务
+
+**使用HTTP**
+
+```
+URL: http://192.168.1.131:9040
+Username: admin
+Password: Admin@123
+```
+
+**使用mysql协议**
+
+```
+Address: 192.168.1.131:9031
+Username: admin
+Password: Admin@123
+```
+
+例如使用mysql客户端：`mysql -uadmin -pAdmin@123 -h192.168.1.113 -P9031`

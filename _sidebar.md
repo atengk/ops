@@ -333,4 +333,6 @@
     - 系统软件
         - [常用软件](/work/syssoft/software/primary/)
         - [其他软件](/work/syssoft/software/others/)
-
+    - 相关文档
+        - [技术文档](/work/syssoft/doc/nb/)
+        - [其他文档](/work/syssoft/doc/others/)

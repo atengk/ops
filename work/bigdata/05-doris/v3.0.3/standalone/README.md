@@ -21,7 +21,7 @@ Doris 存算分离架构：
 
 | IP地址        | 主机名    | 描述                                    |
 | ------------- | --------- | --------------------------------------- |
-| 192.168.1.112 | bigdata01 | FoundationDB、DorisFE、DorisBE、DorisMS |
+| 192.168.1.131 | bigdata01 | FoundationDB、DorisFE、DorisBE、DorisMS |
 
 
 
@@ -65,7 +65,7 @@ mycluster:abcd1234abcd5678@bigdata01:4500
 
 **检查JDK版本**
 
-Doris3要求JDK版本`>=17`
+需要JDK17版本，如果有多个JDK版本，不用配置全局环境变量也可以，后面会在FE、BE的配置文件指定JAVA_HOEM。
 
 ```
 $ java -version
@@ -231,15 +231,7 @@ $DORIS_FE_HOME/bin/start_fe.sh --daemon
 **检查服务**
 
 ```
-curl http://bigdata01:9040/api/bootstrap
-```
-
-**访问FE**
-
-```
-URL: http://bigdata01:9040/
-Username: root
-Password: 密码为空
+curl http://127.0.0.1:9040/api/bootstrap
 ```
 
 
@@ -564,6 +556,8 @@ sudo systemctl status doris-backend.service
 
 ## 设置用户密码
 
+Root 用户和 Admin 用户都属于 Apache Doris 安装完默认存在的 2 个账户。其中 Root 用户拥有整个集群的超级权限，可以对集群完成各种管理操作，比如添加节点，去除节点。Admin 用户没有管理权限，是集群中的 Superuser，拥有除集群管理相关以外的所有权限。建议只有在需要对集群进行运维管理超级权限时才使用 Root 权限。
+
 **连接FE**
 
 ```
@@ -598,7 +592,7 @@ SHOW ALL GRANTS;
 
 
 
-## 使用服务
+## 创建数据
 
 **连接FE**
 
@@ -646,4 +640,26 @@ INSERT INTO kongyu.user_info (id, name, age, city) VALUES
 ```
 SELECT * FROM kongyu.user_info;
 ```
+
+
+
+## 使用服务
+
+**使用HTTP**
+
+```
+URL: http://192.168.1.131:9040
+Username: admin
+Password: Admin@123
+```
+
+**使用mysql协议**
+
+```
+Address: 192.168.1.131:9030
+Username: admin
+Password: Admin@123
+```
+
+例如使用mysql客户端：`mysql -uadmin -pAdmin@123 -h192.168.1.113 -P9030`
 

@@ -187,6 +187,30 @@ INSERT INTO kongyu.user_info (id, name, age, city) VALUES
 SELECT * FROM kongyu.user_info;
 ```
 
+### 使用服务
+
+**使用HTTP**
+
+端口是 `service/doris-cluster-fe-service` 的 8030 端口的nodePort
+
+```
+URL: http://192.168.1.10:36055
+Username: admin
+Password: Admin@123
+```
+
+**使用mysql协议**
+
+端口是 `service/doris-cluster-fe-service` 的 9030 端口的nodePort
+
+```
+Address: 192.168.1.10:29291
+Username: admin
+Password: Admin@123
+```
+
+例如使用mysql客户端：`mysql -uadmin -pAdmin@123 -h192.168.1.10 -P29291`
+
 
 
 ## 创建存算分离集群
@@ -359,6 +383,30 @@ INSERT INTO kongyu.user_info (id, name, age, city) VALUES
 ```
 SELECT * FROM kongyu.user_info;
 ```
+
+### 使用服务
+
+**使用HTTP**
+
+端口是 `service/doris-cluster-fe` 的 8030 端口的nodePort
+
+```
+URL: http://192.168.1.10:36055
+Username: admin
+Password: Admin@123
+```
+
+**使用mysql协议**
+
+端口是 `service/doris-cluster-fe` 的 9030 端口的nodePort
+
+```
+Address: 192.168.1.10:29291
+Username: admin
+Password: Admin@123
+```
+
+例如使用mysql客户端：`mysql -uadmin -pAdmin@123 -h192.168.1.10 -P29291`
 
 
 

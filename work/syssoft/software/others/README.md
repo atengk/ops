@@ -13,3 +13,18 @@
 - [GitHub](https://github.com/Tichau/FileConverter)
 - [博客](https://mp.weixin.qq.com/s/zN3RZoMrVt4WZyOnHb1RaQ)
 
+
+
+### VMware ESXi全套安装包下载网站
+
+- FTP地址：ftp://cios.dhitechnical.com/
+- [博客](https://mp.weixin.qq.com/s/1hTGQWSQaam9RCUv7g1jeg)
+
+
+
+### TikTokDownloader
+
+🔥 **TikTok 主页/合辑/直播/视频/图集/原声；抖音主页/视频/图集/收藏/直播/原声/合集/~~评论~~/~~账号~~/~~搜索~~/热榜数据采集工具：**完全开源，基于 HTTPX 模块实现的免费工具；批量下载抖音账号发布、喜欢、收藏作品；批量下载 TikTok 账号发布、喜欢作品；下载抖音链接或 TikTok 链接作品；获取抖音直播推流地址；下载抖音直播视频；获取 TikTok 直播推流地址；下载 TikTok 直播视频；~~采集抖音作品评论数据~~；批量下载抖音合集作品；批量下载 TikTok 合辑作品；~~采集抖音账号详细数据~~；~~采集抖音用户 / 作品 / 直播搜索结果~~；采集抖音热榜数据。
+
+- [GitHub](https://github.com/JoeanAmier/TikTokDownloader)
+

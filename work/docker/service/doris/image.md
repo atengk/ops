@@ -8,8 +8,6 @@ version=2.1.7
 cat > images-list.txt <<EOF
 selectdb/doris.fe-ubuntu:${version}
 selectdb/doris.be-ubuntu:${version}
-selectdb/doris.k8s-operator:24.1.0
-selectdb/alpine:latest
 bitnami/mysql:8.4.3
 EOF
 ```

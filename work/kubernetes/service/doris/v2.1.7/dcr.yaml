@@ -10,16 +10,20 @@ data:
   be.conf: |
     CUR_DATE=`date +%Y%m%d-%H%M%S`
     PPROF_TMPDIR="$DORIS_HOME/log/"
-    JAVA_OPTS="-Xss1024m -Xmx10240m -DlogPath=$DORIS_HOME/log/jni.log -Xloggc:$DORIS_HOME/log/be.gc.log.$CUR_DATE -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.java.command=DorisBE -XX:-CriticalJNINatives -DJDBC_MIN_POOL=1 -DJDBC_MAX_POOL=100 -DJDBC_MAX_IDLE_TIME=300000 -DJDBC_MAX_WAIT_TIME=5000"
-    JEMALLOC_CONF="percpu_arena:percpu,background_thread:true,metadata_thp:auto,muzzy_decay_ms:15000,dirty_decay_ms:15000,oversize_threshold:0,lg_tcache_max:20,prof:false,lg_prof_interval:32,lg_prof_sample:19,prof_gdump:false,prof_accum:false,prof_leak:false,prof_final:false"
-    JEMALLOC_PROF_PRFIX=""
-    # INFO, WARNING, ERROR, FATAL
-    sys_log_level = INFO
+    JAVA_OPTS="-Xms2048m -Xmx8192m -Dfile.encoding=UTF-8 -DlogPath=$LOG_DIR/jni.log -Xloggc:$DORIS_HOME/log/be.gc.log.$CUR_DATE -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.security.krb5.debug=true -Dsun.java.command=DorisBE -XX:-CriticalJNINatives"
+    JAVA_HOME=/usr/lib/jvm/java
+    JEMALLOC_CONF="percpu_arena:percpu,background_thread:true,metadata_thp:auto,muzzy_decay_ms:5000,dirty_decay_ms:5000,oversize_threshold:0,prof:false,lg_prof_interval:-1"
+    JEMALLOC_PROF_PRFIX="jemalloc_heap_profile_"
     # ports for admin, web, heartbeat service
     be_port = 9060
     webserver_port = 8040
     heartbeat_service_port = 9050
     brpc_port = 8060
+    arrow_flight_sql_port = -1
+    storage_root_path = ${DORIS_HOME}/storage
+    jdbc_drivers_dir = ${DORIS_HOME}/jdbc_drivers
+    # INFO, WARNING, ERROR, FATAL
+    sys_log_level = INFO
   hdfs-site.xml: |
     <?xml version="1.0" encoding="UTF-8"?>
     <configuration>
@@ -41,18 +45,23 @@ data:
   fe.conf: |
     CUR_DATE=`date +%Y%m%d-%H%M%S`
     LOG_DIR = ${DORIS_HOME}/log
-    JAVA_OPTS="-Xss1024m -Xmx8192m -Djavax.security.auth.useSubjectCredsOnly=false -XX:+UseMembar -XX:SurvivorRatio=8 -XX:MaxTenuringThreshold=7 -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:+CMSClassUnloadingEnabled -XX:-CMSParallelRemarkEnabled -XX:CMSInitiatingOccupancyFraction=80 -XX:SoftRefLRUPolicyMSPerMB=0 -Xloggc:$DORIS_HOME/log/fe.gc.log.$CUR_DATE"
-    # INFO, WARN, ERROR, FATAL
-    sys_log_level = WARN
-    # NORMAL, BRIEF, ASYNC
-    sys_log_mode = BRIEF
-    qe_max_connection = 10240
-    qe_query_timeout_second = 300
-    qe_slow_log_ms = 5000
+    JAVA_HOME=/usr/lib/jvm/java
+    JAVA_OPTS="-Xms2048m -Xmx8192m -Dfile.encoding=UTF-8 -Djavax.security.auth.useSubjectCredsOnly=false -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:$LOG_DIR/fe.gc.log.$CUR_DATE -Dlog4j2.formatMsgNoLookups=true"
+    meta_dir = ${DORIS_HOME}/doris-meta
+    jdbc_drivers_dir = ${DORIS_HOME}/jdbc_drivers
     http_port = 8030
     rpc_port = 9020
     query_port = 9030
     edit_log_port = 9010
+    arrow_flight_sql_port = -1
+    log_roll_size_mb = 1024
+    # INFO, WARN, ERROR, FATAL
+    sys_log_level = WARN
+    # NORMAL, BRIEF, ASYNC
+    sys_log_mode = NORMAL
+    qe_max_connection = 1024
+    qe_query_timeout_second = 300
+    qe_slow_log_ms = 5000
     enable_fqdn_mode = true
   hdfs-site.xml: |
     <?xml version="1.0" encoding="UTF-8"?>
@@ -137,7 +146,7 @@ spec:
       resolveKey: be.conf
     limits:
       cpu: 8
-      memory: 16Gi
+      memory: 8Gi
     requests:
       cpu: 100m
       memory: 256Mi
