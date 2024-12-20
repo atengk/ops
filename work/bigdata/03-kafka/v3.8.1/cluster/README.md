@@ -1,8 +1,10 @@
-# 安装Kafka3
+# Kafka3
 
-> Kafka with KRaft 引入了一种新的分布式协调协议，称为 KRaft，以替代传统的 ZooKeeper。KRaft 提供了更简化的架构，将 Kafka 的元数据存储在一组专用的 Kafka brokers 中，而不是依赖外部的 ZooKeeper 集群。
->
-> https://kafka.apache.org/
+Kafka with KRaft 引入了一种新的分布式协调协议，称为 KRaft，以替代传统的 ZooKeeper。KRaft 提供了更简化的架构，将 Kafka 的元数据存储在一组专用的 Kafka brokers 中，而不是依赖外部的 ZooKeeper 集群。
+
+- [官网链接](https://kafka.apache.org/)
+
+
 
 文档使用以下3台服务器，具体服务分配见描述的进程
 
@@ -14,16 +16,41 @@
 
 
 
-## 基础环境配置
+## 基础配置
 
-解压软件包
+### 前置要求
+
+- 参考[基础配置文档](/work/bigdata/00-basic/)
+
+### 安装JDK17
+
+参考: [JDK17安装文档](/work/bigdata/01-jdk/jdk17/)
+
+**检查JDK版本**
+
+需要JDK17版本，如果有多个JDK版本，不用配置全局环境变量也可以，后面会在配置文件指定JAVA_HOEM。
 
 ```
-tar -zxvf kafka_2.13-3.8.0.tgz -C /usr/local/software/
-ln -s /usr/local/software/kafka_2.13-3.8.0 /usr/local/software/kafka
+ll /usr/local/software/jdk-17.0.13+11/
+ln -s /usr/local/software/jdk-17.0.13+11/ /usr/local/software/jdk17
 ```
 
-配置环境变量
+### 安装服务
+
+**下载软件包**
+
+```
+wget https://dlcdn.apache.org/kafka/3.8.1/kafka_2.13-3.8.1.tgz
+```
+
+**解压软件包**
+
+```
+tar -zxvf kafka_2.13-3.8.1.tgz -C /usr/local/software/
+ln -s /usr/local/software/kafka_2.13-3.8.1 /usr/local/software/kafka
+```
+
+**配置环境变量**
 
 ```
 cat >> ~/.bash_profile <<"EOF"
@@ -38,9 +65,9 @@ source ~/.bash_profile
 
 ## 集群配置
 
-> 在bigdata01节点配置文件，然后分发到其他节点上
-
 ### 配置server.properties
+
+在bigdata01节点编辑配置文件，然后分发到其他节点上
 
 ```
 cp $KAFKA_HOME/config/kraft/server.properties{,_bak}
@@ -78,7 +105,7 @@ EOF
 
 ### 分发配置文件
 
-分发配置文件
+**分发配置文件**
 
 ```
 scp $KAFKA_HOME/config/kraft/server.properties bigdata02:$KAFKA_HOME/config/kraft/
@@ -87,16 +114,16 @@ scp $KAFKA_HOME/config/kraft/server.properties bigdata03:$KAFKA_HOME/config/kraf
 
 ### 修改其他节点配置
 
-修改node.id
+**修改node.id**
 
-> 所有server的id在集群中必须保持唯一
+所有server的id在集群中必须保持唯一
 
 ```
 [admin@bigdata02 ~]$ sed -i "s#node.id=.*#node.id=2#" $KAFKA_HOME/config/kraft/server.properties
 [admin@bigdata03 ~]$ sed -i "s#node.id=.*#node.id=3#" $KAFKA_HOME/config/kraft/server.properties
 ```
 
-修改listeners
+**修改listeners**
 
 ```
 [admin@bigdata02 ~]$ sed -i "s#listeners=.*#listeners=CLIENT://bigdata02:9092,CONTROLLER://bigdata02:9093,INTERNAL://bigdata02:9094,EXTERNAL://bigdata02:9095#" $KAFKA_HOME/config/kraft/server.properties
@@ -104,7 +131,7 @@ scp $KAFKA_HOME/config/kraft/server.properties bigdata03:$KAFKA_HOME/config/kraf
 [admin@bigdata03 ~]$ sed -i "s#listeners=.*#listeners=CLIENT://bigdata03:9092,CONTROLLER://bigdata03:9093,INTERNAL://bigdata03:9094,EXTERNAL://bigdata03:9095#" $KAFKA_HOME/config/kraft/server.properties
 ```
 
-修改advertised.listeners
+**修改advertised.listeners**
 
 ```
 [admin@bigdata02 ~]$ sed -i "s#advertised.listeners=.*#advertised.listeners=CLIENT://bigdata02:9092,INTERNAL://bigdata02:9094,EXTERNAL://14.104.200.5:19092#" $KAFKA_HOME/config/kraft/server.properties
@@ -116,17 +143,17 @@ scp $KAFKA_HOME/config/kraft/server.properties bigdata03:$KAFKA_HOME/config/kraf
 
 ### 设置日志目录格式
 
-生成集群 UUID
+**生成集群 UUID**
 
-> 在bigdata01节点生成UUID，用做集群的ID
+在bigdata01节点生成UUID，用做集群的ID
 
 ```
 kafka-storage.sh random-uuid
 ```
 
-格式化目录
+**格式化目录**
 
-> 使用以上生成的UUID，在所有节点格式化目录
+使用以上生成的UUID，在所有节点格式化目录
 
 ```
 kafka-storage.sh format -t NonEOQviS621cjG0UXb7NQ -c $KAFKA_HOME/config/kraft/server.properties
@@ -136,21 +163,24 @@ kafka-storage.sh format -t NonEOQviS621cjG0UXb7NQ -c $KAFKA_HOME/config/kraft/se
 
 ## 启动集群
 
-启动服务
+**启动服务**
 
-> bigdata01: Controller、Broker
->
-> bigdata02: Controller、Broker
->
-> bigdata03: Controller、Broker
->
-> Controller Address: bigdata01:9093
+bigdata01: Controller、Broker
+
+bigdata02: Controller、Broker
+
+bigdata03: Controller、Broker
+
+Controller Address: bigdata01:9093
 
 ```
+export LOG_DIR=/data/service/kafka/logs
+export KAFKA_HEAP_OPTS="-Xmx1g -Xms256m"
+export JAVA_HOME=/usr/local/software/jdk17
 kafka-server-start.sh -daemon $KAFKA_HOME/config/kraft/server.properties
 ```
 
-关闭服务
+**关闭服务**
 
 ```
 kafka-server-stop.sh
@@ -162,21 +192,23 @@ kafka-server-stop.sh
 
 ### Kafka 服务
 
-> bigdata01、bigdata02、bigdata03节点设置
+**编辑配置文件**
+
+bigdata01、bigdata02、bigdata03节点设置
 
 ```
-$ sudo vi /etc/systemd/system/kafka.service
+sudo tee /etc/systemd/system/kafka.service <<"EOF"
 [Unit]
-Description=Kafka Server
+Description=Kafka
 Documentation=https://kafka.apache.org
 After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/usr/local/software/kafka
-Environment="JAVA_HOME=/usr/local/software/jdk1.8.0"
+Environment="JAVA_HOME=/usr/local/software/jdk17"
 Environment="KAFKA_HOME=/usr/local/software/kafka"
 Environment="LOG_DIR=/data/service/kafka/logs"
-Environment="KAFKA_HEAP_OPTS=-Xmx1g -Xms1g"
+Environment="KAFKA_HEAP_OPTS=-Xms1g -Xmx8g"
 ExecStart=/usr/local/software/kafka/bin/kafka-server-start.sh /usr/local/software/kafka/config/kraft/server.properties
 ExecStop=/bin/kill -SIGTERM $MAINPID
 KillSignal=SIGTERM
@@ -187,7 +219,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -200,7 +235,7 @@ sudo systemctl status kafka.service
 
 ## 使用服务
 
-创建topic
+**创建topic**
 
 ```
 kafka-topics.sh --create \
@@ -209,14 +244,14 @@ kafka-topics.sh --create \
     --bootstrap-server bigdata01:9092,bigdata02:9092,bigdata03:9092
 ```
 
-查看topic
+**查看topic**
 
 ```
 kafka-topics.sh --bootstrap-server bigdata01:9092,bigdata02:9092,bigdata03:9092 --list
 kafka-topics.sh --describe --topic quickstart-events --bootstrap-server bigdata01:9092,bigdata02:9092,bigdata03:9092
 ```
 
-写入消息
+**写入消息**
 
 ```
 $ kafka-console-producer.sh --topic quickstart-events --bootstrap-server bigdata01:9092,bigdata02:9092,bigdata03:9092
@@ -224,7 +259,7 @@ This is my first event
 This is my second event
 ```
 
-读取消息
+**读取消息**
 
 ```
 $ kafka-console-consumer.sh --topic quickstart-events --from-beginning --bootstrap-server bigdata01:9092,bigdata02:9092,bigdata03:9092
@@ -232,7 +267,7 @@ This is my first event
 This is my second event
 ```
 
-删除topic
+**删除topic**
 
 ```
 kafka-topics.sh \

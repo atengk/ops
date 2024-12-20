@@ -14,7 +14,7 @@
             - [安装文档](/work/service/juicefs/v1.2.1/)
             - [使用文档](/work/service/juicefs/OPS.md)
         - [备份工具 Restic](/work/service/restic/)
-    - 数据库
+    - 数据存储
         - MySQL
             - [安装文档](/work/service/mysql/v8.4.3/)
             - [编译安装文档](/work/service/mysql/v8.4.3/make/)
@@ -118,7 +118,7 @@
         - kadalu
             - [kadalu](/work/kubernetes/deploy/storage/kadalu/v1.0.0/)
     - 中间件服务
-        - 数据库
+        - 数据存储
             - Redis
                 - [单机模式](/work/kubernetes/service/redis/v7.4.1/standalone/)
                 - [主从模式](/work/kubernetes/service/redis/v7.4.1/replication/)
@@ -263,7 +263,7 @@
         - 基础配置
             - [基础配置](work/bigdata/00-basic/)
         - JDK
-            - [OpenJDK8](/work/bigdata/01-jdk/jdk8/README_OpenJDK.md)
+            - [OpenJDK8](/work/bigdata/01-jdk/jdk8/)
             - [OpenJDK17](/work/bigdata/01-jdk/jdk17/)
             - [OpenJDK21](/work/bigdata/01-jdk/jdk21/)
         - Zookeeper
@@ -273,9 +273,9 @@
             - [集群](work/bigdata/03-hadoop/cluster/)
             - [高可用集群](work/bigdata/03-hadoop/cluster-ha/)
         - Kafka
-            - [单机](work/bigdata/03-kafka/v3.6.1/standalone/)
-            - [集群](work/bigdata/03-kafka/v3.6.1/cluster/)
-            - [高可用集群](work/bigdata/03-kafka/v3.6.1/cluster-ha/)
+            - [单机](work/bigdata/03-kafka/v3.8.1/standalone/)
+            - [集群](work/bigdata/03-kafka/v3.8.1/cluster/)
+            - [高可用集群](work/bigdata/03-kafka/v3.8.1/cluster-ha/)
     - 数据存储
         - HBase
             - [单机](work/bigdata/04-hbase/standalone/)

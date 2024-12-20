@@ -168,7 +168,7 @@ cmake version 3.31.2
 安装以下依赖包
 
 ```
-sudo yum -y install ncurses-devel boost-devel libtirpc-devel bison-devel
+sudo yum -y install ncurses-devel boost-devel libtirpc-devel bison-devel openssl-devel
 ```
 
 在OpenEuler中，还需要安装以下软件包
@@ -181,12 +181,19 @@ sudo yum -y install rpcgen m4
 
 **下载 MySQL 8 源码**
 
+下载boost软件包并解压，MySQL指明需要这个版本，它依赖于该版本的特性和 API
+
+```
+wget https://archives.boost.io/release/1.77.0/source/boost_1_77_0.tar.bz2
+tar -xjf boost_1_77_0.tar.bz2 -C /usr/local/software
+```
+
 在github下载MySQL源码：https://github.com/mysql/mysql-server/tags
 
 ```
-wget https://github.com/mysql/mysql-server/archive/refs/tags/mysql-8.4.3.tar.gz
-tar -zxf mysql-server-mysql-8.4.3.tar.gz
-cd mysql-server-mysql-8.4.3/
+wget https://github.com/mysql/mysql-server/archive/refs/tags/mysql-8.0.40.tar.gz
+tar -zxf mysql-server-mysql-8.0.40.tar.gz
+cd mysql-server-mysql-8.0.40/
 ```
 
 **创建构建目录**
@@ -206,15 +213,18 @@ cd build
 
 ```
 cmake .. \
-  -DCMAKE_INSTALL_PREFIX=/usr/local/software/mysql-8.4.3 \
+  -DCMAKE_INSTALL_PREFIX=/usr/local/software/mysql-8.0.40 \
   -DCMAKE_C_COMPILER=/usr/local/software/gcc-14.2.0/bin/gcc \
-  -DCMAKE_CXX_COMPILER=/usr/local/software/gcc-14.2.0/bin/g++
+  -DCMAKE_CXX_COMPILER=/usr/local/software/gcc-14.2.0/bin/g++ \
+  -DWITH_BOOST=/usr/local/software/boost_1_77_0
 ```
 
 如果是软件源安装的GCC，且版本大于等于10，则不需要指定GCC的路径，使用以下命令
 
 ```
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/software/mysql-8.4.3
+cmake .. \
+  -DCMAKE_INSTALL_PREFIX=/usr/local/software/mysql-8.0.40 \
+  -DWITH_BOOST=/usr/local/software/boost_1_77_0
 ```
 
 **编译 MySQL**
@@ -238,13 +248,13 @@ make install
 **查看目录**
 
 ```
-ll /usr/local/software/mysql-8.4.3
+ll /usr/local/software/mysql-8.0.40
 ```
 
 **查看版本**
 
 ```
-$ /usr/local/software/mysql-8.4.3/bin/mysql --version
-/usr/local/software/mysql-8.4.3/bin/mysql  Ver 8.4.3 for Linux on x86_64 (Source distribution)
+$ /usr/local/software/mysql-8.0.40/bin/mysql --version
+/usr/local/software/mysql-8.0.40/bin/mysql  Ver 8.0.40 for Linux on x86_64 (Source distribution)
 ```
 

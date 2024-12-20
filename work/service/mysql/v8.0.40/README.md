@@ -3,7 +3,7 @@
 MySQL 是一个流行的开源关系型数据库管理系统（RDBMS），广泛用于Web应用、企业系统和数据仓库等场景。它采用结构化查询语言（SQL）进行数据管理，支持多种存储引擎、事务处理和复杂查询操作。MySQL 以高性能、可靠性和易用性著称，同时具有强大的社区支持和广泛的第三方工具兼容性，适合各种规模的应用程序。
 
 - [官网链接](https://www.mysql.com/)
-- [二进制安装文档](https://dev.mysql.com/doc/refman/8.4/en/binary-installation.html)
+- [二进制安装文档](https://dev.mysql.com/doc/refman/8.0/en/binary-installation.html)
 
 ## 前置条件
 
@@ -39,14 +39,22 @@ export MYSQL_GLIBC_VERSION=2.28
 **下载软件包**
 
 ```
-wget https://dev.mysql.com/get/Downloads/MySQL-8.4/mysql-8.4.3-linux-glibc${MYSQL_GLIBC_VERSION}-x86_64.tar.xz
+wget https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.40-linux-glibc${MYSQL_GLIBC_VERSION}-x86_64.tar.xz
 ```
 
 **解压软件包**
 
 ```
-tar -xvf mysql-8.4.3-linux-glibc${MYSQL_GLIBC_VERSION}-x86_64.tar.xz -C /usr/local/software
-ln -s /usr/local/software/mysql-8.4.3-linux-glibc${MYSQL_GLIBC_VERSION}-x86_64 /usr/local/software/mysql
+tar -xvf mysql-8.0.40-linux-glibc${MYSQL_GLIBC_VERSION}-x86_64.tar.xz -C /usr/local/software
+ln -s /usr/local/software/mysql-8.0.40-linux-glibc${MYSQL_GLIBC_VERSION}-x86_64 /usr/local/software/mysql
+```
+
+**安装依赖**
+
+在安装时发现差一个库文件`libnuma.so.1`，安装以下软件包解决该问题问题。使用命令：`ldd $(which mysqld)` 可以查看依赖哪些库文件。
+
+```
+sudo yum -y install numactl-devel
 ```
 
 
