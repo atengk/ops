@@ -195,7 +195,7 @@ df -hT /mnt
 
 ```
 cat >> /etc/fstab <<EOF
-/dev/volumes01/data01 /mnt xfs defaults,nofail 0 2
+/dev/volumes01/data01 /mnt xfs defaults,nofail 0 0
 EOF
 ```
 
@@ -248,18 +248,11 @@ EOF
 修改 `system.conf` 后需要重启系统
 
 ```
-cat << EOF >> /etc/systemd/system.conf
+cat >> /etc/systemd/system.conf <<EOF
 [Manager]
-DefaultTimeoutStartSec=120s
-DefaultTimeoutStopSec=60s
-DefaultRestartSec=30s
-DefaultLimitNOFILE=655360
+DefaultLimitNOFILE=65536
 DefaultLimitNPROC=163840
-CPUAffinity=auto
 DefaultLimitCORE=0
-DefaultLimitMEMLOCK=infinity
-DefaultTasksMax=90%
-DefaultEnvironmentFile=/etc/default/environment
 EOF
 ```
 

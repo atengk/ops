@@ -1,4 +1,4 @@
-# Doris 2.1.4
+# Doris使用文档
 
 数据类型，见[官网文档](https://doris.apache.org/zh-CN/docs/table-design/data-type)
 
@@ -307,8 +307,6 @@ VALUES
 
 **自动分区表**
 
-
-
 ```sql
 CREATE TABLE IF NOT EXISTS example_tbl_auto
 (
@@ -348,7 +346,7 @@ VALUES
 
 ## 自增列
 
-创建一个 Dupliciate 模型表，其中一个 value 列是自增列
+创建一个 Dupliciate 模型表，其中一个 id列是自增列
 
 ```sql
 CREATE TABLE example_tbl_auto_increment1 (
@@ -403,6 +401,54 @@ select * from example_tbl_auto_increment2;
 UPDATE example_tbl_auto_increment2
 SET `name` = 'Updated Name', `value` = 999
 WHERE `id` = 3;
+```
+
+
+
+## 项目实战
+
+### 自增自动分区表
+
+**创建用户表**
+
+其中主键`id`自增、`create_time`数据入库时间，使用 **UNIQUE KEY(`id`, `create_time`)**作为唯一键；AUTO PARTITION根据create_time的月份自动分区，根据id自动哈希分桶；如果BE节点多可以适当增加副本数replication_allocation。
+
+```sql
+drop table if exists kongyu.my_user;
+create table if not exists kongyu.my_user
+(
+    id          bigint      not null auto_increment comment '主键',
+    create_time datetime(3) not null default current_timestamp(3) comment '数据创建时间',
+    name        varchar(20) not null comment '姓名',
+    age         int comment '年龄',
+    score       double comment '分数',
+    birthday    date comment '生日',
+    province    varchar(50) comment '所在省份',
+    city        varchar(50) comment '所在城市',
+    date_time   datetime(3) comment '自定义时间'
+) UNIQUE KEY(`id`, `create_time`)
+AUTO PARTITION BY RANGE (date_trunc(`create_time`, 'month')) ()
+DISTRIBUTED BY HASH(`id`) BUCKETS AUTO
+PROPERTIES (
+"replication_allocation" = "tag.location.default: 1"
+);
+```
+
+**插入数据**
+
+```sql
+insert into kongyu.my_user (name, age, score, birthday, province, city, date_time) values
+('张三', 25, 89.5, '1998-05-12', '北京市', '北京市', '2024-12-23 14:30:00.123'),
+('李四', 30, 95.0, '1993-03-08', '上海市', '上海市', '2024-12-23 15:00:00.123'),
+('王五', 22, 78.0, '2001-11-20', '广东省', '广州市', '2024-12-23 15:30:00.123'),
+('赵六', 28, 88.0, '1995-07-15', '浙江省', '杭州市', '2024-12-23 16:00:00.123'),
+('孙七', 35, 92.5, '1988-02-25', '四川省', '成都市', '2024-12-23 16:30:00.123');
+```
+
+**查看数据**
+
+```
+select * from kongyu.my_user;
 ```
 
 
@@ -664,8 +710,6 @@ doris-streamloader \
 
 ## [Kafka](https://doris.apache.org/zh-CN/docs/data-operate/import/routine-load-manual)
 
-
-
 ```sql
 CREATE ROUTINE LOAD demo.example_routine_load_json ON example_tbl_import2
 PROPERTIES
@@ -718,6 +762,175 @@ RESUME ROUTINE LOAD FOR demo.example_routine_load_json;
 
 ```
 STOP ROUTINE LOAD FOR demo.example_routine_load_json;
+```
+
+
+
+## Routine Load
+
+Doris 可以通过 Routine Load 导入方式持续消费 Kafka Topic 中的数据。在提交 Routine Load 作业后，Doris 会持续运行该导入作业，实时生成导入任务不断消费 Kakfa 集群中指定 Topic 中的消息。
+
+Routine Load 是一个流式导入作业，支持 Exactly-Once 语义，保证数据不丢不重。
+
+- [官网链接1](https://doris.apache.org/zh-CN/docs/data-operate/import/import-way/routine-load-manual)
+- [官网链接2](https://doris.apache.org/zh-CN/docs/sql-manual/sql-statements/data-modification/load-and-export/CREATE-ROUTINE-LOAD)
+
+**创建表**
+
+```sql
+drop table if exists kongyu.my_user;
+create table if not exists kongyu.my_user
+(
+    id          bigint      not null auto_increment comment '主键',
+    create_time datetime(3) not null default current_timestamp(3) comment '数据创建时间',
+    name        varchar(20) not null comment '姓名',
+    age         int comment '年龄',
+    score       double comment '分数',
+    birthday    date comment '生日',
+    province    varchar(50) comment '所在省份',
+    city        varchar(50) comment '所在城市',
+    date_time   datetime(3) comment '自定义时间'
+) UNIQUE KEY(`id`, `create_time`)
+AUTO PARTITION BY RANGE (date_trunc(`create_time`, 'month')) ()
+DISTRIBUTED BY HASH(`id`) BUCKETS AUTO
+PROPERTIES (
+"replication_allocation" = "tag.location.default: 1"
+);
+```
+
+**Kafka推送数据**
+
+创建topic
+
+> 根据实际情况修改partitions和replication
+
+```
+kafka-topics.sh --create \
+    --topic kongyu_my_user \
+    --partitions 3 --replication-factor 1 \
+    --bootstrap-server 192.168.1.10:9094
+```
+
+查看topic
+
+```
+kafka-topics.sh --describe \
+    --topic kongyu_my_user \
+    --bootstrap-server 192.168.1.10:9094
+```
+
+使用producer生产数据
+
+```
+kafka-console-producer.sh \
+    --broker-list 192.168.1.10:9094 \
+    --topic kongyu_my_user
+```
+
+将以下数据粘贴到控制台中
+
+```
+{"name": "张三", "age": 25, "score": 89.5, "birthday": "1998-05-12", "province": "北京市", "city": "北京市", "date_time": "2024-12-23 14:30:00"}
+{"name": "李四", "age": 30, "score": 95.0, "birthday": "1993-03-08", "province": "上海市", "city": "上海市", "date_time": "2024-12-23 15:00:00"}
+{"name": "王五", "age": 22, "score": 78.0, "birthday": "2001-11-20", "province": "广东省", "city": "广州市", "date_time": "2024-12-23 15:30:00"}
+{"name": "赵六", "age": 28, "score": 88.0, "birthday": "1995-07-15", "province": "浙江省", "city": "杭州市", "date_time": "2024-12-23 16:00:00"}
+{"name": "孙七", "age": 35, "score": 92.5, "birthday": "1988-02-25", "province": "四川省", "city": "成都市", "date_time": "2024-12-23 16:30:00"}
+```
+
+**创建任务**
+
+相关参数说明：
+
+- desired_concurrent_number：期望的并发度。
+
+- format：指定导入数据格式，默认是 csv，支持 json 格式。
+
+- strict_mode：关闭严格模式
+
+- max_filter_ratio：采样窗口内，允许的最大过滤率。必须在大于等于0到小于等于1之间。默认值是 0。
+
+- max_batch_rows：每个子任务最多读取的行数。默认是20000000。
+
+- max_error_number：采样窗口内，允许的最大错误行数。必须大于等于 0。默认是 0，即不允许有错误行。
+
+    采样窗口为 max_batch_rows * 10。即如果在采样窗口内，错误行数大于 max_error_number，则会导致例行作业被暂停，需要人工介入检查数据质量问题。被 where 条件过滤掉的行不算错误行。
+
+
+```sql
+CREATE ROUTINE LOAD kongyu.my_user_routine_load ON my_user
+PROPERTIES
+(
+    "desired_concurrent_number" = "5",
+    "format" = "json",
+    "strict_mode" = "false",
+    "max_filter_ratio"= "0.2",
+    "max_batch_rows"="20000000",
+    "max_error_number"="10000"
+)
+FROM KAFKA(
+    "kafka_broker_list" = "192.168.1.10:9094",
+    "kafka_topic" = "kongyu_my_user",
+    "property.group.id" = "my_doris_routine_load",
+    "property.client.id" = "my_doris_routine_load",
+    "property.kafka_default_offsets" = "OFFSET_BEGINNING"
+);
+```
+
+如果Kafka的字段和Doris表中的不一致，可以使用json_root选择数据的根节点，COLUMNS()和jsonpaths按照顺序匹配字段：
+
+```sql
+CREATE ROUTINE LOAD kongyu.my_user_routine_load ON my_user
+COLUMNS(name,age,score,birthday,province,city,date_time)
+PROPERTIES
+(
+    "desired_concurrent_number" = "5",
+    "format" = "json",
+    "strict_mode" = "false",
+    "max_filter_ratio"= "0.2",
+    "max_batch_rows"="20000000",
+    "max_error_number"="10000",
+    "jsonpaths" = "[\"$.name\",\"$.age\",\"$.score\",\"$.birthday\",\"$.province\",\"$.city\",\"$.date_time\"]"
+)
+FROM KAFKA(
+    "kafka_broker_list" = "192.168.1.10:9094",
+    "kafka_topic" = "kongyu_my_user",
+    "property.group.id" = "my_doris_routine_load",
+    "property.client.id" = "my_doris_routine_load",
+    "property.kafka_default_offsets" = "OFFSET_END"
+);
+```
+
+**任务管理**
+
+查看作业
+
+```sql
+SHOW ROUTINE LOAD\G;
+SHOW ROUTINE LOAD FOR kongyu.my_user_routine_load\G;
+```
+
+暂停作业
+
+```sql
+PAUSE ROUTINE LOAD FOR kongyu.my_user_routine_load;
+```
+
+恢复作业
+
+```sql
+RESUME ROUTINE LOAD FOR kongyu.my_user_routine_load;
+```
+
+删除作业
+
+```sql
+STOP ROUTINE LOAD FOR kongyu.my_user_routine_load;
+```
+
+**查看数据**
+
+```sql
+select * from kongyu.my_user;
 ```
 
 

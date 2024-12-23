@@ -1,0 +1,94 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "postgresql"
+postgresql:
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/postgresql-repmgr
+    tag: "16.6.0"
+    pullPolicy: IfNotPresent
+    debug: false
+  replicaCount: 3
+  containerPorts:
+    postgresql: 5432
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  username: postgres
+  password: "Admin@123"
+  database: "postgres"
+  usePgRewind: true
+  audit:
+    logHostname: true
+    logConnections: false
+    logDisconnections: false
+    pgAuditLog: ""
+    pgAuditLogCatalog: "off"
+    clientMinMessages: error
+    logLinePrefix: ""
+    logTimezone: ""
+  maxConnections: "1024"
+  extendedConf: |-
+    max_connections = 1024
+    shared_buffers = 4GB
+    work_mem = 64MB
+    max_parallel_workers_per_gather = 4
+    max_parallel_maintenance_workers = 2
+    max_parallel_workers = 8
+    wal_level = logical
+    log_timezone = Asia/Shanghai
+    timezone = Asia/Shanghai
+
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/postgresql="true"
+    type: "soft"
+    key: "kubernetes.service/postgresql"
+    values:
+      - "true"
+pgpool:
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/pgpool
+    tag: "4.5.4"
+    debug: false
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  replicaCount: 1
+  containerPorts:
+    postgresql: 5432
+volumePermissions:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/os-shell
+    tag: "12"
+    pullPolicy: IfNotPresent
+persistence:
+  enabled: true
+  size: 100Gi
+service:
+  type: NodePort
+  ports:
+    postgresql: 5432
+  portName: postgresql
+  nodePorts:
+    postgresql: ""
+

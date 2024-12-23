@@ -47,9 +47,9 @@ sudo cp -v docker/* /usr/bin/
 
 **编辑配置文件**
 
-> 注意设置 `group` 运行docker的组，他可以修改 `/var/run/docker.sock` 的所属组，以便该组下的用户可以访问docker。
->
-> 如果没有其他用户组设置为root即可。
+注意设置 `group` 运行docker的组，他可以修改 `/var/run/docker.sock` 的所属组，以便该组下的用户可以访问docker。如果没有其他用户组设置为root即可。
+
+镜像加速器registry-mirrors：如果无法拉取镜像了，可以考虑换加速器，例如华为云或者阿里云。这里以华为云为例：容器镜像服务→镜像资源→镜像中心→镜像加速器
 
 ```
 sudo mkdir -p /etc/docker
