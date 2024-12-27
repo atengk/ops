@@ -186,8 +186,8 @@ lvcreate -l 100%FREE -n data volumes
 **格式化并挂载**
 
 ```
-mkfs.xfs -f /dev/volumes01/data01
-mount /dev/volumes01/data01 /mnt
+mkfs.xfs -f /dev/volumes/data
+mount /dev/volumes/data /mnt
 df -hT /mnt
 ```
 
@@ -195,7 +195,7 @@ df -hT /mnt
 
 ```
 cat >> /etc/fstab <<EOF
-/dev/volumes01/data01 /mnt xfs defaults,nofail 0 0
+/dev/volumes/data /mnt xfs defaults,nofail 0 0
 EOF
 ```
 

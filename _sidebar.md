@@ -41,8 +41,6 @@
             - [1.x安装文档](/work/service/opensearch/v1.3.19/)
             - [2.x安装文档](/work/service/opensearch/v2.18.0/)
             - [使用文档](/work/service/opensearch/OPS.md)
-        - CoreDNS
-            - [安装文档](/work/service/coredns/)
     - Web服务
         - Nginx
             - [安装文档](/work/service/nginx/v1.27.3/)
@@ -53,8 +51,15 @@
         - TLS证书
             - [cfssl创建证书](/work/service/tls/tls-cfssl/v1.6.5/)
             - [openssl创建证书](/work/service/tls/tls-openssl/)
-    - 内网远程访问
+    - 其他服务
         - [内网穿透FRP](/work/service/frp/)
+        - [CoreDNS](/work/service/coredns/)
+    - 开发工具
+        - OpenJDK
+            - [OpenJDK8](/work/service/openjdk/openjdk8/)
+            - [OpenJDK11](/work/service/openjdk/openjdk11/)
+            - [OpenJDK17](/work/service/openjdk/openjdk17/)
+            - [OpenJDK21](/work/service/openjdk/openjdk21/)
 - Shell
     - Spring
         - [应用管理](work/shell/java/)

@@ -18,23 +18,6 @@ Kafka with KRaft 引入了一种新的分布式协调协议，称为 KRaft，以
 
 ## 基础配置
 
-### 前置要求
-
-- 参考[基础配置文档](/work/bigdata/00-basic/)
-
-### 安装JDK17
-
-参考: [JDK17安装文档](/work/bigdata/01-jdk/jdk17/)
-
-**检查JDK版本**
-
-需要JDK17版本，如果有多个JDK版本，不用配置全局环境变量也可以，后面会在配置文件指定JAVA_HOEM。
-
-```
-ll /usr/local/software/jdk-17.0.13+11/
-ln -s /usr/local/software/jdk-17.0.13+11/ /usr/local/software/jdk17
-```
-
 ### 安装服务
 
 **下载软件包**
@@ -222,7 +205,7 @@ Controller Address: bigdata01:9093
 ```
 export LOG_DIR=/data/service/kafka/logs
 export KAFKA_HEAP_OPTS="-Xms1g -Xmx4g"
-export JAVA_HOME=/usr/local/software/jdk17
+export JAVA_HOME=/usr/local/software/jdk8
 kafka-server-start.sh -daemon $KAFKA_HOME/config/kraft/controller.properties
 ```
 
@@ -243,7 +226,7 @@ Broker External Address: 14.104.200.4:19092
 ```
 export LOG_DIR=/data/service/kafka/logs
 export KAFKA_HEAP_OPTS="-Xms1g -Xmx8g"
-export JAVA_HOME=/usr/local/software/jdk17
+export JAVA_HOME=/usr/local/software/jdk8
 kafka-server-start.sh -daemon $KAFKA_HOME/config/kraft/broker.properties
 ```
 
@@ -272,7 +255,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/usr/local/software/kafka
-Environment="JAVA_HOME=/usr/local/software/jdk17"
+Environment="JAVA_HOME=/usr/local/software/jdk8"
 Environment="KAFKA_HOME=/usr/local/software/kafka"
 Environment="LOG_DIR=/data/service/kafka/logs"
 Environment="KAFKA_HEAP_OPTS=-Xms1g -Xmx4g"
@@ -313,7 +296,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/usr/local/software/kafka
-Environment="JAVA_HOME=/usr/local/software/jdk17"
+Environment="JAVA_HOME=/usr/local/software/jdk8"
 Environment="KAFKA_HOME=/usr/local/software/kafka"
 Environment="LOG_DIR=/data/service/kafka/logs"
 Environment="KAFKA_HEAP_OPTS=-Xms1g -Xmx8g"

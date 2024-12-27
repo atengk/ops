@@ -1,0 +1,2 @@
+spark:3.5.4
+kubeflow/spark-operator:2.1.0

@@ -14,14 +14,14 @@ OpenJDK 8 是 Java 平台的开源实现，符合 Java SE 8 规范。它包括 J
 
 **解压软件包**
 
-```bash
+```
 tar -zxvf OpenJDK8U-jdk_x64_linux_hotspot_8u432b06.tar.gz -C /usr/local/software/
 ln -s /usr/local/software/jdk8u432-b06 /usr/local/software/jdk8
 ```
 
 **配置环境变量**
 
-```bash
+```
 cat >> ~/.bash_profile <<"EOF"
 ## JAVA_HOME
 export JAVA_HOME=/usr/local/software/jdk8
@@ -32,9 +32,6 @@ source ~/.bash_profile
 
 **查看版本**
 
-```bash
-$ java -version
-openjdk version "1.8.0_432"
-OpenJDK Runtime Environment (Temurin)(build 1.8.0_432-b06)
-OpenJDK 64-Bit Server VM (Temurin)(build 25.432-b06, mixed mode)
+```
+java -version
 ```

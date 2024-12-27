@@ -18,10 +18,6 @@ ZooKeeper 采用了 *高可用* 和 *一致性* 的设计，可以通过多个�
 
 
 
-## 前置条件
-
-- 参考：[基础配置](/work/bigdata/00-basic/)
-
 ## 基础配置
 
 **下载软件包**
@@ -99,6 +95,7 @@ EOF
 
 ```
 cat > $ZOOKEEPER_HOME/conf/java.env <<"EOF"
+export JAVA_HOME=/usr/local/software/jdk8
 export ZK_SERVER_HEAP=2048
 export JVMFLAGS="-Dzookeeper.electionPortBindRetry=0"
 EOF
@@ -166,7 +163,6 @@ Description=Apache ZooKeeper
 Documentation=https://zookeeper.apache.org
 After=network.target
 [Service]
-Environment="JAVA_HOME=/usr/local/software/jdk21"
 ExecStart=/usr/local/software/zookeeper/bin/zkServer.sh start-foreground
 ExecStop=/usr/local/software/zookeeper/bin/zkServer.sh stop
 Restart=always
