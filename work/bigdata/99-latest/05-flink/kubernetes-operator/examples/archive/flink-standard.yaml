@@ -1,0 +1,71 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: flink-standard
+  namespace: flink
+spec:
+  image: registry.lingo.local/service/flink:1.18
+  flinkVersion: v1_18
+  flinkConfiguration:
+    taskmanager.numberOfTaskSlots: "2"
+    state.backend: rocksdb
+    state.savepoints.dir: file:///flink-data/savepoints
+    state.checkpoints.dir: file:///flink-data/checkpoints
+    execution.checkpointing.interval: 30s
+    execution.checkpointing.externalized-checkpoint-retention: DELETE_ON_CANCELLATION
+    high-availability.type: kubernetes
+    high-availability.storageDir: file:///flink-data/ha
+  serviceAccount: flink
+  jobManager:
+    replicas: 1
+    resource:
+      memory: "2048m"
+      cpu: 1
+    podTemplate:
+      spec:
+        containers:
+          - name: flink-main-container
+            volumeMounts:
+            - mountPath: /flink-data
+              name: flink-volume
+            env:
+              - name: TZ
+                value: Asia/Shanghai
+  taskManager:
+    replicas: 3
+    resource:
+      memory: "2048m"
+      cpu: 1
+  job:
+    jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
+    parallelism: 2
+    upgradeMode: savepoint
+    state: running
+    savepointTriggerNonce: 0
+  podTemplate:
+    spec:
+      containers:
+        - name: flink-main-container
+          volumeMounts:
+          - mountPath: /flink-data
+            name: flink-volume
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+      volumes:
+      - name: flink-volume
+        persistentVolumeClaim:
+          claimName: flink-standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flink-standard
+  namespace: flink
+spec:
+  storageClassName: nfs-client
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

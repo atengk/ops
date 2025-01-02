@@ -1,0 +1,95 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flink-standard-myapp
+  namespace: flink
+spec:
+  storageClassName: nfs-client
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: flink-standard-myapp
+  namespace: flink
+spec:
+  image: registry.lingo.local/service/flink:1.18
+  flinkVersion: v1_18
+  flinkConfiguration:
+    state.backend: rocksdb
+    state.savepoints.dir: file:///flink-data/savepoints
+    state.checkpoints.dir: file:///flink-data/checkpoints
+    execution.checkpointing.interval: 30s
+    execution.checkpointing.externalized-checkpoint-retention: DELETE_ON_CANCELLATION
+    job.autoscaler.enabled: "true"
+    job.autoscaler.memory.tuning.enabled: "true"
+    job.autoscaler.restart.time-tracking.enabled: "true"
+    kubernetes.rest-service.exposed.type: NodePort
+    kubernetes.container.image.pull-policy: Always
+    ## limit = limit-factor * 请求数
+    kubernetes.jobmanager.cpu.limit-factor: "2"
+    kubernetes.jobmanager.memory.limit-factor: "1.5"
+    ## 设置为cpu总资源大小：这里是taskManager.resource.cpu * kubernetes.taskmanager.cpu.limit-factor = 3
+    taskmanager.numberOfTaskSlots: "3"
+    kubernetes.taskmanager.cpu.limit-factor: "3"
+    kubernetes.taskmanager.memory.limit-factor: "1.5"
+    kubernetes.taskmanager.labels: "app.kubernetes.io/name:flink-standard-myapp,app.kubernetes.io/component:taskmanager"
+  serviceAccount: flink
+  jobManager:
+    replicas: 1
+    resource:
+      memory: "1g"
+      cpu: 1
+  taskManager:
+    resource:
+      memory: "2g"
+      cpu: 1
+  podTemplate:
+    spec:
+      containers:
+        - name: flink-main-container
+          volumeMounts:
+            - mountPath: /flink-data
+              name: flink-volume
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+      volumes:
+        - name: flink-volume
+          persistentVolumeClaim:
+            claimName: flink-standard-myapp
+      ## 确保容器taskManager调度到不同节点（软策略）
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: flink-standard-myapp
+                    app.kubernetes.io/component: taskmanager
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+---
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkSessionJob
+metadata:
+  name: flink-spring
+  namespace: flink
+spec:
+  deploymentName: flink-standard-myapp
+  job:
+    jarURI: http://192.168.1.12:9000/test/flink/flink-spring-1.0.jar
+    #jarURI: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.12/1.16.1/flink-examples-streaming_2.12-1.16.1-TopSpeedWindowing.jar
+    args:
+      - --class=local.kongyu.flink.task.sql.DatagenToKafka
+      - --method=run
+    ## 和参数taskmanager.numberOfTaskSlots决定容器taskManager的数量，并行度/numberOfTaskSlots(向上取整)=taskManager数量。
+    parallelism: 3
+    upgradeMode: savepoint
+    state: running
+    savepointTriggerNonce: 0

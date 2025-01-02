@@ -1,0 +1,1 @@
+bitnami/flink:1.20.0

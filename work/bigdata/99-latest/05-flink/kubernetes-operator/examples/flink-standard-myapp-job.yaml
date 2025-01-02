@@ -1,0 +1,18 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkSessionJob
+metadata:
+  name: flink-spring-job
+  namespace: flink
+spec:
+  deploymentName: flink-standard-myapp
+  job:
+    jarURI: http://192.168.1.12:9000/test/flink/flink-spring-1.0.jar
+    #jarURI: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.12/1.16.1/flink-examples-streaming_2.12-1.16.1-TopSpeedWindowing.jar
+    args:
+      - --class=local.kongyu.flink.task.sql.DatagenTumbleWindow
+      - --method=run
+    ## 和参数taskmanager.numberOfTaskSlots决定容器taskManager的数量，并行度/numberOfTaskSlots(向上取整)=taskManager数量。
+    parallelism: 3
+    upgradeMode: savepoint
+    state: running
+    savepointTriggerNonce: 0

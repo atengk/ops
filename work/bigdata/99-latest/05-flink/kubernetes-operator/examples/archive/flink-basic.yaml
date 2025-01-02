@@ -1,0 +1,22 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: flink-basic
+  namespace: flink
+spec:
+  image: registry.lingo.local/service/flink:1.18
+  flinkVersion: v1_18
+  flinkConfiguration:
+    taskmanager.numberOfTaskSlots: "2"
+  serviceAccount: flink
+  jobManager:
+    resource:
+      memory: "2048m"
+      cpu: 1
+  taskManager:
+    resource:
+      memory: "2048m"
+      cpu: 1
+  job:
+    jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
+    parallelism: 2
