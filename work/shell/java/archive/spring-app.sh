@@ -2,28 +2,6 @@
 
 # 配置部分
 # -----------------------------------------------------------------------------
-# 设置Java路径，如果设置了JAVA_HOME，优先使用，否则使用自带的全局的java
-# 设置 JAVA_HOME
-JAVA_HOME=${JAVA_HOME}
-# 尝试获取 java 命令的路径
-JAVA_BIN=$(command -v java &> /dev/null && echo $(command -v java))
-# 如果设置了 JAVA_HOME，优先使用 JAVA_HOME/bin/java
-if [ -n "$JAVA_HOME" ]; then
-    JAVA_BIN="$JAVA_HOME/bin/java"
-# 如果 JAVA_BIN 不为空，使用 JAVA_BIN
-elif [ -n "$JAVA_BIN" ]; then
-    JAVA_BIN="$JAVA_BIN"
-# 如果 JAVA_HOME 和 JAVA_BIN 都为空，报错
-else
-    echo "Error: JAVA_HOME or java binary not found!"
-    exit 1
-fi
-# 判断 JAVA_BIN 是否可用
-if ! [ -x "$JAVA_BIN" ]; then
-    echo "Error: JAVA binary at '$JAVA_BIN' is not executable or does not exist!"
-    exit 1
-fi
-
 # 从环境变量中读取JAR路径
 JAR_PATH="${SPRINGBOOT_JAR_PATH}"
 
@@ -68,7 +46,7 @@ JVM_OPTS=${JVM_OPTS:--server}
 SPRING_OPTS=${SPRING_OPTS:-}
 
 # 优雅关闭的最大等待时间（秒）
-GRACEFUL_SHUTDOWN_TIMEOUT=${GRACEFUL_SHUTDOWN_TIMEOUT:-60}
+GRACEFUL_SHUTDOWN_TIMEOUT=${GRACEFUL_SHUTDOWN_TIMEOUT:-30}
 
 # 日志清理配置
 LOG_CLEANUP_ENABLED=${LOG_ENABLED:-false}
@@ -142,11 +120,11 @@ start() {
   log_message "INFO" "启动 $APP_NAME..."
 
   if [ "$LOG_ENABLED" = true ]; then
-    nohup $JAVA_BIN $JVM_OPTS -jar $JAR_PATH $SPRING_OPTS >> "$LOG_FILE" 2>&1 &
+    nohup java $JVM_OPTS -jar $JAR_PATH $SPRING_OPTS >> "$LOG_FILE" 2>&1 &
     # 更新日志链接
     ln -sf "$LOG_FILE" "$LOG_LINK"
   else
-    nohup $JAVA_BIN $JVM_OPTS -jar $JAR_PATH $SPRING_OPTS > /dev/null 2>&1 &
+    nohup java $JVM_OPTS -jar $JAR_PATH $SPRING_OPTS > /dev/null 2>&1 &
   fi
   
   echo $! > "$PID_FILE"
@@ -246,11 +224,11 @@ status() {
 	else
       log_message "WARN" "$APP_NAME 未运行"
 	  rm -f $PID_FILE
-	  exit 0
+	  exit 1
 	fi
   else
     log_message "WARN" "$APP_NAME 未运行"
-	exit 0
+	exit 1
   fi
 }
 

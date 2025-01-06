@@ -1,0 +1,6 @@
+apache/dolphinscheduler-alert-server:3.2.2
+apache/dolphinscheduler-api:3.2.2
+apache/dolphinscheduler-master:3.2.2
+apache/dolphinscheduler-worker:3.2.2
+apache/dolphinscheduler-tools:3.2.2
+busybox:1.30.1

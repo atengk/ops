@@ -1,0 +1,140 @@
+timezone: "Asia/Shanghai"
+initImage:
+  pullPolicy: "IfNotPresent"
+  busybox: "registry.lingo.local/service/busybox:1.30.1"
+image:
+  registry: "registry.lingo.local/service"
+  tag: "3.2.2"
+  pullPolicy: "IfNotPresent"
+  pullSecret: ""
+  master: dolphinscheduler-master
+  worker: dolphinscheduler-worker
+  api: dolphinscheduler-api
+  alert: dolphinscheduler-alert-server
+  tools: dolphinscheduler-tools
+postgresql:
+  enabled: false
+mysql:
+  enabled: false
+minio:
+  enabled: false
+externalDatabase:
+  enabled: true
+  type: "postgresql"
+  host: "postgresql.kongyu"
+  port: "5432"
+  username: "dolphinscheduler"
+  password: "dolphinscheduler"
+  database: "dolphinscheduler"
+  params: "characterEncoding=utf8"
+  driverClassName: "org.postgresql.Driver"
+zookeeper:
+  enabled: false
+etcd:
+  enabled: false
+externalRegistry:
+  registryPluginName: "zookeeper"
+  registryServers: "zookeeper.kongyu:2181"
+
+conf:
+  auto: false
+  common:
+    data.basedir.path: /tmp/dolphinscheduler
+    resource.storage.type: S3
+    resource.storage.upload.base.path: /dolphinscheduler
+    resource.aws.access.key.id: admin
+    resource.aws.secret.access.key: Admin@123
+    resource.aws.region: ca-central-1
+    resource.aws.s3.bucket.name: dolphinscheduler
+    resource.aws.s3.endpoint: http://minio.kongyu:9000
+common:
+  sharedStoragePersistence:
+    enabled: true
+    mountPath: "/opt/soft"
+    accessModes:
+    - "ReadWriteMany"
+    storageClassName: "nfs-client"
+    storage: "20Gi"
+  fsFileResourcePersistence:
+    enabled: true
+    accessModes:
+    - "ReadWriteMany"
+    storageClassName: "nfs-client"
+    storage: "20Gi"
+
+master:
+  enabled: true
+  replicas: "1"
+  persistentVolumeClaim:
+    enabled: true
+    accessModes:
+    - "ReadWriteOnce"
+    storageClassName: "openebs-hostpath"
+    storage: "20Gi"
+  env:
+    JAVA_OPTS: "-Xms1g -Xmx1g -Xmn512m"
+    MASTER_EXEC_THREADS: "100"
+    MASTER_EXEC_TASK_NUM: "20"
+    MASTER_DISPATCH_TASK_NUM: "3"
+    MASTER_HOST_SELECTOR: "LowerWeight"
+    MASTER_HEARTBEAT_INTERVAL: "10s"
+    MASTER_HEARTBEAT_ERROR_THRESHOLD: "5"
+    MASTER_TASK_COMMIT_RETRYTIMES: "5"
+    MASTER_TASK_COMMIT_INTERVAL: "1s"
+    MASTER_STATE_WHEEL_INTERVAL: "5s"
+    MASTER_MAX_CPU_LOAD_AVG: "1"
+    MASTER_RESERVED_MEMORY: "0.3"
+    MASTER_FAILOVER_INTERVAL: "10m"
+    MASTER_KILL_APPLICATION_WHEN_HANDLE_FAILOVER: "true"
+
+worker:
+  enabled: true
+  replicas: "1"
+  persistentVolumeClaim:
+    enabled: true
+    ## dolphinscheduler data volume
+    dataPersistentVolume:
+      enabled: true
+      accessModes:
+      - "ReadWriteOnce"
+      storageClassName: "openebs-hostpath"
+      storage: "20Gi"
+    ## dolphinscheduler logs volume
+    logsPersistentVolume:
+      enabled: true
+      accessModes:
+      - "ReadWriteOnce"
+      storageClassName: "openebs-hostpath"
+      storage: "20Gi"
+  env:
+    WORKER_MAX_CPU_LOAD_AVG: "1"
+    WORKER_RESERVED_MEMORY: "0.3"
+    WORKER_EXEC_THREADS: "100"
+    WORKER_HEARTBEAT_INTERVAL: "10s"
+    WORKER_HEART_ERROR_THRESHOLD: "5"
+    WORKER_HOST_WEIGHT: "100"
+alert:
+  enabled: true
+  replicas: 1
+  persistentVolumeClaim:
+    enabled: true
+    accessModes:
+    - "ReadWriteOnce"
+    storageClassName: "openebs-hostpath"
+    storage: "20Gi"
+  env:
+    JAVA_OPTS: "-Xms512m -Xmx512m -Xmn256m"
+api:
+  enabled: true
+  replicas: "1"
+  persistentVolumeClaim:
+    enabled: true
+    accessModes:
+    - "ReadWriteOnce"
+    storageClassName: "openebs-hostpath"
+    storage: "20Gi"
+  service:
+    type: "NodePort"
+    nodePort: ""
+  env:
+    JAVA_OPTS: "-Xms512m -Xmx512m -Xmn256m"

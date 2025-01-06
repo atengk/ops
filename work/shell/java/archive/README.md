@@ -19,13 +19,7 @@ chmod +x spring-app.sh
 
 ### 自定义配置
 
-**设置java路径**
-
-```shell
-export JAVA_HOME=/usr/local/software/jdk21
-```
-
-**设置应用程序全路径**
+**配置应用程序全路径**
 
 ```shell
 export SPRINGBOOT_JAR_PATH="/data/service/application/spring-app.jar"
@@ -93,7 +87,7 @@ export HEALTH_CHECK_URL="http://localhost:8888/actuator/health"
 等待程序自动退出最大时间（秒）
 
 ```shell
-export GRACEFUL_SHUTDOWN_TIMEOUT=60
+export GRACEFUL_SHUTDOWN_TIMEOUT=30
 ```
 
 ### 重启服务
@@ -119,7 +113,6 @@ cat > /data/service/application/spring-app.env <<EOF
 # 必填
 SPRINGBOOT_JAR_PATH="/data/service/application/spring-app.jar"
 # 选填
-JAVA_HOME=/usr/local/software/jdk21
 JVM_OPTS="-server -Xms512m -Xmx4096m"
 SPRING_OPTS="--spring.profiles.active=prod"
 LOG_ENABLED="false"
@@ -128,7 +121,7 @@ HEALTH_CHECK_METHOD="none"
 LOG_KEYWORD="JVM running for"
 HEALTH_CHECK_TCP_PORT=8888
 HEALTH_CHECK_URL="http://localhost:8888/actuator/health"
-GRACEFUL_SHUTDOWN_TIMEOUT=60
+GRACEFUL_SHUTDOWN_TIMEOUT=30
 PATH=$PATH
 EOF
 ```
@@ -140,19 +133,36 @@ sudo tee /etc/systemd/system/spring-app.service <<"EOF"
 [Unit]
 Description=My Spring Boot Application Manager
 After=network.target
+
 [Service]
+# 服务进程会在启动时分叉，主进程退出，子进程继续运行。适用于传统的 init.d 脚本。
 Type=forking
+
+# 指定运行服务的用户
 User=admin
 Group=ateng
+
+# 应用的工作目录
 WorkingDirectory=/data/service/application
-EnvironmentFile=-/data/service/application/spring-app.env
-ExecStartPre=/data/service/application/spring-app.sh status
+
+# 启动脚本的路径
 ExecStart=/data/service/application/spring-app.sh start
+
+# 关闭脚本的路径
 ExecStop=/data/service/application/spring-app.sh stop
+
+# 确保服务在崩溃后自动重启
 Restart=always
 RestartSec=10
+
+# 设置环境变量配置文件
+EnvironmentFile=-/data/service/application/spring-app.env
+
+# 设置启动超时时间
 TimeoutStartSec=90
-TimeoutStopSec=60
+
+# 设置停止超时时间
+TimeoutStopSec=30
 [Install]
 WantedBy=multi-user.target
 EOF

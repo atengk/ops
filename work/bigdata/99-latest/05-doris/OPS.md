@@ -253,6 +253,8 @@ SELECT * FROM example_tbl_agg1;
 
 ## 动态分区
 
+动态分区线程的执行频率，默认为 600(10 分钟)，即每 10 分钟进行一次调度。
+
 **动态分区表**
 
 表 example_tbl_dynamic 分区列 timestamp 类型为 DATETIME，创建一个动态分区规则。按周分区，只保留最近 50 周的分区，并且预先创建未来 3 周的分区。
@@ -344,6 +346,70 @@ VALUES
 
 
 
+## 自动&动态分区
+
+自 2.1.7 起，Doris 支持自动分区和动态分区同时使用。此时，二者的功能都生效：
+
+自动分区将会自动在数据导入过程中按需创建分区；
+动态分区将会自动创建、回收、转储分区。
+二者语法功能不存在冲突，同时设置对应的子句/属性即可。
+
+**自动分区与动态分区联用**
+
+创建表
+
+```sql
+drop table if exists kongyu.my_user;
+create table if not exists kongyu.my_user
+(
+    id          bigint      not null auto_increment comment '主键',
+    create_time datetime(3) not null default current_timestamp(3) comment '数据创建时间',
+    name        varchar(20) not null comment '姓名',
+    age         int comment '年龄',
+    score       double comment '分数',
+    birthday    date comment '生日',
+    province    varchar(50) comment '所在省份',
+    city        varchar(50) comment '所在城市',
+    date_time   datetime(3) comment '自定义时间'
+) UNIQUE KEY(`id`, `create_time`)
+AUTO PARTITION BY RANGE (date_trunc(`create_time`, 'week')) ()
+DISTRIBUTED BY HASH(`id`) BUCKETS AUTO
+PROPERTIES (
+    "replication_allocation" = "tag.location.default: 1",
+    "dynamic_partition.enable" = "true",
+    "dynamic_partition.prefix" = "p",
+    "dynamic_partition.start" = "-100",
+    "dynamic_partition.end" = "0",
+    "dynamic_partition.time_unit" = "week",
+    "dynamic_partition.buckets" = "10"
+);
+```
+
+**查看分区**
+
+```
+show partitions from kongyu.my_user\G;
+```
+
+**插入数据**
+
+```sql
+insert into kongyu.my_user (name, age, score, birthday, province, city, date_time) values
+('张三', 25, 89.5, '1998-05-12', '北京市', '北京市', '2014-12-23 14:30:00.123'),
+('李四', 30, 95.0, '1993-03-08', '上海市', '上海市', '2024-02-23 15:00:00.123'),
+('王五', 22, 78.0, '2001-11-20', '广东省', '广州市', '2024-05-23 15:30:00.123'),
+('赵六', 28, 88.0, '1995-07-15', '浙江省', '杭州市', '2024-06-23 16:00:00.123'),
+('孙七', 35, 92.5, '1988-02-25', '四川省', '成都市', '2024-09-23 16:30:00.123');
+```
+
+**查看数据**
+
+```
+select * from kongyu.my_user;
+```
+
+
+
 ## 自增列
 
 创建一个 Dupliciate 模型表，其中一个 id列是自增列
@@ -407,7 +473,7 @@ WHERE `id` = 3;
 
 ## 项目实战
 
-### 自增自动分区表
+### 自增自动动态分区表
 
 **创建用户表**
 
@@ -427,11 +493,23 @@ create table if not exists kongyu.my_user
     city        varchar(50) comment '所在城市',
     date_time   datetime(3) comment '自定义时间'
 ) UNIQUE KEY(`id`, `create_time`)
-AUTO PARTITION BY RANGE (date_trunc(`create_time`, 'month')) ()
+AUTO PARTITION BY RANGE (date_trunc(`create_time`, 'week')) ()
 DISTRIBUTED BY HASH(`id`) BUCKETS AUTO
 PROPERTIES (
-"replication_allocation" = "tag.location.default: 1"
+    "replication_allocation" = "tag.location.default: 1",
+    "dynamic_partition.enable" = "true",
+    "dynamic_partition.prefix" = "p",
+    "dynamic_partition.start" = "-100",
+    "dynamic_partition.end" = "0",
+    "dynamic_partition.time_unit" = "week",
+    "dynamic_partition.buckets" = "10"
 );
+```
+
+**查看分区**
+
+```sql
+show partitions from kongyu.my_user\G;
 ```
 
 **插入数据**
@@ -447,7 +525,7 @@ insert into kongyu.my_user (name, age, score, birthday, province, city, date_tim
 
 **查看数据**
 
-```
+```sql
 select * from kongyu.my_user;
 ```
 
@@ -891,7 +969,7 @@ PROPERTIES
     "max_filter_ratio"= "0.2",
     "max_batch_rows"="20000000",
     "max_error_number"="10000",
-    "jsonpaths" = "[\"$.name\",\"$.age\",\"$.score\",\"$.birthday\",\"$.province\",\"$.city\",\"$.date_time\"]"
+    "jsonpaths" = "[\"$.name\",\"$.age\",\"$.score\",\"$.birthday\",\"$.province\",\"$.city\",\"$.dateTime\"]"
 )
 FROM KAFKA(
     "kafka_broker_list" = "192.168.1.10:9094",

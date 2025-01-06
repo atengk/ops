@@ -4,7 +4,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta charset="UTF-8">
-  <title>阿腾知识库</title>
+  <title>运维知识库</title>
   <link rel="icon" href="_media/favicon.ico" />
   <link rel="stylesheet" href="css/vue.css">
   <!-- 一个docsify插件，为gif添加可定制的播放器控件 -->
@@ -21,13 +21,13 @@
   <script>
     window.$docsify = {
         // 项目名称
-        name: '阿腾知识库',
+        name: '运维知识库',
         // 网站的基本路径
-        basePath: '/work/',
+        basePath: '/ops/',
         // 点击文档标题后跳转的链接地址。
-        nameLink: '/work/#/README',
+        nameLink: '/ops/#/README',
         // 仓库地址，点击右上角的Github章鱼猫头像会跳转到此地址
-        repo: 'https://github.com/kongyu666/work/tree/main/work/',
+        repo: 'https://github.com/kongyu666/ops/tree/main/work/',
         // 侧边栏支持，默认加载的是项目根目录下的_sidebar.md文件
         loadSidebar: true,
         // 支持docsify侧边栏目录展开和折叠，设置侧边栏显示级别
@@ -89,7 +89,7 @@
         busuanzi: true,
         plugins: [
             EditOnGithubPlugin.create(
-            'https://github.com/kongyu666/work/tree/main/',
+            'https://github.com/kongyu666/ops/tree/main/',
             null,
             function(file) {
                 if (file.indexOf('en') === -1) {

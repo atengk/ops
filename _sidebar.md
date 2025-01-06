@@ -60,6 +60,7 @@
             - [OpenJDK11](/work/service/openjdk/openjdk11/)
             - [OpenJDK17](/work/service/openjdk/openjdk17/)
             - [OpenJDK21](/work/service/openjdk/openjdk21/)
+            - [使用文档](/work/service/openjdk/OPS.md)
 - Shell
     - Spring
         - [应用管理](work/shell/java/)
@@ -144,9 +145,9 @@
                 - [主从模式](/work/kubernetes/service/mysql/v8.4.3/replication/)
                 - [配置metrics](/work/kubernetes/service/mysql/v8.4.3/metrics/)
             - Doris
-                - [单机模式](/work/kubernetes/service/doris/v2.1.6/standalone/)
-                - [集群模式](/work/kubernetes/service/doris/v2.1.6/cluster/)
-                - [集群模式All](/work/kubernetes/service/doris/v2.1.6/cluster-all/)
+                - [单机模式](/work/kubernetes/service/doris/v2.1.7/standalone/)
+                - [集群模式](/work/kubernetes/service/doris/v2.1.7/cluster/)
+                - [集群模式All](/work/kubernetes/service/doris/v2.1.7/cluster-all/)
             - Clickhouse
                 - [集群模式](/work/kubernetes/service/clickhouse/v23.12.2/)
             - ElasticSearch7
@@ -213,9 +214,9 @@
             - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
         - 大数据
             - [Zookeeper](/work/kubernetes/service/zookeeper/v3.9.3/)
-            - [Flink](/work/kubernetes/service/flink/v1.19.1/)
+            - [Flink](/work/kubernetes/service/flink/v1.20.0/)
             - [Spark](/work/kubernetes/service/spark/v3.5.1/)
-            - [DolphinScheduler](/work/kubernetes/service/dolphinscheduler/)
+            - [DolphinScheduler](/work/kubernetes/service/dolphinscheduler/v3.2.2/)
             - Doris2
                 - [单机模式](/work/kubernetes/service/doris/v2.1.7/standalone/)
                 - [集群模式](/work/kubernetes/service/doris/v2.1.7/cluster/)

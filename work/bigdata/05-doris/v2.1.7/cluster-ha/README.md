@@ -247,7 +247,7 @@ SHOW FRONTENDS\G;
 $ vi $DORIS_BE_HOME/conf/be.conf
 JAVA_HOME=/usr/local/software/jdk1.8.0
 JAVA_OPTS="-Xss8192m -Xmx8192m -Dfile.encoding=UTF-8 -DlogPath=$LOG_DIR/jni.log -Xloggc:$DORIS_HOME/log/be.gc.log.$CUR_DATE -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.security.krb5.debug=true -Dsun.java.command=DorisBE -XX:-CriticalJNINatives"
-storage_root_path=/data/service/doris/storage01;/data/service/doris/storage02
+storage_root_path=/data/service/doris/storage
 be_port = 9060
 webserver_port = 9070
 heartbeat_service_port = 9050
@@ -266,7 +266,7 @@ scp $DORIS_BE_HOME/conf/be.conf bigdata03:$DORIS_BE_HOME/conf/be.conf
 相关节点都需要创建
 
 ```
-mkdir -p /data/service/doris/storage{01,02}
+mkdir -p /data/service/doris/storage
 ```
 
 **启动BE**

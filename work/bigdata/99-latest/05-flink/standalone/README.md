@@ -90,7 +90,7 @@ taskmanager:
 rest:
   port: 8082
   address: bigdata01
-  bind-address: bigdata01
+  bind-address: 0.0.0.0
 web:
   submit:
     enable: true

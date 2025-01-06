@@ -55,7 +55,7 @@ Version: 1.20.0, Commit ID: b1fe7b4
 
 ## 服务配置
 
-### 配置flink-conf.yaml
+### 配置config.yaml
 
 修改以下配置
 
@@ -92,7 +92,7 @@ taskmanager:
 rest:
   port: 8082
   address: bigdata01
-  bind-address: bigdata01
+  bind-address: 0.0.0.0
 web:
   submit:
     enable: true
