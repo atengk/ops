@@ -29,7 +29,7 @@ Apache Doris 的**整体架构**：
 
 ### 安装JDK8
 
-参考: [JDK8安装文档](/work/bigdata/01-jdk/jdk8/)
+参考: [JDK8安装文档](/work/bigdata/01-jdk/)
 
 **检查JDK版本**
 
@@ -74,7 +74,9 @@ source ~/.bash_profile
 **查看版本**
 
 ```
-$DORIS_BE_HOME/lib/doris_be --version
+$ $DORIS_BE_HOME/lib/doris_be --version
+doris-2.1.7-rc03(AVX2) RELEASE (build git://vm-36@443e87e20327eaa5577cc10f08a63ec1694de358)
+Built on Wed, 06 Nov 2024 15:34:46 CST by vm-36
 ```
 
 
@@ -93,15 +95,29 @@ $DORIS_BE_HOME/lib/doris_be --version
 配置java路径、添加元数据目录、服务端口和开启fqdn，可以根据环境适当修改JAVA_OPTS的JVM堆内存
 
 ```
-$ vi $DORIS_FE_HOME/conf/fe.conf
-JAVA_HOME=/usr/local/software/jdk1.8.0
-JAVA_OPTS="-Xss8192m -Xmx8192m -Dfile.encoding=UTF-8 -Djavax.security.auth.useSubjectCredsOnly=false -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:$LOG_DIR/fe.gc.log.$CUR_DATE -Dlog4j2.formatMsgNoLookups=true"
-meta_dir=/usr/local/software/doris/fe/doris-meta/
+cp $DORIS_FE_HOME/conf/fe.conf{,_bak}
+tee $DORIS_FE_HOME/conf/fe.conf <<"EOF"
+CUR_DATE=`date +%Y%m%d-%H%M%S`
+LOG_DIR = ${DORIS_HOME}/log
+JAVA_HOME=/usr/local/software/jdk8
+JAVA_OPTS="-Xms1g -Xmx8g -Dfile.encoding=UTF-8 -Djavax.security.auth.useSubjectCredsOnly=false -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+PrintGCDateStamps -XX:+PrintGCDetails -Xloggc:$LOG_DIR/fe.gc.log.$CUR_DATE -Dlog4j2.formatMsgNoLookups=true"
+meta_dir = ${DORIS_HOME}/doris-meta
+jdbc_drivers_dir = ${DORIS_HOME}/jdbc_drivers
 http_port = 9040
 rpc_port = 9020
 query_port = 9030
 edit_log_port = 9010
+arrow_flight_sql_port = -1
+log_roll_size_mb = 1024
+# INFO, WARN, ERROR, FATAL
+sys_log_level = INFO
+# NORMAL, BRIEF, ASYNC
+sys_log_mode = NORMAL
+qe_max_connection = 1024
+qe_query_timeout_second = 300
+qe_slow_log_ms = 5000
 enable_fqdn_mode = true
+EOF
 ```
 
 **创建目录**
@@ -114,6 +130,12 @@ mkdir -p /usr/local/software/doris/fe/doris-meta/
 
 ```
 start_fe.sh --daemon
+```
+
+**查看日志**
+
+```
+tail -200f $DORIS_FE_HOME/log/fe.log
 ```
 
 **检查服务**
@@ -205,14 +227,25 @@ ArrowFlightSqlPort: -1
 配置java路径、BE数据存储目录、服务端口，可以根据环境适当修改JAVA_OPTS的JVM堆内存
 
 ```
-$ vi $DORIS_BE_HOME/conf/be.conf
-JAVA_HOME=/usr/local/software/jdk1.8.0
-JAVA_OPTS="-Xss8192m -Xmx8192m -Dfile.encoding=UTF-8 -DlogPath=$LOG_DIR/jni.log -Xloggc:$DORIS_HOME/log/be.gc.log.$CUR_DATE -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.security.krb5.debug=true -Dsun.java.command=DorisBE -XX:-CriticalJNINatives"
-storage_root_path=/data/service/doris/storage
+cp $DORIS_BE_HOME/conf/be.conf{,_bak}
+tee $DORIS_BE_HOME/conf/be.conf <<"EOF"
+CUR_DATE=`date +%Y%m%d-%H%M%S`
+PPROF_TMPDIR="$DORIS_HOME/log/"
+JAVA_HOME=/usr/local/software/jdk8
+JAVA_OPTS="-Xms1g -Xmx8g -Dfile.encoding=UTF-8 -DlogPath=$LOG_DIR/jni.log -Xloggc:$DORIS_HOME/log/be.gc.log.$CUR_DATE -Djavax.security.auth.useSubjectCredsOnly=false -Dsun.security.krb5.debug=true -Dsun.java.command=DorisBE -XX:-CriticalJNINatives"
+JEMALLOC_CONF="percpu_arena:percpu,background_thread:true,metadata_thp:auto,muzzy_decay_ms:5000,dirty_decay_ms:5000,oversize_threshold:0,prof:false,lg_prof_interval:-1"
+JEMALLOC_PROF_PRFIX="jemalloc_heap_profile_"
+# ports for admin, web, heartbeat service
 be_port = 9060
 webserver_port = 9070
 heartbeat_service_port = 9050
 brpc_port = 9080
+arrow_flight_sql_port = -1
+storage_root_path = /data/service/doris/storage
+jdbc_drivers_dir = ${DORIS_HOME}/jdbc_drivers
+# INFO, WARNING, ERROR, FATAL
+sys_log_level = INFO
+EOF
 ```
 
 **创建目录**
@@ -225,6 +258,12 @@ mkdir -p /data/service/doris/storage
 
 ```
 start_be.sh --daemon
+```
+
+**查看日志**
+
+```
+tail -f $DORIS_BE_HOME/log/be.INFO $DORIS_BE_HOME/log/be.WARNING
 ```
 
 
@@ -255,7 +294,34 @@ ALTER SYSTEM ADD BACKEND "bigdata01:9050";
 Alive : true 表示节点正常运行
 
 ```
-SHOW BACKENDS\G;
+mysql> SHOW BACKENDS\G;
+*************************** 1. row ***************************
+              BackendId: 10201
+                   Host: bigdata01
+          HeartbeatPort: 9050
+                 BePort: 9060
+               HttpPort: 9070
+               BrpcPort: 9080
+     ArrowFlightSqlPort: -1
+          LastStartTime: 2024-12-25 09:50:11
+          LastHeartbeat: 2024-12-25 09:54:51
+                  Alive: true
+   SystemDecommissioned: false
+              TabletNum: 0
+       DataUsedCapacity: 0.000
+      TrashUsedCapacity: 0.000
+          AvailCapacity: 17.208 GB
+          TotalCapacity: 74.214 GB
+                UsedPct: 76.81 %
+         MaxDiskUsedPct: 76.81 %
+     RemoteUsedCapacity: 0.000
+                    Tag: {"location" : "default"}
+                 ErrMsg:
+                Version: doris-2.1.7-rc03-443e87e203
+                 Status: {"lastSuccessReportTabletsTime":"N/A","lastStreamLoadTime":-1,"isQueryDisabled":false,"isLoadDisabled":false}
+HeartbeatFailureCounter: 0
+               NodeRole: mix
+1 row in set (0.00 sec)
 ```
 
 
@@ -289,6 +355,12 @@ cp $HADOOP_HOME/etc/hadoop/{core-site.xml,hdfs-site.xml} conf/
 bin/start_broker.sh --daemon
 ```
 
+**查看日志**
+
+```
+tail -200f log/apache_hdfs_broker.log
+```
+
 
 
 ## 添加Broker节点（可选）
@@ -312,7 +384,16 @@ ALTER SYSTEM ADD BROKER ateng_doris_broker "bigdata01:8000";
 Alive : true 表示节点正常运行
 
 ```
-SHOW BROKER\G;
+mysql> SHOW BROKER\G;
+*************************** 1. row ***************************
+          Name: ateng_doris_broker
+          Host: bigdata01
+          Port: 8000
+         Alive: true
+ LastStartTime: 2024-12-25 09:56:32
+LastUpdateTime: 2024-12-25 09:56:32
+        ErrMsg:
+1 row in set (0.02 sec)
 ```
 
 
@@ -416,7 +497,7 @@ Documentation=https://doros.apache.org
 After=network.target
 [Service]
 Type=forking
-Environment="JAVA_HOME=/usr/local/software/jdk1.8.0"
+Environment="JAVA_HOME=/usr/local/software/jdk8"
 ExecStart=/usr/local/software/doris/broker/bin/start_broker.sh --daemon
 ExecStop=/usr/local/software/doris/broker/bin/stop_broker.sh
 Restart=always

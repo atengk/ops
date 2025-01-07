@@ -1,10 +1,12 @@
-# 安装DolphinScheduler
+# DolphinScheduler
 
-> Apache DolphinScheduler 是一个分布式易扩展的可视化DAG工作流任务调度开源系统。适用于企业级场景，提供了一个可视化操作任务、工作流和全生命周期数据处理过程的解决方案。
->
-> https://dolphinscheduler.apache.org/zh-cn/docs/3.2.0/guide/installation/pseudo-cluster
->
-> https://dolphinscheduler.apache.org/zh-cn/docs/3.2.0/guide/installation/cluster
+DolphinScheduler 是一个开源的分布式工作流调度系统，专为数据处理和任务调度设计。支持 DAG 可视化任务编排，具备强大的任务依赖管理、高可用性和扩展性。它易于集成，支持多种任务类型，适合大规模数据工程和复杂工作流场景。
+
+- [伪集群部署](https://dolphinscheduler.apache.org/zh-cn/docs/3.2.2/guide/installation/pseudo-cluster)
+
+- [集群部署](https://dolphinscheduler.apache.org/zh-cn/docs/3.2.2/guide/installation/cluster)
+
+
 
 文档使用以下3台服务器，具体服务分配见描述的进程
 
@@ -14,16 +16,24 @@
 | 192.168.1.132 | bigdata02 | master、worker、alertServer |
 | 192.168.1.133 | bigdata03 | master、worker              |
 
-## 基础环境配置
 
-解压软件包
+
+## 基础配置
+
+**下载软件包**
 
 ```
-tar -zxvf apache-dolphinscheduler-3.2.0-bin.tar.gz -C /usr/local/software/
-ln -s /usr/local/software/apache-dolphinscheduler-3.2.0-bin /usr/local/software/dolphinscheduler
+wget https://archive.apache.org/dist/dolphinscheduler/3.2.2/apache-dolphinscheduler-3.2.2-bin.tar.gz
 ```
 
-配置环境变量
+**解压软件包**
+
+```
+tar -zxvf apache-dolphinscheduler-3.2.2-bin.tar.gz -C /usr/local/software/
+ln -s /usr/local/software/apache-dolphinscheduler-3.2.2-bin /usr/local/software/dolphinscheduler
+```
+
+**配置环境变量**
 
 ```
 cat >> ~/.bash_profile <<"EOF"
@@ -34,31 +44,25 @@ EOF
 source ~/.bash_profile
 ```
 
-查看版本
-
-```
-
-```
-
 
 
 ## 准备启动环境
 
-安装进程树分析工具
+**安装进程树分析工具**
 
 ```
 sudo yum -y install psmisc
 ```
 
-准备zookeeper
+**准备zookeeper**
 
 ```
 bigdata01:2181,bigdata02:2181,bigdata03:2181
 ```
 
-mysql创建数据库
+**mysql创建数据库**
 
-> 数据源配置：https://github.com/apache/dolphinscheduler/blob/3.2.0-release/docs/docs/zh/guide/howto/datasource-setting.md
+> 数据源配置：https://github.com/apache/dolphinscheduler/blob/3.2.2-release/docs/docs/zh/guide/howto/datasource-setting.md
 
 ```
 DolphinScheduler 元数据存储在关系型数据库中，故需创建相应的数据库和用户。
@@ -73,7 +77,7 @@ mysql> GRANT ALL PRIVILEGES ON lingo_dolphinscheduler.* TO
 mysql> flush privileges;
 ```
 
-配置数据库驱动
+**配置数据库驱动**
 
 > 移动到 DolphinScheduler 的每个模块的 libs 目录下，其中包括 `api-server/libs` 和 `alert-server/libs` 和 `master-server/libs` 和 `worker-server/libs`。
 
@@ -86,7 +90,7 @@ cp ~/bigdata/mysql-connector-j-8.0.33.jar worker-server/libs/
 cp ~/bigdata/mysql-connector-j-8.0.33.jar tools/libs/
 ```
 
-初始化数据库
+**初始化数据库**
 
 ```
 bash $DS_HOME/tools/bin/upgrade-schema.sh
@@ -96,7 +100,7 @@ bash $DS_HOME/tools/bin/upgrade-schema.sh
 
 ## 配置一键部署脚本
 
-修改 install_env.sh 文件
+**修改 install_env.sh 文件**
 
 ```
 $ vi $DS_HOME/bin/env/install_env.sh
@@ -112,7 +116,7 @@ deployUser=admin
 zkRoot=/dolphinscheduler
 ```
 
-修改 dolphinscheduler_env.sh 文件
+**修改 dolphinscheduler_env.sh 文件**
 
 ```
 vi $DS_HOME/bin/env/dolphinscheduler_env.sh
@@ -138,7 +142,7 @@ export DATAX_LAUNCHER=${DATAX_LAUNCHER:-/opt/soft/datax/bin/python3}
 export PATH=$HADOOP_HOME/bin:$SPARK_HOME/bin:$PYTHON_LAUNCHER:$JAVA_HOME/bin:$HIVE_HOME/bin:$FLINK_HOME/bin:$DATAX_LAUNCHER:$PATH
 ```
 
-创建临时目录
+**创建临时目录**
 
 > 所有节点都需要创建
 

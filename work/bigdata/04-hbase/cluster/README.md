@@ -1,4 +1,10 @@
-# 安装HBase2
+# HBase2
+
+HBase2是一个分布式、面向列的NoSQL数据库，构建于Hadoop HDFS之上，提供高效的大规模结构化数据存储与检索。相比1.x版本，HBase2提升了性能、可靠性和可扩展性，支持异步操作（Async API）、分布式集群的动态扩展以及改进的数据压缩。它广泛用于实时分析和大数据处理场景。
+
+- [官网链接](https://hbase.apache.org/)
+
+
 
 文档使用以下3台服务器，具体服务分配见描述的进程
 
@@ -10,16 +16,24 @@
 
 
 
-## 基础环境配置
 
-解压软件包
+
+## 基础配置
+
+**下载软件包**
 
 ```
-tar -zxvf hbase-2.5.7-bin.tar.gz -C /usr/local/software/
-ln -s /usr/local/software/hbase-2.5.7 /usr/local/software/hbase
+wget https://dlcdn.apache.org/hbase/2.6.1/hbase-2.6.1-bin.tar.gz
 ```
 
-配置环境变量
+**解压软件包**
+
+```
+tar -zxvf hbase-2.6.1-bin.tar.gz -C /usr/local/software/
+ln -s /usr/local/software/hbase-2.6.1 /usr/local/software/hbase
+```
+
+**配置环境变量**
 
 ```
 cat >> ~/.bash_profile <<"EOF"
@@ -30,7 +44,7 @@ EOF
 source ~/.bash_profile
 ```
 
-查看版本
+**查看版本**
 
 ```
 hbase version
@@ -47,8 +61,10 @@ hbase version
 ```
 cp $HBASE_HOME/conf/hbase-env.sh{,_bak}
 cat > $HBASE_HOME/conf/hbase-env.sh <<"EOF"
-export JAVA_HOME=/usr/local/software/jdk1.8.0
-export HBASE_HEAPSIZE=1G
+export JAVA_HOME=/usr/local/software/jdk8
+export HBASE_HEAPSIZE=4G
+export HBASE_MASTER_OPTS="-Xms1g -Xmx4g"
+export HBASE_REGIONSERVER_OPTS="-Xms1g -Xmx8g"
 export HBASE_MANAGES_ZK=false
 # 是否禁用 Hadoop 类路径查找
 export HBASE_DISABLE_HADOOP_CLASSPATH_LOOKUP="true"
@@ -56,6 +72,11 @@ EOF
 ```
 
 ### 配置hbase-site.xml
+
+注意修改以下配置：
+
+- hbase.rootdir： HBase数据目录
+- hbase.zookeeper.quorum：Zookeeper服务地址
 
 ```
 cat > $HBASE_HOME/conf/hbase-site.xml <<"EOF"
@@ -137,18 +158,18 @@ ln -s ${HADOOP_HOME}/etc/hadoop/hdfs-site.xml $HBASE_HOME/conf/hdfs-site.xml
 
 ## 启动集群
 
-启动hbase
+**启动hbase**
 
-> bigdata01: HMaster HRegionServer
-> bigdata02: HRegionServer
-> bigdata03: HRegionServer
-> hbase http: http://bigdata01:16010
+bigdata01: HMaster HRegionServer
+bigdata02: HRegionServer
+bigdata03: HRegionServer
+hbase http: http://bigdata01:16010
 
 ```
 start-hbase.sh
 ```
 
-关闭hbase
+**关闭hbase**
 
 ```
 stop-hbase.sh
@@ -158,16 +179,16 @@ stop-hbase.sh
 
 ## 设置服务自启
 
-> **请在对应的服务器设置各个进程的自启**
->
-> 后台进程使用**Type=forking**
+**请在对应的服务器设置各个进程的自启**
 
 ### HBase Master 服务
 
-> bigdata01设置Master
+bigdata01设置Master
+
+**编辑配置文件**
 
 ```
-$ sudo vi /etc/systemd/system/hbase-master.service
+sudo tee /etc/systemd/system/hbase-master.service <<"EOF"
 [Unit]
 Description=HBase Master
 Documentation=https://hbase.apache.org
@@ -183,7 +204,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -192,12 +216,16 @@ sudo systemctl start hbase-master.service
 sudo systemctl status hbase-master.service
 ```
 
+
+
 ### HBase Regionserver 服务
 
-> bigdata01、bigdata02、bigdata03设置Regionserver
+bigdata01、bigdata02、bigdata03设置Regionserver
+
+**编辑配置文件**
 
 ```
-$ sudo vi /etc/systemd/system/hbase-regionserver.service
+sudo tee /etc/systemd/system/hbase-regionserver.service <<"EOF"
 [Unit]
 Description=HBase Regionserver
 Documentation=https://hbase.apache.org
@@ -213,7 +241,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -226,13 +257,13 @@ sudo systemctl status hbase-regionserver.service
 
 ## 使用集群
 
-进入客户端
+**进入客户端**
 
 ```
 hbase shell
 ```
 
-创建表
+**创建表**
 
 ```
 hbase:001:0> create 'ateng','info'
@@ -242,16 +273,39 @@ hbase:004:0> scan 'ateng', {FORMATTER=>'toString'}
 hbase:005:0> exit
 ```
 
-导入导出
+**导入导出**
+
+导出到HDFS
 
 ```
-## 导出到HDFS
-hbase org.apache.hadoop.hbase.mapreduce.Export default:ateng /data/hbase/ateng
-hadoop fs -ls /data/hbase/ateng
+$ hbase org.apache.hadoop.hbase.mapreduce.Export default:ateng /data/hbase/ateng
+$ hadoop fs -ls /data/hbase/ateng
+Found 2 items
+-rw-r--r--   1 admin ateng          0 2024-12-24 11:30 /data/hbase/ateng/_SUCCESS
+-rw-r--r--   1 admin ateng        174 2024-12-24 11:30 /data/hbase/ateng/part-m-00000
 ```
 
+导出到本地
+
 ```
-## 导入
-hbase org.apache.hadoop.hbase.mapreduce.Import default:ateng /data/hbase/ateng
+$ hbase org.apache.hadoop.hbase.mapreduce.Export default:ateng file:///tmp/hbase/ateng
+$ ll /tmp/hbase/ateng
+total 4
+-rw-r--r-- 1 admin ateng 174 Dec 24 11:31 part-m-00000
+-rw-r--r-- 1 admin ateng   0 Dec 24 11:31 _SUCCESS
+```
+
+导入
+
+```
+$ hbase shell
+hbase:001:0> create 'ateng2','info'
+$ hbase org.apache.hadoop.hbase.mapreduce.Import default:ateng2 file:///tmp/hbase/ateng
+$ hbase shell
+hbase:002:0> scan 'ateng2', {FORMATTER=>'toString'}
+ROW                                        COLUMN+CELL
+ row1                                      column=info:name, timestamp=2024-12-24T11:30:20.076, value=阿腾                                                            
+1 row(s)
+Took 0.0193 seconds
 ```
 

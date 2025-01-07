@@ -151,10 +151,16 @@ cp $HADOOP_HOME/share/hadoop/tools/lib/{hadoop-aws-3.3.6.jar,aws-java-sdk-bundle
 sudo systemctl restart hadoop-yarn-* hive-*
 ```
 
-创建表
+进入Hive，Tez引擎会出错，使用MR
 
 ```
 $ beeline -u jdbc:hive2://bigdata01:10000 -n admin
+set hive.execution.engine=mr;
+```
+
+创建表
+
+```
 CREATE EXTERNAL TABLE external_table_minio (
   id BIGINT,
   name STRING,
@@ -315,6 +321,13 @@ SELECT * FROM internal_table;
 
 ### 数据准备
 
+上传数据
+
+```
+hadoop fs -put  tools/my_user.csv /data/hive
+beeline -u jdbc:hive2://bigdata01:10000 -n admin
+```
+
 为了方便测试，这里创建文本类型的表并导入数据，生产环境建议使用PARQUET
 
 ```
@@ -329,11 +342,12 @@ CREATE TABLE my_user (
   create_time TIMESTAMP
 ) COMMENT 'User Information'
 ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
-STORED AS TEXTFILE;
+STORED AS TEXTFILE
+TBLPROPERTIES ("skip.header.line.count"="1");
 DESCRIBE EXTENDED my_user;
 ```
 
-插入数据
+导入数据
 
 ```
 LOAD DATA INPATH '/data/hive/my_user.csv' INTO TABLE my_user;

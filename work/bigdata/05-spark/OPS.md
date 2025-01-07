@@ -7,7 +7,7 @@
 拷贝依赖包到所有yarn节点上
 
 ```
-cp $SPARK_HOME/yarn/spark-3.5.0-yarn-shuffle.jar $HADOOP_HOME/share/hadoop/yarn/
+cp $SPARK_HOME/yarn/spark-3.5.4-yarn-shuffle.jar $HADOOP_HOME/share/hadoop/yarn/
 ```
 
 yarn-site.xml修改配置
@@ -59,7 +59,7 @@ spark.dynamicAllocation.maxExecutors    30
 spark-submit --master yarn \
     --class org.apache.spark.examples.SparkPi \
     --deploy-mode cluster \
-    $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.0.jar 10000
+    $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.4.jar 10000
 ```
 
 
@@ -89,7 +89,7 @@ FIELDS TERMINATED BY ',' -- 设置CSV文件中的字段分隔符为逗号
 STORED AS TEXTFILE;
 
 -- 导入数据
-LOAD DATA INPATH 'hdfs://bigdata01/data/my_table_user.csv' INTO TABLE user;
+LOAD DATA INPATH 'hdfs://bigdata01/data/my_user.csv' INTO TABLE user;
 ```
 
 ### 提交程序
@@ -339,14 +339,14 @@ OPTIONS (
 DESCRIBE EXTENDED user_ext_mysql;
 -- 插入数据
 INSERT INTO user_ext_mysql 
-VALUES (8888,'a4770d5c844a4f338510a738958b531f','李强','宁夏回族自治区',24,'blankenshipwilliam@example.org',26206,62.23,CAST('1997-04-21 11:35:17' AS TIMESTAMP));
+VALUES (8888,'a4770d5c844a4f33.5.4a738958b531f','李强','宁夏回族自治区',24,'blankenshipwilliam@example.org',26206,62.23,CAST('1997-04-21 11:35:17' AS TIMESTAMP));
 -- 查看数据
 select * from user_ext_mysql;
 ```
 
 ### PostgreSQL
 
-```
+```sql
 -- 创建表
 DROP TABLE IF EXISTS user_ext_postgresql;
 CREATE TABLE IF NOT EXISTS user_ext_postgresql
@@ -362,7 +362,7 @@ OPTIONS (
 DESCRIBE EXTENDED user_ext_postgresql;
 -- 插入数据
 INSERT INTO user_ext_postgresql 
-VALUES (8888,'a4770d5c844a4f338510a738958b531f','李强','宁夏回族自治区',24,'blankenshipwilliam@example.org',26206,62.23,CAST('1997-04-21 11:35:17' AS TIMESTAMP));
+VALUES (8888,'a4770d5c844a4f33.5.4a738958b531f','李强','宁夏回族自治区',24,'blankenshipwilliam@example.org',26206,62.23,CAST('1997-04-21 11:35:17' AS TIMESTAMP));
 -- 查看数据
 select * from user_ext_postgresql;
 ```

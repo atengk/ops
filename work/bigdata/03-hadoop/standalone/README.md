@@ -1,4 +1,10 @@
-# 安装Hadoop3
+# Hadoop3
+
+Hadoop 3 是 Apache Hadoop 的最新版本，改进了性能、可扩展性和稳定性。它引入了新的特性，如 YARN 的资源管理器改进、HDFS 的支持多个 NameNode 以提高容错能力、以及支持 Kubernetes 部署。Hadoop 3 提供了更高效的计算和存储能力，并且优化了容错机制，增强了对大规模数据处理任务的支持，适用于大数据分析、机器学习等应用。
+
+- [官网链接](https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html)
+
+
 
 文档使用以下1台服务器，具体服务分配见描述的进程
 
@@ -8,16 +14,22 @@
 
 
 
-## 基础环境配置
+## 基础配置
 
-解压软件包
+**下载软件包**
+
+```
+wget https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+```
+
+**解压软件包**
 
 ```
 tar -zxvf hadoop-3.3.6.tar.gz -C /usr/local/software/
 ln -s /usr/local/software/hadoop-3.3.6 /usr/local/software/hadoop
 ```
 
-配置环境变量
+**配置环境变量**
 
 ```
 cat >> ~/.bash_profile <<"EOF"
@@ -33,14 +45,13 @@ export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 export HADOOP_HDFS_HOME=$HADOOP_HOME
 export HADOOP_MAPRED_HOME=$HADOOP_HOME
 export HADOOP_YARN_HOME=$HADOOP_HOME
-export PATH=$PATH:$HADOOP_HOME/bin
-export PATH=$PATH:$HADOOP_HOME/sbin
+export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 export HADOOP_CLASSPATH=`hadoop classpath`
 EOF
 source ~/.bash_profile
 ```
 
-查看版本
+**查看版本**
 
 ```
 hadoop version
@@ -52,35 +63,48 @@ hadoop version
 
 ### 配置hadoop-env.sh
 
+根据实际情况修改相关配置
+
 ```
 cp $HADOOP_HOME/etc/hadoop/hadoop-env.sh{,_bak}
 cat > $HADOOP_HOME/etc/hadoop/hadoop-env.sh <<"EOF"
-export JAVA_HOME=/usr/local/software/jdk1.8.0
-export HADOOP_HEAPSIZE_MAX=10g
+export JAVA_HOME=/usr/local/software/jdk8
+export HADOOP_HOME=/usr/local/software/hadoop
+export HADOOP_HEAPSIZE_MAX=2g
 export HADOOP_HEAPSIZE_MIN=1g
 EOF
 ```
 
 ### 配置yarn-env.sh
 
+根据实际情况修改相关配置
+
 ```
 cp $HADOOP_HOME/etc/hadoop/yarn-env.sh{,_bak}
 cat > $HADOOP_HOME/etc/hadoop/yarn-env.sh <<"EOF"
-export YARN_RESOURCEMANAGER_HEAPSIZE=10g
-export YARN_NODEMANAGER_HEAPSIZE=10g
+export YARN_RESOURCEMANAGER_HEAPSIZE=2g
+export YARN_NODEMANAGER_HEAPSIZE=2g
 EOF
 ```
 
 ### 配置mapred-env.sh
 
+根据实际情况修改相关配置
+
 ```
 cp $HADOOP_HOME/etc/hadoop/mapred-env.sh{,_bak}
 cat > $HADOOP_HOME/etc/hadoop/mapred-env.sh <<"EOF"
-export HADOOP_JOB_HISTORYSERVER_HEAPSIZE=4g
+export HADOOP_JOB_HISTORYSERVER_HEAPSIZE=2g
 EOF
 ```
 
 ### 配置core-site.xml
+
+需要修改以下配置：
+
+- fs.defaultFS：指定Hadoop文件系统的URI
+- hadoop.tmp.dir：指定Hadoop的临时目录
+- 其他配置根据实际情况修改
 
 ```
 cat > $HADOOP_HOME/etc/hadoop/core-site.xml <<EOF
@@ -138,6 +162,13 @@ EOF
 ```
 
 ### 配置hdfs-site.xml
+
+需要修改以下配置：
+
+- dfs.data.dir：HDFS数据目录
+- dfs.namenode.name.dir：NameNode元数据存储目录
+- dfs.replication: HDFS默认数据块副本数量
+- 其他配置根据实际情况修改
 
 ```
 cat > $HADOOP_HOME/etc/hadoop/hdfs-site.xml <<EOF
@@ -197,7 +228,7 @@ cat > $HADOOP_HOME/etc/hadoop/hdfs-site.xml <<EOF
         <value>bigdata01:9867</value>
     </property>
     
-    <!-- 配置HDFS默认数据块复本数量 -->
+    <!-- 配置HDFS默认数据块副本数量 -->
     <property>
         <name>dfs.replication</name>
         <value>1</value>
@@ -237,6 +268,8 @@ EOF
 ```
 
 ### 配置yarn-site.xml
+
+根据实际情况修改相关配置。如果需要分配更多的CPU和内存资源，请修改相应参数：yarn.nodemanager.resource.memory-mb、yarn.nodemanager.resource.cpu-vcores
 
 ```
 cat > $HADOOP_HOME/etc/hadoop/yarn-site.xml <<EOF
@@ -344,6 +377,8 @@ EOF
 
 ### 配置mapred-site.xml
 
+根据实际情况修改相关配置
+
 ```
 cat > $HADOOP_HOME/etc/hadoop/mapred-site.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -431,6 +466,8 @@ EOF
 
 ### 配置workers
 
+根据实际情况修改相关配置
+
 ```
 cat > $HADOOP_HOME/etc/hadoop/workers <<EOF
 bigdata01
@@ -441,16 +478,16 @@ EOF
 
 ## 格式化集群
 
-格式化namenode
+**格式化namenode**
 
 ```
 hdfs namenode -format
 ll /data/service/hadoop/dfs
 ```
 
-重新格式化
+**重新格式化**
 
-> 如果需要重新格式化，先将数据目录删除，再重新格式化
+如果需要重新格式化，先将数据目录删除，再重新格式化
 
 ```
 rm -rf /data/service/hadoop/dfs
@@ -461,36 +498,36 @@ hdfs namenode -format
 
 ## 启动集群
 
-启动hdfs
+**启动hdfs**
 
-> bigdata01: NameNode SecondaryNameNode  DataNode
-> NameNode RPC: hdfs://bigdata01:8020
-> NameNode HTTP: http://bigdata01:9870/
-> SecondaryNameNode HTTP: http://bigdata01:9861/
+bigdata01: NameNode SecondaryNameNode  DataNode
+NameNode RPC: hdfs://bigdata01:8020
+NameNode HTTP: http://bigdata01:9870/
+SecondaryNameNode HTTP: http://bigdata01:9868/
 
 ```
 start-dfs.sh
 ```
 
-启动yarn
+**启动yarn**
 
-> bigdata01: NodeManager ResourceManager
-> http-address: http://bigdata01:8088/
+bigdata01: NodeManager ResourceManager
+http-address: http://bigdata01:8088/
 
 ```
 start-yarn.sh
 ```
 
-启动historyserver
+**启动historyserver**
 
-> bigdata01: JobHistoryServer
-> http-address: http://bigdata01:19888/
+bigdata01: JobHistoryServer
+http-address: http://bigdata01:19888/
 
 ```
 mapred --daemon start historyserver
 ```
 
-关闭服务
+**关闭服务**
 
 ```
 mapred --daemon stop historyserver
@@ -500,14 +537,14 @@ stop-dfs.sh
 
 ## 设置服务自启
 
-> 后台进程使用**Type=forking**
-
 ### HDFS NameNode 服务
 
-> HDFS（Hadoop分布式文件系统）中的NameNode是整个文件系统的关键组件之一，它负责管理文件系统的命名空间和元数据信息。
+HDFS（Hadoop分布式文件系统）中的NameNode是整个文件系统的关键组件之一，它负责管理文件系统的命名空间和元数据信息。
+
+**编辑配置文件**
 
 ```
-$ sudo vi /etc/systemd/system/hadoop-hdfs-namenode.service
+sudo tee /etc/systemd/system/hadoop-hdfs-namenode.service <<"EOF"
 [Unit]
 Description=Hadoop HDFS NameNode
 Documentation=https://hadoop.apache.org
@@ -523,7 +560,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -534,10 +574,12 @@ sudo systemctl status hadoop-hdfs-namenode.service
 
 ### HDFS SecondaryNameNode 服务
 
-> HDFS SecondaryNameNode 是 Apache Hadoop HDFS 的一个辅助组件，它的主要作用是协助 NameNode 处理文件系统的编辑日志（Edit Log）以及内存中的文件系统镜像（FsImage）。
+HDFS SecondaryNameNode 是 Apache Hadoop HDFS 的一个辅助组件，它的主要作用是协助 NameNode 处理文件系统的编辑日志（Edit Log）以及内存中的文件系统镜像（FsImage）。
+
+**编辑配置文件**
 
 ```
-$ sudo vi /etc/systemd/system/hadoop-hdfs-secondarynamenode.service
+sudo tee /etc/systemd/system/hadoop-hdfs-secondarynamenode.service <<"EOF"
 [Unit]
 Description=Hadoop HDFS SecondaryNameNode
 Documentation=https://hadoop.apache.org
@@ -553,7 +595,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -564,10 +609,12 @@ sudo systemctl status hadoop-hdfs-secondarynamenode.service
 
 ### HDFS DataNode 服务
 
-> HDFS（Hadoop分布式文件系统）中的DataNode是负责存储和管理数据块的关键组件之一
+HDFS（Hadoop分布式文件系统）中的DataNode是负责存储和管理数据块的关键组件之一
+
+**编辑配置文件**
 
 ```
-$ sudo vi /etc/systemd/system/hadoop-hdfs-datanode.service
+sudo tee /etc/systemd/system/hadoop-hdfs-datanode.service <<"EOF"
 [Unit]
 Description=Hadoop HDFS DataNode
 Documentation=https://hadoop.apache.org
@@ -583,7 +630,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -594,10 +644,12 @@ sudo systemctl status hadoop-hdfs-datanode.service
 
 ### YARN ResourceManager 服务
 
-> YARN ResourceManager（资源管理器）是 Apache Hadoop YARN（Yet Another Resource Negotiator）中的一个关键组件，它是整个资源管理系统的核心。YARN ResourceManager 主要负责整个集群资源的分配和管理，以及协调各个应用程序对资源的请求和使用。
+YARN ResourceManager（资源管理器）是 Apache Hadoop YARN（Yet Another Resource Negotiator）中的一个关键组件，它是整个资源管理系统的核心。YARN ResourceManager 主要负责整个集群资源的分配和管理，以及协调各个应用程序对资源的请求和使用。
+
+**编辑配置文件**
 
 ```
-$ sudo vi /etc/systemd/system/hadoop-yarn-resourcemanager.service
+sudo tee /etc/systemd/system/hadoop-yarn-resourcemanager.service <<"EOF"
 [Unit]
 Description=Hadoop YARN ResourceManager
 Documentation=https://hadoop.apache.org
@@ -613,7 +665,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -624,10 +679,12 @@ sudo systemctl status hadoop-yarn-resourcemanager.service
 
 ### YARN NodeManager 服务
 
-> YARN NodeManager 是 Apache Hadoop YARN（Yet Another Resource Negotiator）中的一个重要组件，负责在集群中管理和监控各个节点的资源使用情况，并执行与资源分配相关的任务。
+YARN NodeManager 是 Apache Hadoop YARN（Yet Another Resource Negotiator）中的一个重要组件，负责在集群中管理和监控各个节点的资源使用情况，并执行与资源分配相关的任务。
+
+**编辑配置文件**
 
 ```
-$ sudo vi /etc/systemd/system/hadoop-yarn-nodemanager.service
+sudo tee /etc/systemd/system/hadoop-yarn-nodemanager.service <<"EOF"
 [Unit]
 Description=Hadoop YARN NodeManager
 Documentation=https://hadoop.apache.org
@@ -643,7 +700,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -654,10 +714,12 @@ sudo systemctl status hadoop-yarn-nodemanager.service
 
 ### Hadoop JobHistoryServer 服务
 
-> Hadoop JobHistoryServer 是 Hadoop 生态系统中的一个关键组件，它负责跟踪和存储 MapReduce 作业（Job）的历史信息
+Hadoop JobHistoryServer 是 Hadoop 生态系统中的一个关键组件，它负责跟踪和存储 MapReduce 作业（Job）的历史信息
+
+**编辑配置文件**
 
 ```
-$ sudo vi /etc/systemd/system/hadoop-mapreduce-historyserver.service
+sudo tee /etc/systemd/system/hadoop-mapreduce-historyserver.service <<"EOF"
 [Unit]
 Description=Hadoop MapReduce HistoryServer
 Documentation=https://hadoop.apache.org
@@ -674,7 +736,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -687,20 +752,20 @@ sudo systemctl status hadoop-mapreduce-historyserver.service
 
 ## 使用集群
 
-查看hdfs
+**查看hdfs**
 
 ```
 hadoop fs -df -h
 ```
 
-创建web的目录
+**创建web的目录**
 
 ```
 hadoop fs -mkdir /web
 hadoop fs -chown web /web
 ```
 
-运行mapreduce任务
+**运行mapreduce任务**
 
 ```
 hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.6.jar pi 5 5

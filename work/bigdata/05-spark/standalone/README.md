@@ -1,17 +1,27 @@
-# 安装Spark3
+# Spark3
+
+Apache Spark 是一个开源的大数据处理框架，旨在快速处理大规模数据集。它提供了分布式计算能力，支持批处理和流处理。Spark 提供了丰富的API，支持多种编程语言（如Java、Scala、Python、R），并且能在不同的集群管理器（如Hadoop YARN、Kubernetes）上运行。Spark 通过内存计算和高度优化的执行引擎，显著提高了数据处理速度，广泛应用于数据分析、机器学习和图计算等领域。
+
+- [官网链接](https://spark.apache.org/)
 
 
 
-## 基础环境配置
+## 基础配置
 
-解压软件包
+**下载软件包**
 
 ```
-tar -zxvf spark-3.5.0-bin-hadoop3.tgz -C /usr/local/software/
-ln -s /usr/local/software/spark-3.5.0-bin-hadoop3 /usr/local/software/spark
+wget https://dlcdn.apache.org/spark/spark-3.5.4/spark-3.5.4-bin-hadoop3.tgz
 ```
 
-配置环境变量
+**解压软件包**
+
+```
+tar -zxvf spark-3.5.4-bin-hadoop3.tgz -C /usr/local/software/
+ln -s /usr/local/software/spark-3.5.4-bin-hadoop3 /usr/local/software/spark
+```
+
+**配置环境变量**
 
 ```
 cat >> ~/.bash_profile <<"EOF"
@@ -22,7 +32,7 @@ EOF
 source ~/.bash_profile
 ```
 
-查看版本
+**查看版本**
 
 ```
 spark-shell --version
@@ -32,11 +42,13 @@ spark-shell --version
 
 ## Spark Standalone（单机）
 
-> Spark提供了一个独立的集群管理器，允许用户在不依赖于其他资源管理器的情况下部署Spark应用程序。用户可以通过启动和配置独立的Master和Worker节点来实现集群。
->
-> https://spark.apache.org/docs/latest/spark-standalone.html
->
-> 这种模式仅用于开发环境，生产环境使用Spark on YARN的方式
+Spark提供了一个独立的集群管理器，允许用户在不依赖于其他资源管理器的情况下部署Spark应用程序。用户可以通过启动和配置独立的Master和Worker节点来实现集群。
+
+这种模式仅用于开发环境，生产环境使用Spark on YARN的方式
+
+- [官网链接](https://spark.apache.org/docs/latest/spark-standalone.html)
+
+
 
 文档使用以下1台服务器，具体服务分配见描述的进程
 
@@ -44,14 +56,16 @@ spark-shell --version
 | ------------- | --------- | --------------------------- |
 | 192.168.1.131 | bigdata01 | Master Worker HistoryServer |
 
+
+
 ### 集群配置
 
-配置spark-env.sh
+**配置spark-env.sh**
 
 ```
 cat >> $SPARK_HOME/conf/spark-env.sh <<"EOF"
-export JAVA_HOME=/usr/local/software/jdk1.8.0
-export HADOOP_HOME=/usr/local/software/hadoop/
+export JAVA_HOME=/usr/local/software/jdk8
+export HADOOP_HOME=/usr/local/software/hadoop
 export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
 export LD_LIBRARY_PATH=$HADOOP_HOME/lib/native
 export SPARK_MASTER_HOST=bigdata01
@@ -63,7 +77,7 @@ export SPARK_DAEMON_MEMORY=1g
 EOF
 ```
 
-配置worker
+**配置worker**
 
 ```
 cat > $SPARK_HOME/conf/workers <<EOF
@@ -71,7 +85,7 @@ bigdata01
 EOF
 ```
 
-配置spark-defaults.conf
+**配置spark-defaults.conf**
 
 ```
 cat >> $SPARK_HOME/conf/spark-defaults.conf <<EOF
@@ -86,7 +100,7 @@ spark.history.fs.logDirectory hdfs://bigdata01:8020/tmp/logs/spark
 spark.driver.cores 1
 spark.driver.memory 1g
 spark.driver.memoryOverhead 1g
-spark.executor.instances 5
+spark.executor.instances 2
 spark.executor.cores 1
 spark.executor.memory 2g
 spark.executor.memoryOverhead 1g
@@ -96,7 +110,7 @@ spark.default.paralleism 8
 EOF
 ```
 
-创建日志目录
+**创建日志目录**
 
 ```
 hadoop fs -mkdir /tmp/logs/spark
@@ -104,27 +118,27 @@ hadoop fs -mkdir /tmp/logs/spark
 
 ### 启动集群
 
-启动服务
+**启动服务**
 
-> bigdata01: Master Worker
->
-> Master Web: http://bigdata01:8080
+bigdata01: Master Worker
+
+Master Web: http://bigdata01:8080
 
 ```
 $SPARK_HOME/sbin/start-all.sh
 ```
 
-启动historyserver服务
+**启动historyserver服务**
 
-> bigdata01: HistoryServer
->
-> HistoryServer Web: http://bigdata01:18080
+bigdata01: HistoryServer
+
+HistoryServer Web: http://bigdata01:18080
 
 ```
 $SPARK_HOME/sbin/start-history-server.sh
 ```
 
-关闭服务
+**关闭服务**
 
 ```
 $SPARK_HOME/sbin/stop-history-server.sh
@@ -133,12 +147,12 @@ $SPARK_HOME/sbin/stop-all.sh
 
 ### 设置服务自启
 
-> 后台进程使用**Type=forking**
-
 #### Spark Master
 
+**编辑配置文件**
+
 ```
-$ sudo vi /etc/systemd/system/spark-master.service
+sudo tee /etc/systemd/system/spark-master.service <<"EOF"
 [Unit]
 Description=Spark Master
 Documentation=https://spark.apache.org
@@ -154,7 +168,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -165,8 +182,10 @@ sudo systemctl status spark-master.service
 
 #### Spark Worker
 
+**编辑配置文件**
+
 ```
-$ sudo vi /etc/systemd/system/spark-worker.service
+sudo tee /etc/systemd/system/spark-worker.service <<"EOF"
 [Unit]
 Description=Spark Worker
 Documentation=https://spark.apache.org
@@ -182,7 +201,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -193,8 +215,10 @@ sudo systemctl status spark-worker.service
 
 #### Spark HistoryServer
 
+**编辑配置文件**
+
 ```
-$ sudo vi /etc/systemd/system/spark-history-server.service
+sudo tee /etc/systemd/system/spark-history-server.service <<"EOF"
 [Unit]
 Description=Spark HistoryServer
 Documentation=https://spark.apache.org
@@ -210,7 +234,10 @@ User=admin
 Group=ateng
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
+
+**启动服务**
 
 ```
 sudo systemctl daemon-reload
@@ -225,7 +252,7 @@ sudo systemctl status spark-history-server.service
 
 #### spark-submit
 
-提交任务到Spark Standalone
+**提交任务到Spark Standalone**
 
 ```
 spark-submit \
@@ -233,20 +260,24 @@ spark-submit \
     --deploy-mode cluster \
     --total-executor-cores 2 \
     --class org.apache.spark.examples.SparkPi \
-    $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.0.jar 1000
+    $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.4.jar 1000
 ```
 
 #### spark-sql
 
-使用SparkSQL连接Spark Standalone
+**使用SparkSQL连接Spark Standalone**
+
+没有配置Spark on Hive持久存储，使用内存模式进入默认会在当前目录下生成 `spark-warehouse` 目录
 
 ```
 spark-sql \
+    --conf spark.sql.catalogImplementation=in-memory \
+    --conf spark.sql.legacy.createHiveTableByDefault=false \
     --master spark://bigdata01:7077 \
     --total-executor-cores 2
 ```
 
-创建数据库
+**创建数据库**
 
 ```
 CREATE TABLE my_table_spark (
@@ -255,7 +286,7 @@ CREATE TABLE my_table_spark (
 );
 ```
 
-插入数据
+**插入数据**
 
 ```
 INSERT INTO my_table_spark VALUES
@@ -265,16 +296,16 @@ INSERT INTO my_table_spark VALUES
     (4, 'Alice');
 ```
 
-查询数据
+**查询数据**
 
 ```
 SELECT * FROM my_table_spark;
+SELECT count(*) FROM my_table_spark;
 ```
 
-进入hive查看数据
+**清理目录**
 
 ```
-hive
-SELECT * FROM my_table_spark;
+rm -rf spark-warehouse/
 ```
 

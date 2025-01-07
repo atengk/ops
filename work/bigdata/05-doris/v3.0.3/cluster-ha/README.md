@@ -55,7 +55,7 @@ mycluster:abcd1234abcd5678@bigdata01:4500,bigdata02:4500,bigdata03:4500
 
 ### 安装JDK17
 
-参考: [JDK17安装文档](/work/bigdata/01-jdk/jdk17/)
+参考: [JDK17安装文档](/work/service/openjdk/openjdk17/)
 
 **检查JDK版本**
 

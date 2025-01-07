@@ -1,65 +1,72 @@
+# Flink Operator
 
-# 使用Kubernetes安装Flink Kubernetes Operator 1.9.0
+`flink-kubernetes-operator` 是一个 Kubernetes Operator，用于自动化管理 Apache Flink 作业和集群。通过自定义资源（CR），它简化了 Flink 作业的部署、监控、扩展和恢复。该工具提供声明式 API，支持高可用性、动态资源调整和自动故障恢复，使 Flink 在 Kubernetes 环境中的管理更加高效和可靠。
+
+- [官网链接](https://github.com/apache/flink-kubernetes-operator)
+
+
 
 ## 前提条件
 
-- 已经安装 `cert-manager`
+- 已经安装 `cert-manager`，参考[链接](/work/kubernetes/service/cert-manager/v1.16.2/)
 
-## 步骤一：下载并解压Flink Kubernetes Operator
+## 安装operator
 
-首先，我们需要下载并解压Flink Kubernetes Operator的安装包。
+**下载并解压软件包**
 
 ```bash
-wget https://github.com/apache/flink-kubernetes-operator/archive/refs/tags/release-1.9.0.tar.gz
-tar -zxf flink-kubernetes-operator-release-1.9.0.tar.gz
+wget https://github.com/apache/flink-kubernetes-operator/archive/refs/tags/release-1.10.0.tar.gz
+tar -zxf flink-kubernetes-operator-release-1.10.0.tar.gz
 ```
 
-**说明：**
-
-- `wget` 命令用于从指定的URL下载文件。
-- `tar -zxf` 命令用于解压下载的tar.gz文件。
-
-## 步骤二：使用Helm打包并安装Flink Kubernetes Operator
-
-接下来，我们使用Helm打包并安装Flink Kubernetes Operator。
+**打包Chart**
 
 ```bash
-helm package flink-kubernetes-operator-release-1.9.0/helm/flink-kubernetes-operator/
+helm package flink-kubernetes-operator-release-1.10.0/helm/flink-kubernetes-operator/
+rm -rf flink-kubernetes-operator-release-1.10.0/
+```
+
+**安装operator**
+
+```bash
 helm install flink-kubernetes-operator \
-    -n flink --create-namespace \
+    -n flink-operator --create-namespace \
     --set image.repository=registry.lingo.local/service/flink-kubernetes-operator \
-    --set image.tag=1.9.0 \
+    --set image.tag=1.10.0 \
     --set image.pullPolicy=IfNotPresent \
-    flink-kubernetes-operator-1.9.0.tgz
+    flink-kubernetes-operator-1.10.0.tgz
 ```
 
-**说明：**
-
-- `helm package` 命令用于将Flink Kubernetes Operator的Helm chart打包成tgz文件。
-- `helm install` 命令用于在Kubernetes集群中安装Helm chart。
-- `-n flink --create-namespace` 参数用于在名为`flink`的命名空间中安装，并在需要时创建该命名空间。
-- `--set` 参数用于覆盖Helm chart中的默认值，例如镜像仓库、标签和拉取策略。
-
-安装完成后，可以通过以下命令查看Pod的状态：
+**查看operator**
 
 ```bash
-kubectl get -n flink pod -o wide
+kubectl get -n flink-operator pod -o wide
 ```
 
-## 步骤三：部署一个基本的Flink任务
-
-接下来，我们创建一个基本的Flink任务配置文件，并在Kubernetes中部署。
+**查看日志**
 
 ```bash
-cat > flink-basic.yaml <<EOF
+kubectl logs -n flink-operator -f --tail=200 deploy/flink-kubernetes-operator
+```
+
+
+
+## 创建任务
+
+**创建任务**
+
+`flink-operator 1.10.0`版本还不支持1.20版本的flink，等待后续更新，这里先使用1.19
+
+```bash
+kubectl apply -f - <<EOF
 apiVersion: flink.apache.org/v1beta1
 kind: FlinkDeployment
 metadata:
   name: flink-basic
-  namespace: flink
+  namespace: ateng-flink
 spec:
-  image: registry.lingo.local/service/flink:1.18
-  flinkVersion: v1_18
+  image: registry.lingo.local/service/flink:1.19-java8
+  flinkVersion: v1_19
   flinkConfiguration:
     taskmanager.numberOfTaskSlots: "2"
   serviceAccount: flink
@@ -75,83 +82,36 @@ spec:
     jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
     parallelism: 2
 EOF
-kubectl apply -f flink-basic.yaml
 ```
 
-**说明：**
+**查看应用**
 
-- `cat > flink-basic.yaml <<EOF ... EOF` 命令用于创建一个新的yaml文件并写入内容。
-- `kubectl apply -f flink-basic.yaml` 命令用于在Kubernetes中应用该配置文件。
-
-查看并跟踪Pod日志：
+查看应用
 
 ```bash
-kubectl get pod -n flink -l app=flink-basic
-kubectl logs -f -n flink -l app=flink-basic
+kubectl get -n ateng-flink flinkdep flink-basic
 ```
 
-## 步骤四：部署支持检查点的Flink任务
-
-如果需要部署一个支持检查点和保存点的Flink任务，可以使用以下配置文件：
+查看pod
 
 ```bash
-cat > flink-basic-checkpoints.yaml <<EOF
-apiVersion: flink.apache.org/v1beta1
-kind: FlinkDeployment
-metadata:
-  name: flink-basic-checkpoints
-  namespace: flink
-spec:
-  image: registry.lingo.local/service/flink:1.18
-  flinkVersion: v1_18
-  flinkConfiguration:
-    taskmanager.numberOfTaskSlots: "2"
-    state.savepoints.dir: file:///flink-data/savepoints
-    state.checkpoints.dir: file:///flink-data/checkpoints
-  serviceAccount: flink
-  jobManager:
-    resource:
-      memory: "2048m"
-      cpu: 1
-  taskManager:
-    resource:
-      memory: "2048m"
-      cpu: 1
-  job:
-    jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
-    parallelism: 2
-    upgradeMode: savepoint
-    state: running
-    checkpointTriggerNonce: 30
-    savepointTriggerNonce: 30
-  podTemplate:
-    spec:
-      containers:
-        - name: flink-main-container
-          volumeMounts:
-          - mountPath: /flink-data
-            name: flink-volume
-      volumes:
-      - name: flink-volume
-        hostPath:
-          path: /tmp/flink
-          type: DirectoryOrCreate
-EOF
-kubectl apply -f flink-basic-checkpoints.yaml
+kubectl get -n ateng-flink pod,svc -l app=flink-basic
+kubectl logs -n ateng-flink -f --tail=200 -l app=flink-basic
 ```
 
-**说明：**
 
-- 该配置文件与基本的Flink任务配置类似，但添加了检查点和保存点的配置。
-- `state.savepoints.dir` 和 `state.checkpoints.dir` 指定了保存点和检查点的存储路径。
-- `checkpointTriggerNonce` 和 `savepointTriggerNonce` 用于手动触发检查点和保存点。
 
-同样，查看并跟踪Pod日志：
+## 删除服务
+
+**删除应用**
 
 ```bash
-kubectl get pod -n flink -l app=flink-basic-checkpoints
-kubectl logs -f -n flink -l app=flink-basic-checkpoints
+kubectl delete -n ateng-flink flinkdep flink-basic
 ```
 
+**删除operator**
 
+```bash
+helm uninstall -n flink-operator flink-kubernetes-operator
+```
 
