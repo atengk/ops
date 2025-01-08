@@ -20,7 +20,7 @@ $FLINK_HOME/bin/historyserver.sh start
 **拷贝依赖包**
 
 ```
-cp $FLINK_HOME/opt/flink-sql-client-1.20.0.jar $FLINK_HOME/lib/
+cp $FLINK_HOME/opt/flink-sql-client-1.19.1.jar $FLINK_HOME/lib/
 ```
 
 **启动SQL Client**
@@ -48,13 +48,13 @@ SET sql-client.execution.result-mode=tableau;
 下载依赖
 
 ```
-wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-connector-datagen/1.20.0/flink-connector-datagen-1.20.0.jar
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-connector-datagen/1.19.1/flink-connector-datagen-1.19.1.jar
 ```
 
 拷贝依赖到lib下后再启动sql client
 
 ```
-cp lib/flink-connector-datagen-1.20.0.jar $FLINK_HOME/lib/
+cp lib/flink-connector-datagen-1.19.1.jar $FLINK_HOME/lib/
 ```
 
 创建表
@@ -95,14 +95,14 @@ select * from my_user;
 下载依赖
 
 ```
-wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka/3.4.0-1.20/flink-connector-kafka-3.4.0-1.20.jar
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-connector-kafka/3.3.0-1.19/flink-connector-kafka-3.3.0-1.19.jar
 wget -P lib https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.8.1/kafka-clients-3.8.1.jar
 ```
 
 拷贝依赖到lib下后再启动sql client，需要重启Flink服务
 
 ```
-cp lib/{flink-connector-kafka-3.4.0-1.20.jar,kafka-clients-3.8.1.jar} $FLINK_HOME/lib/
+cp lib/{flink-connector-kafka-3.3.0-1.19.jar,kafka-clients-3.8.1.jar} $FLINK_HOME/lib/
 ```
 
 创建表
@@ -197,13 +197,13 @@ select * from my_user_file;
 下载依赖
 
 ```
-wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-parquet/1.20.0/flink-sql-parquet-1.20.0.jar
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-parquet/1.19.1/flink-sql-parquet-1.19.1.jar
 ```
 
 拷贝依赖到lib下后再启动sql clientt，需要重启Flink服务
 
 ```
-cp lib/flink-sql-parquet-1.20.0.jar $FLINK_HOME/lib/
+cp lib/flink-sql-parquet-1.19.1.jar $FLINK_HOME/lib/
 ```
 
 创建表
@@ -263,13 +263,13 @@ select age,count(*) from my_user_hive group by age;
 下载依赖
 
 ```
-wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-parquet/1.20.0/flink-sql-parquet-1.20.0.jar
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-parquet/1.19.1/flink-sql-parquet-1.19.1.jar
 ```
 
 拷贝依赖到lib下后再启动sql clientt，需要重启Flink服务
 
 ```
-cp lib/flink-sql-parquet-1.20.0.jar $FLINK_HOME/lib/
+cp lib/flink-sql-parquet-1.19.1.jar $FLINK_HOME/lib/
 ```
 
 创建表
@@ -359,19 +359,19 @@ s3:
 
 ```
 mkdir -p $FLINK_HOME/plugins/s3-fs-hadoop
-cp $FLINK_HOME/opt/flink-s3-fs-hadoop-1.20.0.jar $FLINK_HOME/plugins/s3-fs-hadoop/
+cp $FLINK_HOME/opt/flink-s3-fs-hadoop-1.19.1.jar $FLINK_HOME/plugins/s3-fs-hadoop/
 ```
 
 下载依赖
 
 ```
-wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-parquet/1.20.0/flink-sql-parquet-1.20.0.jar
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-parquet/1.19.1/flink-sql-parquet-1.19.1.jar
 ```
 
 拷贝依赖到lib下后再启动sql clientt，需要重启Flink服务
 
 ```
-cp lib/flink-sql-parquet-1.20.0.jar $FLINK_HOME/lib/
+cp lib/flink-sql-parquet-1.19.1.jar $FLINK_HOME/lib/
 ```
 
 创建表
@@ -430,19 +430,19 @@ s3.path.style.access: true
 
 ```
 mkdir -p $FLINK_HOME/plugins/s3-fs-hadoop
-cp $FLINK_HOME/opt/flink-s3-fs-hadoop-1.20.0.jar $FLINK_HOME/plugins/s3-fs-hadoop/
+cp $FLINK_HOME/opt/flink-s3-fs-hadoop-1.19.1.jar $FLINK_HOME/plugins/s3-fs-hadoop/
 ```
 
 下载依赖
 
 ```
-wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-parquet/1.20.0/flink-sql-parquet-1.20.0.jar
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-parquet/1.19.1/flink-sql-parquet-1.19.1.jar
 ```
 
 拷贝依赖到lib下后再启动sql clientt，需要重启Flink服务
 
 ```
-cp lib/flink-sql-parquet-1.20.0.jar $FLINK_HOME/lib/
+cp lib/flink-sql-parquet-1.19.1.jar $FLINK_HOME/lib/
 ```
 
 创建表
@@ -517,8 +517,6 @@ CREATE TABLE `my_user_mysql` (
 ```
 
 下载依赖
-
-> 2025年1月4日：下载时还没有1.20版本的，就先使用1.19版本
 
 ```
 wget -P lib https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
@@ -604,8 +602,6 @@ COMMENT ON COLUMN my_user_postgresql.create_time IS '创建时间';
 
 下载依赖
 
-> 2025年1月4日：下载时还没有1.20版本的，就先使用1.19版本
-
 ```
 wget -P lib https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar
 wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-connector-jdbc/3.2.0-1.19/flink-connector-jdbc-3.2.0-1.19.jar
@@ -668,13 +664,13 @@ select * from my_user_postgresql;
 下载依赖
 
 ```
-wget -P lib https://repo1.maven.org/maven2/org/apache/doris/flink-doris-connector-1.20/24.1.0/flink-doris-connector-1.20-24.1.0.jar
+wget -P lib https://repo1.maven.org/maven2/org/apache/doris/flink-doris-connector-1.19/24.1.0/flink-doris-connector-1.19-24.1.0.jar
 ```
 
 拷贝依赖到lib下后再启动sql clientt，需要重启Flink服务
 
 ```
-cp lib/flink-doris-connector-1.20-24.1.0.jar $FLINK_HOME/lib/
+cp lib/flink-doris-connector-1.19-24.1.0.jar $FLINK_HOME/lib/
 ```
 
 doris创建表
@@ -735,8 +731,6 @@ select * from my_user_doris;
 
 下载依赖
 
-> 2025年1月4日：下载时还没有1.20版本的，就先使用1.19版本
-
 ```
 wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-mongodb/1.2.0-1.19/flink-sql-connector-mongodb-1.2.0-1.19.jar
 ```
@@ -792,8 +786,6 @@ select * from my_user_mongo;
 
 下载依赖
 
-> 2025年1月4日：下载时还没有1.20版本的，就先使用1.19版本
-
 ```
 wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-opensearch/1.2.0-1.19/flink-sql-connector-opensearch-1.2.0-1.19.jar
 ```
@@ -843,8 +835,6 @@ insert into my_user_es select * from my_user;
 > [下载地址](https://central.sonatype.com/artifact/org.apache.flink/flink-sql-connector-opensearch/overview)
 
 下载依赖
-
-> 2025年1月4日：下载时还没有1.20版本的，就先使用1.19版本
 
 ```
 wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-opensearch/1.2.0-1.19/flink-sql-connector-opensearch-1.2.0-1.19.jar
@@ -1303,3 +1293,258 @@ show catalogs;
 use catalog mysql_catalog;
 ```
 
+
+
+## Flink CDC
+
+Flink CDC源是Apache Flink®的一组源连接器，使用更改数据捕获（CDC）从不同的数据库摄取更改。一些CDC源集成了Debezium作为捕获数据变化的引擎。所以它可以充分利用Debezium的能力。
+
+- [官网链接](https://nightlies.apache.org/flink/flink-cdc-docs-release-3.2/zh/docs/connectors/flink-sources/overview/)
+
+### MySQL CDC
+
+下载依赖
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-mysql-cdc/3.2.1/flink-sql-connector-mysql-cdc-3.2.1.jar
+wget -P lib https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
+```
+
+拷贝依赖到lib下后再启动sql client，需要重启Flink服务
+
+```
+cp lib/{flink-sql-connector-mysql-cdc-3.2.1.jar,mysql-connector-j-8.0.33.jar} $FLINK_HOME/lib/
+```
+
+创建数据库表
+
+```sql
+--- mysql
+CREATE TABLE kongyu_flink.my_user (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(10),
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP(3),
+  province VARCHAR(20),
+  city VARCHAR(20),
+  create_time TIMESTAMP(3),
+  PRIMARY KEY (id)
+);
+
+--- doris
+CREATE TABLE kongyu_flink.my_user (
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday DATETIME,
+  province STRING,
+  city STRING,
+  create_time DATETIME
+) 
+UNIQUE KEY(`id`)
+DISTRIBUTED BY HASH(id) BUCKETS AUTO
+PROPERTIES (
+"replication_allocation" = "tag.location.default: 1"
+);
+```
+
+进入FlinkSQL
+
+```
+$ $FLINK_HOME/bin/sql-client.sh
+SET sql-client.execution.result-mode=tableau;
+```
+
+创建MySQL CDC
+
+```
+CREATE TABLE cdc_mysql_source (
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP(3),
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP(3),
+  PRIMARY KEY (id) NOT ENFORCED
+) WITH (
+ 'connector' = 'mysql-cdc',
+ 'hostname' = '192.168.1.10',
+ 'port' = '35725',
+ 'username' = 'root',
+ 'password' = 'Admin@123',
+ 'database-name' = 'kongyu_flink',
+ 'table-name' = 'my_user'
+);
+```
+
+创建Doris
+
+```
+CREATE TABLE doris_sink (
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP(3),
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP(3)
+)
+WITH (
+  'connector' = 'doris',
+  'fenodes' = '192.168.1.12:9040',
+  'table.identifier' = 'kongyu_flink.my_user',
+  'username' = 'admin',
+  'password' = 'Admin@123',
+  'sink.properties.format' = 'json',
+  'sink.properties.read_json_by_line' = 'true',
+  'sink.enable-delete' = 'true',  -- 同步删除事件
+  'sink.properties.partial_columns' = 'true', -- 开启部分列更新
+  'sink.label-prefix' = 'doris_label'
+);
+```
+
+同步数据
+
+```
+insert into doris_sink select * from cdc_mysql_source;
+```
+
+
+
+### PostgreSQL CDC
+
+下载依赖
+
+```
+wget https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-postgres-cdc/3.2.1/flink-sql-connector-postgres-cdc-3.2.1.jar
+```
+
+创建数据库表
+
+> 注意PostgreSQ需要设置**wal_level = 'logical**参数，还需要安装**[Postgres Decoderbufs插件](https://github.com/debezium/postgres-decoderbufs)**
+
+```sql
+--- postgresql
+create table if not exists public.my_user
+(
+    id          serial primary key,
+    name        varchar(10),
+    age         integer,
+    score       double precision,
+    birthday    timestamp,
+    province    varchar(20),
+    city        varchar(20),
+    create_time timestamp
+);
+```
+
+进入FlinkSQL
+
+```
+$ $FLINK_HOME/bin/sql-client.sh
+SET sql-client.execution.result-mode=tableau;
+```
+
+创建Postgresql CDC
+
+```
+CREATE TABLE cdc_postgres_source (
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP(3),
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP(3),
+  PRIMARY KEY (id) NOT ENFORCED
+) WITH (
+ 'connector' = 'postgres-cdc',
+ 'hostname' = '192.168.1.10',
+ 'port' = '32297',
+ 'username' = 'postgres',
+ 'password' = 'Lingo@local_postgresql_5432',
+ 'database-name' = 'kongyu_flink',
+ 'schema-name' = 'public',
+ 'table-name' = 'my_user',
+ 'slot.name' = 'flink'
+);
+```
+
+实时查看数据
+
+```
+select * from cdc_postgres_source;
+```
+
+
+
+### MongoDB CDC
+
+下载依赖
+
+```
+wget https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-mongodb-cdc/3.2.1/flink-sql-connector-mongodb-cdc-3.2.1.jar
+```
+
+创建数据库表
+
+> MongoDB必须是[replica sets](https://docs.mongodb.com/manual/replication/) or [sharded clusters](https://docs.mongodb.com/manual/sharding/)
+
+```sql
+// mongodb
+db.my_user.insertOne({
+    id: 1, // MongoDB 会自动生成 _id 字段作为主键，你可以省略 id 字段
+    name: "Alice",
+    age: 30,
+    score: 85.5,
+    birthday: new Date("1992-03-25T00:00:00Z"),
+    province: "Beijing",
+    city: "Beijing",
+    create_time: new Date()
+});
+```
+
+进入FlinkSQL
+
+```
+$ $FLINK_HOME/bin/sql-client.sh
+SET sql-client.execution.result-mode=tableau;
+```
+
+创建MongoDB CDC
+
+```
+CREATE TABLE cdc_mongodb_source (
+  _id STRING,
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP(3),
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP(3),
+  PRIMARY KEY (_id) NOT ENFORCED
+) WITH (
+ 'connector' = 'mongodb-cdc',
+  'hosts' = '192.168.1.10:19868',
+  'username' = 'root',
+  'password' = 'Admin@123',
+  'database' = 'kongyu_flink',
+  'collection' = 'my_user'
+);
+```
+
+实时查看数据
+
+```
+select * from cdc_mongodb_source;
+```
+
+### 

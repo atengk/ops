@@ -18,7 +18,7 @@ metadata:
   name: flink-standard-myapp
   namespace: flink
 spec:
-  image: registry.lingo.local/service/flink:1.18
+  image: registry.lingo.local/service/flink:1.19-java8
   flinkVersion: v1_18
   flinkConfiguration:
     state.backend: rocksdb

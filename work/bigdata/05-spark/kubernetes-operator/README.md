@@ -3,7 +3,7 @@
 Spark Operator 是一个 Kubernetes 控制器，用于简化 Apache Spark 应用的部署与管理。它支持通过 Kubernetes 自定义资源 (CRDs) 定义和管理 Spark 应用生命周期，自动处理集群资源调度、监控和故障恢复。Spark Operator 是 Kubeflow 的一部分，适用于大数据和机器学习任务。
 
 - [Spark Operator GitHub 仓库](https://github.com/kubeflow/spark-operator)
-- [Kubeflow Spark Operator 入门指南](https://www.kubeflow.org/docs/components/spark-operator/getting-started/)[](https://github.com/kubeflow/spark-operator)
+- [Kubeflow Spark Operator 入门指南](https://www.kubeflow.org/docs/components/spark-operator/getting-started/)
 
 
 
@@ -25,19 +25,23 @@ kubectl create ns ateng-spark
 
 **安装Operator**
 
+修改values.yaml
+
 修改以下配置：
 
 - image.*: 镜像信息
 - spark.jobNamespaces: spark作业命名空间，命名空间需要存在
 
+```
+cat values.yaml
+```
+
+安装Operator
+
 ```sh
 helm install spark-operator \
     -n spark-operator --create-namespace \
-    --set image.registry=registry.lingo.local \
-    --set image.repository=service/spark-operator \
-    --set image.tag=2.1.0 \
-    --set image.pullPolicy=IfNotPresent \
-    --set spark.jobNamespaces="{default,ateng-spark}" \
+    -f values.yaml \
     spark-operator-2.1.0.tgz
 ```
 
@@ -52,6 +56,12 @@ kubectl get pod,svc -n spark-operator
 ```
 kubectl logs -f -n spark-operator deploy/spark-operator-controller
 kubectl logs -f -n spark-operator deploy/spark-operator-webhook
+```
+
+**删除operator**
+
+```
+helm uninstall spark-operator -n spark-operator
 ```
 
 ## 安装sparkctl

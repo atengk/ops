@@ -929,7 +929,11 @@ kafka-console-producer.sh \
 
 - max_filter_ratio：采样窗口内，允许的最大过滤率。必须在大于等于0到小于等于1之间。默认值是 0。
 
-- max_batch_rows：每个子任务最多读取的行数。默认是20000000。
+- max_batch_interval：每个子任务的最大运行时间，单位是秒，必须大于0，默认值为 10(s)。max_batch_interval/max_batch_rows/max_batch_size 共同形成子任务执行阈值。任一参数达到阈值，导入子任务结束，并生成新的导入子任务。
+
+- max_batch_rows：每个子任务最多读取的行数。必须大于等于 200000。默认是 20000000。max_batch_interval/max_batch_rows/max_batch_size 共同形成子任务执行阈值。任一参数达到阈值，导入子任务结束，并生成新的导入子任务。
+
+- max_batch_size：每个子任务最多读取的字节数。单位是字节，范围是 100MB 到 1GB。默认是 1G。max_batch_interval/max_batch_rows/max_batch_size 共同形成子任务执行阈值。任一参数达到阈值，导入子任务结束，并生成新的导入子任务。
 
 - max_error_number：采样窗口内，允许的最大错误行数。必须大于等于 0。默认是 0，即不允许有错误行。
 
@@ -944,7 +948,9 @@ PROPERTIES
     "format" = "json",
     "strict_mode" = "false",
     "max_filter_ratio"= "0.2",
-    "max_batch_rows"="20000000",
+    "max_batch_interval" = "10",
+    "max_batch_rows" = "20000000",
+    "max_batch_size" = "1073741824",
     "max_error_number"="10000"
 )
 FROM KAFKA(

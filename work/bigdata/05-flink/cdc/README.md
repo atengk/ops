@@ -1,303 +1,158 @@
 # Flink CDC
 
-将**lib**下的依赖拷贝到**FLINK_HOME/lib**
+Flink CDC 是一个基于流的数据集成工具，旨在为用户提供一套功能更加全面的编程接口（API）。 该工具使得用户能够以 YAML 配置文件的形式，优雅地定义其 ETL（Extract, Transform, Load）流程，并协助用户自动化生成定制化的 Flink 算子并且提交 Flink 作业。 Flink CDC 在任务提交过程中进行了优化，并且增加了一些高级特性，如表结构变更自动同步（Schema Evolution）、数据转换（Data Transformation）、整库同步（Full Database Synchronization）以及 精确一次（Exactly-once）语义。
+
+Flink CDC 深度集成并由 Apache Flink 驱动，提供以下核心功能：
+
+- ✅ 端到端的数据集成框架
+- ✅ 为数据集成的用户提供了易于构建作业的 API
+- ✅ 支持在 Source 和 Sink 中处理多个表
+- ✅ 整库同步
+- ✅具备表结构变更自动同步的能力（Schema Evolution）
 
 
 
-参考文档：
-
-https://nightlies.apache.org/flink/flink-cdc-docs-release-3.1/zh/docs/get-started/quickstart/mysql-to-doris/
-
-https://doris.apache.org/zh-CN/docs/ecosystem/flink-doris-connector#%E4%BD%BF%E7%94%A8-flinkcdc-%E6%8E%A5%E5%85%A5%E5%A4%9A%E8%A1%A8%E6%88%96%E6%95%B4%E5%BA%93-%E6%94%AF%E6%8C%81-mysqloraclepostgresqlsqlserver
+- [官网链接](https://nightlies.apache.org/flink/flink-cdc-docs-release-3.2/zh/)
+- [Flink Doris Connector](https://doris.apache.org/zh-CN/docs/ecosystem/flink-doris-connector/)
 
 
 
 ## 使用flink-cdc.sh
 
+**下载软件包**
+
+```
+wget https://archive.apache.org/dist/flink/flink-cdc-3.2.1/flink-cdc-3.2.1-bin.tar.gz
+```
+
 **解压软件包**
 
 ```
-tar -zxf flink-cdc-3.1.1-bin.tar.gz
-cd flink-cdc-3.1.1
+tar -zxf flink-cdc-3.2.1-bin.tar.gz
+cd flink-cdc-3.2.1
 ```
 
 **创建配置文件**
 
 ### MySQL => Doris
 
+**编辑配置文件**
+
+将MySQL中 `kongyu_flink` 数据库中的所有表同步到Doris的同名数据库中（需要再Doris提前创建好该库）
+
 ```
-$ cat mysql-to-doris.yaml
+cat > mysql-to-doris.yaml <<"EOF"
 source:
- type: mysql
- hostname: 192.168.1.10
- port: 35725
- username: root
- password: Admin@123
- tables: kongyu_flink.\.*
- server-id: 5400-5404
- server-time-zone: Asia/Shanghai
+  type: mysql
+  hostname: 192.168.1.10
+  port: 35725
+  username: root
+  password: Admin@123
+  tables: kongyu_flink.\.*
+  server-id: 5400-5404
+  server-time-zone: Asia/Shanghai
 
 sink:
- type: doris
- fenodes: 192.168.1.115:9030
- username: root
- password: "Admin@123"
+  type: doris
+  fenodes: 192.168.1.12:9040
+  username: admin
+  password: "Admin@123"
+  table.create.properties.light_schema_change: true
+  table.create.properties.replication_num: 1
 
 pipeline:
- name: Sync MySQL Database to Doris
- parallelism: 4
+  name: Sync MySQL Database to Doris
+  parallelism: 2
+EOF
+```
+
+**下载依赖**
+
+MySQL pipeline connector
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-cdc-pipeline-connector-mysql/3.2.1/flink-cdc-pipeline-connector-mysql-3.2.1.jar
+```
+
+Apache Doris pipeline connector
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-cdc-pipeline-connector-doris/3.2.1/flink-cdc-pipeline-connector-doris-3.2.1.jar
+```
+
+MySQL Connector Java
+
+> 这个包需要放在Flink lib目录下，然后重启服务
+
+```
+wget -P lib https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
+cp lib/mysql-connector-j-8.0.33.jar $FLINK_HOME/lib
+```
+
+**运行cdc**
+
+```
+bin/flink-cdc.sh mysql-to-doris.yaml
 ```
 
 ### MySQL => Kafka
 
+**编辑配置文件**
+
+并行度最好配置和Kafka topic的分区数一致
+
 ```
-$ cat mysql-to-kafka.yaml
+cat > mysql-to-kafka.yaml <<"EOF"
 source:
- type: mysql
- hostname: 192.168.1.10
- port: 35725
- username: root
- password: Admin@123
- tables: kongyu_flink.\.*
- server-id: 5101-5105
- server-time-zone: Asia/Shanghai
+  type: mysql
+  hostname: 192.168.1.10
+  port: 35725
+  username: root
+  password: Admin@123
+  tables: kongyu_flink.\.*
+  server-id: 5101-5105
+  server-time-zone: Asia/Shanghai
 
 sink:
   type: kafka
   name: Kafka Sink
   properties.bootstrap.servers: PLAINTEXT://192.168.1.10:9094
+  partition.strategy: hash-by-key
 
 pipeline:
- name: Sync MySQL Database to Kafka
- parallelism: 4
+  name: Sync MySQL Database to Kafka
+  parallelism: 3
+EOF
 ```
 
-运行cdc
+**下载依赖**
+
+MySQL pipeline connector
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-cdc-pipeline-connector-mysql/3.2.1/flink-cdc-pipeline-connector-mysql-3.2.1.jar
+```
+
+Apache Kafka pipeline connector
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-cdc-pipeline-connector-kafka/3.2.1/flink-cdc-pipeline-connector-kafka-3.2.1.jar
+```
+
+MySQL Connector Java
+
+> 这个包需要放在Flink lib目录下，然后重启服务
+
+```
+wget -P lib https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
+cp lib/mysql-connector-j-8.0.33.jar $FLINK_HOME/lib
+```
+
+**运行cdc**
+
+同步到Kafka后的topic是db_name.table_name这种结构
 
 ```
 bin/flink-cdc.sh mysql-to-kafka.yaml
-```
-
-
-
-## 创建MySQL CDC
-
-创建数据库表
-
-```sql
---- mysql
-CREATE TABLE kongyu_flink.my_user (
-  id BIGINT NOT NULL AUTO_INCREMENT,
-  name VARCHAR(10),
-  age INT,
-  score DOUBLE,
-  birthday TIMESTAMP(3),
-  province VARCHAR(20),
-  city VARCHAR(20),
-  create_time TIMESTAMP(3),
-  PRIMARY KEY (id)
-);
-
---- doris
-CREATE TABLE kongyu_flink.my_user (
-  id BIGINT NOT NULL,
-  name STRING,
-  age INT,
-  score DOUBLE,
-  birthday DATETIME,
-  province STRING,
-  city STRING,
-  create_time DATETIME
-) 
-UNIQUE KEY(`id`)
-DISTRIBUTED BY HASH(id) BUCKETS AUTO
-PROPERTIES (
-"replication_allocation" = "tag.location.default: 1"
-);
-```
-
-进入FlinkSQL
-
-```
-$ $FLINK_HOME/bin/sql-client.sh
-SET sql-client.execution.result-mode=tableau;
-```
-
-创建MySQL CDC
-
-```
-CREATE TABLE cdc_mysql_source (
-  id BIGINT NOT NULL,
-  name STRING,
-  age INT,
-  score DOUBLE,
-  birthday TIMESTAMP(3),
-  province STRING,
-  city STRING,
-  create_time TIMESTAMP(3),
-  PRIMARY KEY (id) NOT ENFORCED
-) WITH (
- 'connector' = 'mysql-cdc',
- 'hostname' = '192.168.1.10',
- 'port' = '35725',
- 'username' = 'root',
- 'password' = 'Admin@123',
- 'database-name' = 'kongyu_flink',
- 'table-name' = 'my_user'
-);
-```
-
-创建Doris
-
-```
-CREATE TABLE doris_sink (
-  id BIGINT NOT NULL,
-  name STRING,
-  age INT,
-  score DOUBLE,
-  birthday TIMESTAMP(3),
-  province STRING,
-  city STRING,
-  create_time TIMESTAMP(3)
-)
-WITH (
-  'connector' = 'doris',
-  'fenodes' = '192.168.1.115:9040',
-  'table.identifier' = 'kongyu_flink.my_user',
-  'username' = 'root',
-  'password' = 'Admin@123',
-  'sink.properties.format' = 'json',
-  'sink.properties.read_json_by_line' = 'true',
-  'sink.enable-delete' = 'true',  -- 同步删除事件
-  'sink.properties.partial_columns' = 'true', -- 开启部分列更新
-  'sink.label-prefix' = 'doris_label'
-);
-```
-
-同步数据
-
-```
-insert into doris_sink select * from cdc_mysql_source;
-```
-
-
-
-## 创建PostgreSQL CDC
-
-创建数据库表
-
-> 注意PostgreSQ需要设置**wal_level = 'logical**参数，还需要安装**[Postgres Decoderbufs插件](https://github.com/debezium/postgres-decoderbufs)**
-
-```sql
---- postgresql
-create table if not exists public.my_user
-(
-    id          serial primary key,
-    name        varchar(10),
-    age         integer,
-    score       double precision,
-    birthday    timestamp,
-    province    varchar(20),
-    city        varchar(20),
-    create_time timestamp
-);
-```
-
-进入FlinkSQL
-
-```
-$ $FLINK_HOME/bin/sql-client.sh
-SET sql-client.execution.result-mode=tableau;
-```
-
-创建Postgresql CDC
-
-```
-CREATE TABLE cdc_postgres_source (
-  id BIGINT NOT NULL,
-  name STRING,
-  age INT,
-  score DOUBLE,
-  birthday TIMESTAMP(3),
-  province STRING,
-  city STRING,
-  create_time TIMESTAMP(3),
-  PRIMARY KEY (id) NOT ENFORCED
-) WITH (
- 'connector' = 'postgres-cdc',
- 'hostname' = '192.168.1.10',
- 'port' = '32297',
- 'username' = 'postgres',
- 'password' = 'Lingo@local_postgresql_5432',
- 'database-name' = 'kongyu_flink',
- 'schema-name' = 'public',
- 'table-name' = 'my_user',
- 'slot.name' = 'flink'
-);
-```
-
-实时查看数据
-
-```
-select * from cdc_postgres_source;
-```
-
-
-
-## 创建MongoDB CDC
-
-创建数据库表
-
-> MongoDB必须是[replica sets](https://docs.mongodb.com/manual/replication/) or [sharded clusters](https://docs.mongodb.com/manual/sharding/)
-
-```sql
-// mongodb
-db.my_user.insertOne({
-    id: 1, // MongoDB 会自动生成 _id 字段作为主键，你可以省略 id 字段
-    name: "Alice",
-    age: 30,
-    score: 85.5,
-    birthday: new Date("1992-03-25T00:00:00Z"),
-    province: "Beijing",
-    city: "Beijing",
-    create_time: new Date()
-});
-```
-
-进入FlinkSQL
-
-```
-$ $FLINK_HOME/bin/sql-client.sh
-SET sql-client.execution.result-mode=tableau;
-```
-
-创建Postgresql CDC
-
-```
-CREATE TABLE cdc_mongodb_source (
-  _id STRING,
-  id BIGINT NOT NULL,
-  name STRING,
-  age INT,
-  score DOUBLE,
-  birthday TIMESTAMP(3),
-  province STRING,
-  city STRING,
-  create_time TIMESTAMP(3),
-  PRIMARY KEY (_id) NOT ENFORCED
-) WITH (
- 'connector' = 'mongodb-cdc',
-  'hosts' = '192.168.1.10:19868',
-  'username' = 'root',
-  'password' = 'Admin@123',
-  'database' = 'kongyu_flink',
-  'collection' = 'my_user'
-);
-```
-
-实时查看数据
-
-```
-select * from cdc_mongodb_source;
 ```
 

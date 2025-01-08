@@ -65,7 +65,14 @@ spec:
     instances: 1
     env:
       - name: TZ
-        value: Asia/Shanghai      
+        value: Asia/Shanghai
+      - name: "MY_ENV_VAR"
+        value: "some_value"
+      - name: "ANOTHER_VAR"
+        valueFrom:
+          configMapKeyRef:
+            name: my-configmap
+            key: my-key
     labels:
       version: 3.5.4
       app.kubernetes.io/name: spark-pi

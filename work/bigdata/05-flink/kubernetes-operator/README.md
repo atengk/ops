@@ -55,8 +55,6 @@ kubectl logs -n flink-operator -f --tail=200 deploy/flink-kubernetes-operator
 
 **创建任务**
 
-`flink-operator 1.10.0`版本还不支持1.20版本的flink，等待后续更新，这里先使用1.19
-
 ```bash
 kubectl apply -f - <<EOF
 apiVersion: flink.apache.org/v1beta1

@@ -6,22 +6,51 @@ Iceberg是一个用于处理大数据的高性能表格式，支持对数据的�
 
 
 
+## 前提条件
+
+- 元数据存储：PostgreSQL，安装[参考链接](/work/service/postgresql/v17.2.0)，还有一个更好的元数据方案：[Polaris](https://github.com/apache/polaris)，该项目还在孵化中，等待。
+- 数据存储：MinIO，安装[参考链接](/work/service/minio/v20241107)
+
+
+
 ## Spark
 
 Iceberg可以与Apache Spark集成，使用Spark SQL进行数据操作。官方文档：[Spark Getting Started](https://iceberg.apache.org/docs/nightly/spark-getting-started/)
 
 ### 编辑配置
 
+**下载依赖包**
+
+iceberg-spark-runtime，用于spark集成iceberg
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.5_2.12/1.6.1/iceberg-spark-runtime-3.5_2.12-1.6.1.jar
+```
+
+iceberg-aws-bundle，用于spark集成iceberg后数据写入s3（MinIO）中
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/1.6.1/iceberg-aws-bundle-1.6.1.jar
+```
+
+postgresql，用于连接数据库的JDBC驱动
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar
+```
+
 **拷贝依赖**
 
 ```
-cp iceberg-spark-runtime-3.5_2.12-1.6.0.jar \
-   iceberg-aws-bundle-1.6.0.jar \
-   postgresql-42.7.1.jar \
-   $SPARK_HOME/jars
+cp lib/{iceberg-spark-runtime-3.5_2.12-1.6.1.jar,iceberg-aws-bundle-1.6.1.jar,postgresql-42.7.1.jar} $SPARK_HOME/jars
 ```
 
 **编辑配置文件**
+
+注意修改以下配置
+
+- spark.master：spark地址
+- spark.sql.catalog.*：s3(MinIO)存储地址和桶、元数据PostgreSQL数据库信息
 
 ```
 cp $SPARK_HOME/conf/spark-defaults.conf{,_bak}
@@ -33,7 +62,7 @@ spark.history.fs.logDirectory          /tmp/spark/spark-events
 spark.sql.extensions                   org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
 spark.sql.catalog.my_iceberg_catalog                 org.apache.iceberg.spark.SparkCatalog
 spark.sql.catalog.my_iceberg_catalog.warehouse       s3://iceberg-bucket/warehouse
-spark.sql.catalog.my_iceberg_catalog.s3.endpoint     http://192.168.1.10:8110
+spark.sql.catalog.my_iceberg_catalog.s3.endpoint     http://192.168.1.13:9000
 spark.sql.catalog.my_iceberg_catalog.io-impl         org.apache.iceberg.aws.s3.S3FileIO
 spark.sql.catalog.my_iceberg_catalog.catalog-impl    org.apache.iceberg.jdbc.JdbcCatalog
 spark.sql.catalog.my_iceberg_catalog.uri             jdbc:postgresql://192.168.1.10:32297/iceberg
@@ -47,15 +76,19 @@ EOF
 
 **配置MinIO环境变量**
 
-> 这里坑得很，一些文档上就说配置环境变量，也没说配在哪...
-
 ```
 cat >> $SPARK_HOME/conf/spark-env.sh <<EOF
 ## MinIO Config
 export AWS_ACCESS_KEY_ID=admin
-export AWS_SECRET_ACCESS_KEY=Admin@123
+export AWS_SECRET_ACCESS_KEY=Lingo@local_minio_9000
 export AWS_REGION=us-east-1
 EOF
+```
+
+**创建目录**
+
+```
+mkdir -p /tmp/spark/spark-events
 ```
 
 **重启服务**
@@ -200,24 +233,46 @@ Iceberg也可以与Apache Flink集成，利用Flink进行流式数据处理。�
 
 ### 编辑配置
 
+**下载依赖包**
+
+iceberg-flink-runtime，用于flink集成iceberg
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.19/1.6.1/iceberg-flink-runtime-1.19-1.6.1.jar
+```
+
+iceberg-aws-bundle，用于spark集成iceberg后数据写入s3（MinIO）中
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/1.6.1/iceberg-aws-bundle-1.6.1.jar
+```
+
+postgresql，用于连接数据库的JDBC驱动
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar
+```
+
 **拷贝依赖**
 
 ```
-cp iceberg-flink-runtime-1.18-1.6.0.jar \
-   iceberg-aws-bundle-1.6.0.jar \
-   postgresql-42.7.1.jar \
-   $FLINK_HOME/lib
+cp lib/{iceberg-flink-runtime-1.19-1.6.1.jar,iceberg-aws-bundle-1.6.1.jar,postgresql-42.7.1.jar} $FLINK_HOME/lib
 ```
 
 **配置MinIO环境变量**
 
+使用sql-client需要加载MinIO配置的环境变量到当前终端
+
 ```
 cat >> /data/service/flink/config/env.conf <<EOF
 ## MinIO Config
-export AWS_ACCESS_KEY_ID=admin
-export AWS_SECRET_ACCESS_KEY=Admin@123
-export AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=admin
+AWS_SECRET_ACCESS_KEY=Lingo@local_minio_9000
+AWS_REGION=us-east-1
 EOF
+export AWS_ACCESS_KEY_ID=admin
+export AWS_SECRET_ACCESS_KEY=Lingo@local_minio_9000
+export AWS_REGION=us-east-1
 ```
 
 **重启服务**
@@ -245,7 +300,7 @@ WITH (
     'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',
     'uri'='jdbc:postgresql://192.168.1.10:32297/iceberg?user=postgres&password=Lingo@local_postgresql_5432',
     'warehouse'='s3://iceberg-bucket/warehouse',
-    's3.endpoint'='http://192.168.1.10:8110'
+    's3.endpoint'='http://192.168.1.13:9000'
 );
 ```
 
@@ -305,6 +360,11 @@ CREATE TABLE my_user (
 ) WITH (
   'write.format.default' = 'parquet'
 );
+```
+
+**查看表**
+
+```
 SHOW CREATE TABLE my_user;
 ```
 
@@ -340,6 +400,11 @@ CREATE TABLE my_user_part (
 ) PARTITIONED BY (t_date, t_hour) WITH (
   'write.format.default' = 'parquet'
 );
+```
+
+**查看表**
+
+```
 SHOW CREATE TABLE my_user_part;
 ```
 
@@ -397,7 +462,7 @@ CREATE TABLE iceberg_flink_my_user (
     'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',
     'uri'='jdbc:postgresql://192.168.1.10:32297/iceberg?user=postgres&password=Lingo@local_postgresql_5432',
     'warehouse'='s3://iceberg-bucket/warehouse',
-    's3.endpoint'='http://192.168.1.10:8110',
+    's3.endpoint'='http://192.168.1.13:9000',
     'catalog-name'='my_iceberg_catalog',
     'catalog-database'='flink',
     'catalog-table'='iceberg_flink_my_user'

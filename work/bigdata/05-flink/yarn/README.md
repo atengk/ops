@@ -2,7 +2,7 @@
 
 Flink 是一个开源的分布式流处理框架，专注于大规模数据流的实时处理。它提供了高吞吐量、低延迟的处理能力，支持有状态和无状态的数据流操作。Flink 可以处理事件时间、窗口化、流与批处理混合等复杂场景，广泛应用于实时数据分析、实时监控、机器学习等领域。其强大的容错机制和高可扩展性，使其成为大数据领域中的重要技术之一。
 
-- [官网链接](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/datastream/overview/)
+- [官网链接](https://nightlies.apache.org/flink/flink-docs-release-1.19/docs/dev/datastream/overview/)
 
 
 
@@ -11,14 +11,14 @@ Flink 是一个开源的分布式流处理框架，专注于大规模数据流�
 **下载软件包**
 
 ```
-wget https://archive.apache.org/dist/flink/flink-1.20.0/flink-1.20.0-bin-scala_2.12.tgz
+wget https://archive.apache.org/dist/flink/flink-1.19.1/flink-1.19.1-bin-scala_2.12.tgz
 ```
 
 **解压软件包**
 
 ```
-tar -zxvf flink-1.20.0-bin-scala_2.12.tgz -C /usr/local/software/
-ln -s /usr/local/software/flink-1.20.0 /usr/local/software/flink
+tar -zxvf flink-1.19.1-bin-scala_2.12.tgz -C /usr/local/software/
+ln -s /usr/local/software/flink-1.19.1 /usr/local/software/flink
 ```
 
 **配置环境变量**
@@ -36,7 +36,7 @@ source ~/.bash_profile
 
 ```
 $ flink --version
-Version: 1.20.0, Commit ID: b1fe7b4
+Version: 1.19.1, Commit ID: 5edb5a9
 ```
 
 **编辑配置文件**
@@ -95,9 +95,9 @@ Flink on YARN 是将 Apache Flink 部署在 Hadoop YARN（Yet Another Resource N
 
 ### Application 模式
 
-- [官方文档](https://nightlies.apache.org/flink/flink-docs-release-1.20/zh/docs/deployment/resource-providers/yarn/)
+- [官方文档](https://nightlies.apache.org/flink/flink-docs-release-1.19/zh/docs/deployment/resource-providers/yarn/)
 
-- [配置参数](https://nightlies.apache.org/flink/flink-docs-release-1.20/zh/docs/deployment/config/#kubernetes)
+- [配置参数](https://nightlies.apache.org/flink/flink-docs-release-1.19/zh/docs/deployment/config/#kubernetes)
 
 **带有参数的运行**
 

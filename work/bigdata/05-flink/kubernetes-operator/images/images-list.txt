@@ -1,3 +1,2 @@
 apache/flink-kubernetes-operator:1.10.0
-apache/flink:1.20-java8
 apache/flink:1.19-java8

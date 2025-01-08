@@ -4,11 +4,10 @@
 
 ```
 app=flink
-version=1.20-java8
+version=1.19-java8
 cat > images-list.txt <<EOF
 apache/flink-kubernetes-operator:1.10.0
 apache/flink:${version}
-apache/flink:1.19-java8
 EOF
 ```
 
