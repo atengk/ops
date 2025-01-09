@@ -84,7 +84,7 @@ export HEALTH_CHECK_TCP_PORT=8888
 URL检查
 
 ```shell
-export HEALTH_CHECK_METHOD=tcp
+export HEALTH_CHECK_METHOD=url
 export HEALTH_CHECK_URL="http://localhost:8888/actuator/health"
 ```
 

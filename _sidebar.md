@@ -81,6 +81,7 @@
     - 服务安装文档
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)
+        - [doris](/work/docker/service/doris/)
         - [redis](/work/docker/service/redis/)
         - [kafka](/work/docker/service/kafka/)
         - [kafka-ui](/work/docker/service/kafka-ui/)
@@ -95,6 +96,7 @@
         - [opensearch](/work/docker/service/opensearch/)
         - [elastic-view](/work/docker/service/elastic-view/)
         - [jenkins](/work/docker/service/jenkins/)
+        - [jumpserver](/work/docker/service/jumpserver/)
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
@@ -145,9 +147,8 @@
                 - [主从模式](/work/kubernetes/service/mysql/v8.4.3/replication/)
                 - [配置metrics](/work/kubernetes/service/mysql/v8.4.3/metrics/)
             - Doris
-                - [单机模式](/work/kubernetes/service/doris/v2.1.7/standalone/)
-                - [集群模式](/work/kubernetes/service/doris/v2.1.7/cluster/)
-                - [集群模式All](/work/kubernetes/service/doris/v2.1.7/cluster-all/)
+                - [集群模式2](/work/kubernetes/service/doris/v2.1.7/)
+                - [集群模式3l](/work/kubernetes/service/doris/v3.0.3/)
             - Clickhouse
                 - [集群模式](/work/kubernetes/service/clickhouse/v23.12.2/)
             - ElasticSearch7
@@ -199,7 +200,7 @@
                 - [https模式](/work/kubernetes/service/harbor/v2.12.0/https/)
                 - [https模式(自定义证书)](/work/kubernetes/service/harbor/v2.12.0/https-custom/)
         - 开发工具
-            - [Spring Boot应用](/work/kubernetes/service/springboot-app/v1.0/)
+            - [Spring Boot应用](/work/kubernetes/service/springboot-app/v1.1/)
             - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
             - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
             - [Jenkins](/work/kubernetes/service/jenkins/v2.479.1/baseic/)
@@ -214,17 +215,13 @@
             - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
         - 大数据
             - [Zookeeper](/work/kubernetes/service/zookeeper/v3.9.3/)
-            - [Flink](/work/kubernetes/service/flink/v1.20.0/)
-            - [Spark](/work/kubernetes/service/spark/v3.5.1/)
+            - [Flink](/work/kubernetes/service/flink/v1.19.1/)
+            - [Spark](/work/kubernetes/service/spark/v3.5.4/)
             - [DolphinScheduler](/work/kubernetes/service/dolphinscheduler/v3.2.2/)
             - Doris2
-                - [单机模式](/work/kubernetes/service/doris/v2.1.7/standalone/)
-                - [集群模式](/work/kubernetes/service/doris/v2.1.7/cluster/)
-                - [集群模式All](/work/kubernetes/service/doris/v2.1.7/cluster-all/)
+                - [集群模式](/work/kubernetes/service/doris/v2.1.7/)
             - Doris3
-                - [单机模式](/work/kubernetes/service/doris/v3.0.3/standalone/)
-                - [集群模式](/work/kubernetes/service/doris/v3.0.3/cluster/)
-                - [集群模式All](/work/kubernetes/service/doris/v3.0.3/cluster-all/)
+                - [集群模式](/work/kubernetes/service/doris/v3.0.3/)
         - 负载均衡和网络
             - [MetalLB](/work/kubernetes/service/metallb/v0.14.8/)
             - [External-DNS](/work/kubernetes/service/external-dns/v0.15.0/)
@@ -269,24 +266,27 @@
         - 基础配置
             - [基础配置](work/bigdata/00-basic/)
         - JDK
-            - [OpenJDK8](/work/bigdata/01-jdk/jdk8/)
-            - [OpenJDK17](/work/bigdata/01-jdk/jdk17/)
-            - [OpenJDK21](/work/bigdata/01-jdk/jdk21/)
+            - [安装OpenJDK8](/work/bigdata/01-jdk/)
         - Zookeeper
-            - [集群](work/bigdata/02-zookeeper/)
+            - [单机](work/bigdata/02-zookeeper/standalone/)
+            - [集群](work/bigdata/02-zookeeper/cluster/)
+            - [使用文档](work/bigdata/02-zookeeper/OPS.md)
         - Hadoop
             - [单机](work/bigdata/03-hadoop/standalone/)
             - [集群](work/bigdata/03-hadoop/cluster/)
             - [高可用集群](work/bigdata/03-hadoop/cluster-ha/)
+            - [使用文档](work/bigdata/03-hadoop/OPS.md)
         - Kafka
-            - [单机](work/bigdata/03-kafka/v3.8.1/standalone/)
-            - [集群](work/bigdata/03-kafka/v3.8.1/cluster/)
-            - [高可用集群](work/bigdata/03-kafka/v3.8.1/cluster-ha/)
+            - [单机](work/bigdata/03-kafka/standalone/)
+            - [集群](work/bigdata/03-kafka/cluster/)
+            - [高可用集群](work/bigdata/03-kafka/cluster-ha/)
+            - [使用文档](work/bigdata/03-kafka/OPS.md)
     - 数据存储
         - HBase
             - [单机](work/bigdata/04-hbase/standalone/)
             - [集群](work/bigdata/04-hbase/cluster/)
             - [高可用集群](work/bigdata/04-hbase/cluster-ha/)
+            - [使用文档](work/bigdata/04-hbase/OPS.md)
         - Hive
             - [单机](work/bigdata/04-hive/standalone/)
             - [集群](work/bigdata/04-hive/cluster/)
@@ -304,7 +304,7 @@
                 - [高可用集群](work/bigdata/05-doris/v3.0.3/cluster-ha/)
             - [使用文档](work/bigdata/05-doris/OPS.md)
         - Iceberg
-            - [iceberg表格式](work/bigdata/06-iceberg/)
+            - [使用文档](work/bigdata/06-iceberg/)
     - 数据计算
         - Spark
             - [单机](work/bigdata/05-spark/standalone/)
@@ -312,7 +312,6 @@
             - [高可用集群](work/bigdata/05-spark/cluster-ha/)
             - [YARN](work/bigdata/05-spark/yarn)
             - [Kubernetes Operator](work/bigdata/05-spark/kubernetes-operator/)
-            - [Kubernetes](work/bigdata/05-spark/kubernetes/)
             - [集成Hive](work/bigdata/05-spark/hive/)
             - [使用文档](work/bigdata/05-spark/OPS.md)
         - Flink
@@ -321,7 +320,6 @@
             - [高可用集群](work/bigdata/05-flink/cluster-ha/)
             - [YARN](work/bigdata/05-flink/yarn)
             - [Kubernetes Operator](work/bigdata/05-flink/kubernetes-operator/)
-            - [Kubernetes](work/bigdata/05-flink/k8s/)
             - [Flink CDC](work/bigdata/05-flink/cdc/)
             - [使用文档](work/bigdata/05-flink/OPS.md)
     - 调度平台
