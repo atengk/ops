@@ -105,7 +105,7 @@ DISTRIBUTED BY HASH(`user_id`) BUCKETS AUTO
 PROPERTIES (
 "replication_allocation" = "tag.location.default: 1"
 );
-show create table  example_tbl_unique\G;
+show create table example_tbl_unique\G;
 ```
 
 **插入示例数据**
