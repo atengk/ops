@@ -144,6 +144,7 @@ After=network.target
 Type=forking
 User=admin
 Group=ateng
+PrivateTmp=true
 WorkingDirectory=/data/service/application
 EnvironmentFile=-/data/service/application/spring-app.env
 ExecStartPre=/data/service/application/spring-app.sh status

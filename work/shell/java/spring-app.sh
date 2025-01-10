@@ -59,7 +59,8 @@ LOG_FILE="$LOG_FILE_BASE.log"
 LOG_LINK="$LOG_DIR/$APP_NAME-current.log"
 
 # PID文件
-PID_FILE="$APP_HOME/$APP_NAME.pid"
+#PID_FILE="$APP_HOME/$APP_NAME.pid"
+PID_FILE="/tmp/$APP_NAME.pid"
 
 # JVM参数
 JVM_OPTS=${JVM_OPTS:--server}
