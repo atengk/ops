@@ -554,8 +554,15 @@ Type=forking
 Environment="HADOOP_HOME=/usr/local/software/hadoop"
 ExecStart=/usr/local/software/hadoop/bin/hdfs --daemon start namenode
 ExecStop=/usr/local/software/hadoop/bin/hdfs --daemon stop namenode
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -589,8 +596,15 @@ Type=forking
 Environment="HADOOP_HOME=/usr/local/software/hadoop"
 ExecStart=/usr/local/software/hadoop/bin/hdfs --daemon start secondarynamenode
 ExecStop=/usr/local/software/hadoop/bin/hdfs --daemon stop secondarynamenode
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -624,8 +638,15 @@ Type=forking
 Environment="HADOOP_HOME=/usr/local/software/hadoop"
 ExecStart=/usr/local/software/hadoop/bin/hdfs --daemon start datanode
 ExecStop=/usr/local/software/hadoop/bin/hdfs --daemon stop datanode
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -659,8 +680,15 @@ Type=forking
 Environment="HADOOP_HOME=/usr/local/software/hadoop"
 ExecStart=/usr/local/software/hadoop/bin/yarn --daemon start resourcemanager
 ExecStop=/usr/local/software/hadoop/bin/yarn --daemon stop resourcemanager
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -694,8 +722,15 @@ Type=forking
 Environment="HADOOP_HOME=/usr/local/software/hadoop"
 ExecStart=/usr/local/software/hadoop/bin/yarn --daemon start nodemanager
 ExecStop=/usr/local/software/hadoop/bin/yarn --daemon stop nodemanager
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -730,8 +765,15 @@ Type=forking
 Environment="HADOOP_HOME=/usr/local/software/hadoop"
 ExecStart=/usr/local/software/hadoop/bin/mapred --daemon start historyserver
 ExecStop=/usr/local/software/hadoop/bin/mapred --daemon stop historyserver
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]

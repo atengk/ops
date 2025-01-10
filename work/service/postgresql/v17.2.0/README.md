@@ -167,13 +167,20 @@ After=network-online.target
 
 [Service]
 Type=forking
-Restart=always
-RestartSec=10
 User=admin
 Group=ateng
 ExecStart=/usr/local/software/postgresql/bin/pg_ctl -D /data/service/postgresql --log /data/service/postgresql/postgresql.log start
 ExecStop=/usr/local/software/postgresql/bin/pg_ctl stop -D /data/service/postgresql -s -m fast
 ExecReload=/usr/local/software/postgresql/bin/pg_ctl reload -D /data/service/postgresql -s
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target

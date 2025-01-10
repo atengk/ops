@@ -206,8 +206,15 @@ Type=forking
 Environment="SPARK_HOME=/usr/local/software/spark"
 ExecStart=/usr/local/software/spark/sbin/spark-daemon.sh start org.apache.spark.deploy.master.Master 1
 ExecStop=/usr/local/software/spark/sbin/spark-daemon.sh stop org.apache.spark.deploy.master.Master 1
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -241,8 +248,15 @@ Type=forking
 Environment="SPARK_HOME=/usr/local/software/spark"
 ExecStart=/usr/local/software/spark/sbin/spark-daemon.sh start org.apache.spark.deploy.worker.Worker 1 spark://bigdata01:7077,bigdata02:7077,bigdata03:7077
 ExecStop=/usr/local/software/spark/sbin/spark-daemon.sh stop org.apache.spark.deploy.worker.Worker 1
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -276,8 +290,15 @@ Type=forking
 Environment="SPARK_HOME=/usr/local/software/spark"
 ExecStart=/usr/local/software/spark/sbin/spark-daemon.sh start org.apache.spark.deploy.history.HistoryServer 1
 ExecStop=/usr/local/software/spark/sbin/spark-daemon.sh stop org.apache.spark.deploy.history.HistoryServer 1
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]

@@ -214,10 +214,15 @@ Type=simple
 Environment="HIVE_HOME=/usr/local/software/hive"
 ExecStart=/usr/local/software/hive/bin/hive --service metastore
 ExecStop=/bin/kill -SIGTERM $MAINPID
-KillSignal=SIGTERM
-TimeoutStopSec=30
-Restart=always
+Restart=on-failure
 RestartSec=10
+TimeoutStartSec=90
+TimeoutStopSec=120
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -253,10 +258,15 @@ Environment="HIVE_HOME=/usr/local/software/hive"
 ExecStartPre=/usr/bin/sleep 10
 ExecStart=/usr/local/software/hive/bin/hive --service hiveserver2
 ExecStop=/bin/kill -SIGTERM $MAINPID
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
 KillSignal=SIGTERM
-TimeoutStopSec=30
-Restart=always
-RestartSec=10
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]

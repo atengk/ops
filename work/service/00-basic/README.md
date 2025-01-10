@@ -250,7 +250,7 @@ EOF
 ```
 cat >> /etc/systemd/system.conf <<EOF
 [Manager]
-DefaultLimitNOFILE=65536
+DefaultLimitNOFILE=655360
 DefaultLimitNPROC=163840
 DefaultLimitCORE=0
 EOF

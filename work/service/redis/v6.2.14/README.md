@@ -88,8 +88,15 @@ After=network-online.target
 [Service]
 ExecStart=/usr/local/software/redis/bin/redis-server /usr/local/software/redis/conf/redis.conf --supervised systemd
 Type=simple
-Restart=always
+Restart=on-failure
 RestartSec=10
+TimeoutStartSec=90
+TimeoutStopSec=120
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]

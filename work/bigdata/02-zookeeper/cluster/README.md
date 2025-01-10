@@ -163,10 +163,19 @@ Description=Apache ZooKeeper
 Documentation=https://zookeeper.apache.org
 After=network.target
 [Service]
+Type=simple
+WorkingDirectory=/usr/local/software/zookeeper
 ExecStart=/usr/local/software/zookeeper/bin/zkServer.sh start-foreground
 ExecStop=/usr/local/software/zookeeper/bin/zkServer.sh stop
-Restart=always
+Restart=on-failure
 RestartSec=10
+TimeoutStartSec=90
+TimeoutStopSec=120
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]

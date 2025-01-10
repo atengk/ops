@@ -70,13 +70,18 @@ After=network-online.target
 User=admin
 Group=ateng
 Type=simple
-Restart=on-failure
-RestartSec=5
 EnvironmentFile=-/etc/default/minio
 ExecStart=/usr/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
 ExecStop=/bin/kill -SIGTERM $MAINPID
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
 KillSignal=SIGTERM
-TimeoutStopSec=30
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target
@@ -200,13 +205,18 @@ After=network-online.target
 User=admin
 Group=ateng
 Type=simple
-Restart=on-failure
-RestartSec=5
 EnvironmentFile=-/etc/default/minio
 ExecStart=/usr/bin/minio server $MINIO_OPTS $MINIO_VOLUMES
 ExecStop=/bin/kill -SIGTERM $MAINPID
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
 KillSignal=SIGTERM
-TimeoutStopSec=30
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target

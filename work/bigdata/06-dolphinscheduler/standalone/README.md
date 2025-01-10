@@ -99,8 +99,15 @@ Environment="SPARK_HOME=/usr/local/software/spark"
 WorkingDirectory=/usr/local/software/dolphinscheduler
 ExecStart=/usr/local/software/dolphinscheduler/bin/dolphinscheduler-daemon.sh start standalone-server
 ExecStop=/usr/local/software/dolphinscheduler/bin/dolphinscheduler-daemon.sh stop standalone-serverorg.apache.spark.deploy.worker.Worker 1
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]

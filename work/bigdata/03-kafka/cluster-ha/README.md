@@ -261,10 +261,15 @@ Environment="LOG_DIR=/data/service/kafka/logs"
 Environment="KAFKA_HEAP_OPTS=-Xms1g -Xmx4g"
 ExecStart=/usr/local/software/kafka/bin/kafka-server-start.sh /usr/local/software/kafka/config/kraft/controller.properties
 ExecStop=/bin/kill -SIGTERM $MAINPID
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
 KillSignal=SIGTERM
-TimeoutStopSec=30
-Restart=always
-RestartSec=10
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -302,10 +307,15 @@ Environment="LOG_DIR=/data/service/kafka/logs"
 Environment="KAFKA_HEAP_OPTS=-Xms1g -Xmx8g"
 ExecStart=/usr/local/software/kafka/bin/kafka-server-start.sh /usr/local/software/kafka/config/kraft/broker.properties
 ExecStop=/bin/kill -SIGTERM $MAINPID
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
 KillSignal=SIGTERM
-TimeoutStopSec=30
-Restart=always
-RestartSec=10
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]

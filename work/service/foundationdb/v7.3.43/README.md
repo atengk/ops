@@ -161,7 +161,14 @@ ExecStop=/bin/kill -s TERM $MAINPID
 PIDFile=/tmp/fdbmonitor.pid
 PrivateTmp=true
 Restart=on-failure
-RestartSec=5s
+RestartSec=10
+TimeoutStartSec=90
+TimeoutStopSec=120
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target
@@ -401,7 +408,14 @@ ExecStop=/bin/kill -s TERM $MAINPID
 PIDFile=/tmp/fdbmonitor.pid
 PrivateTmp=true
 Restart=on-failure
-RestartSec=5s
+RestartSec=10
+TimeoutStartSec=90
+TimeoutStopSec=120
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target

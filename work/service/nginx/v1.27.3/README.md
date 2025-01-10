@@ -202,12 +202,19 @@ After=network.target
 User=root
 Group=root
 Type=forking
-Restart=on-failure
-RestartSec=5
 ExecStartPre=/usr/local/software/nginx/sbin/nginx -t -c /etc/nginx/nginx.conf
 ExecStart=/usr/local/software/nginx/sbin/nginx -c /etc/nginx/nginx.conf
 ExecReload=/usr/local/software/nginx/sbin/nginx -s reload
 ExecStop=/usr/local/software/nginx/sbin/nginx -s stop
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=90
+TimeoutStopSec=120
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target

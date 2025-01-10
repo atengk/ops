@@ -164,14 +164,19 @@ After=network-online.target
 User=admin
 Group=ateng
 Type=simple
-Restart=on-failure
-RestartSec=10
 WorkingDirectory=/usr/local/software/opensearch
 EnvironmentFile=-/usr/local/software/opensearch/config/opensearch.env
 ExecStart=/usr/local/software/opensearch/bin/opensearch
 ExecStop=/bin/kill -SIGTERM $MAINPID
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
 KillSignal=SIGTERM
-TimeoutStopSec=60
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target
@@ -431,13 +436,18 @@ After=network-online.target
 User=admin
 Group=ateng
 Type=simple
-Restart=on-failure
-RestartSec=10
 WorkingDirectory=/usr/local/software/opensearch-dashboards
 ExecStart=/usr/local/software/opensearch-dashboards/bin/opensearch-dashboards
 ExecStop=/bin/kill -SIGTERM $MAINPID
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=90
+TimeoutStopSec=120
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
 KillSignal=SIGTERM
-TimeoutStopSec=60
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target

@@ -149,10 +149,15 @@ EnvironmentFile=-/data/service/application/spring-app.env
 ExecStartPre=/data/service/application/spring-app.sh status
 ExecStart=/data/service/application/spring-app.sh start
 ExecStop=/data/service/application/spring-app.sh stop
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
 TimeoutStartSec=90
-TimeoutStopSec=60
+TimeoutStopSec=120
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 [Install]
 WantedBy=multi-user.target
 EOF

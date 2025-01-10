@@ -450,8 +450,15 @@ After=network.target
 Type=forking
 ExecStart=/usr/local/software/doris/fe/bin/start_fe.sh --daemon
 ExecStop=/usr/local/software/doris/fe/bin/stop_fe.sh
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -481,11 +488,18 @@ Documentation=https://doros.apache.org
 After=network.target
 [Service]
 Type=forking
-LimitNOFILE=60000
+LimitNOFILE=655360
 ExecStart=/usr/local/software/doris/be/bin/start_be.sh --daemon
 ExecStop=/usr/local/software/doris/be/bin/stop_be.sh
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]
@@ -516,8 +530,15 @@ Type=forking
 Environment="JAVA_HOME=/usr/local/software/jdk8"
 ExecStart=/usr/local/software/doris/broker/bin/start_broker.sh --daemon
 ExecStop=/usr/local/software/doris/broker/bin/stop_broker.sh
-Restart=always
-RestartSec=10
+Restart=on-failure
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 User=admin
 Group=ateng
 [Install]

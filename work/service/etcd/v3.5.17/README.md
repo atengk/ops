@@ -597,10 +597,15 @@ Type=notify
 EnvironmentFile=/etc/etcd/etcd.conf
 ExecStart=/usr/bin/etcd
 ExecStop=/bin/kill -SIGTERM $MAINPID
-KillSignal=SIGTERM
-TimeoutStopSec=30
 Restart=on-failure
-RestartSec=10s
+RestartSec=30
+TimeoutStartSec=120
+TimeoutStopSec=180
+StartLimitIntervalSec=600
+StartLimitBurst=3
+KillMode=control-group
+KillSignal=SIGTERM
+SuccessExitStatus=143
 
 [Install]
 WantedBy=multi-user.target
