@@ -83,7 +83,7 @@ WHERE op_time < '2024-07-11 10:00:00';
 
 ## 主键模型
 
-https://doris.apache.org/zh-CN/docs/table-design/data-model/unique
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/table-design/data-model/unique)
 
 **创建表**
 
@@ -471,7 +471,167 @@ WHERE `id` = 3;
 
 
 
+## 创建索引
+
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/table-design/index/index-overview)
+
+### 倒排索引
+
+**创建索引**
+
+```sql
+-- 语法 1
+CREATE INDEX idx_name ON table_name(column_name) USING INVERTED [PROPERTIES(...)] [COMMENT 'your comment'];
+-- 语法 2
+ALTER TABLE table_name ADD INDEX idx_name(column_name) USING INVERTED [PROPERTIES(...)] [COMMENT 'your comment'];
+-- 创建示例
+CREATE INDEX idx_name ON my_user(name) USING INVERTED;
+CREATE INDEX idx_date_time ON my_user(date_time) USING INVERTED;
+```
+
+**建立索引**
+
+CREATE / ADD INDEX 操作只是新增了索引定义，这个操作之后的新写入数据会生成倒排索引，而存量数据需要使用 BUILD INDEX 触发：
+
+```sql
+-- 语法 1，默认给全表的所有分区 BUILD INDEX
+BUILD INDEX index_name ON table_name;
+-- 语法 2，可指定 Partition，可指定一个或多个
+BUILD INDEX index_name ON table_name PARTITIONS(partition_name1, partition_name2);
+-- 使用示例
+BUILD INDEX idx_name ON my_user;
+```
+
+通过 `SHOW BUILD INDEX` 查看 `BUILD INDEX` 进度：
+
+```sql
+SHOW BUILD INDEX [FROM db_name];
+-- 示例 1，查看所有的 BUILD INDEX 任务进展
+SHOW BUILD INDEX;
+-- 示例 2，查看指定 table 的 BUILD INDEX 任务进展
+SHOW BUILD INDEX where TableName = "table1";
+-- 使用示例
+SHOW BUILD INDEX where TableName = "my_user";
+```
+
+通过 CANCEL BUILD INDEX 取消 BUILD INDEX：
+
+```sql
+CANCEL BUILD INDEX ON table_name;
+CANCEL BUILD INDEX ON table_name (job_id1,jobid_2,...);
+```
+
+**查看索引**
+
+```sql
+-- 语法 1，表的 schema 中 INDEX 部分 USING INVERTED 是倒排索引
+SHOW CREATE TABLE table_name;
+-- 语法 2，IndexType 为 INVERTED 的是倒排索引
+SHOW INDEX FROM idx_name;
+-- 使用示例
+SHOW INDEX FROM my_user;
+```
+
+**删除索引**
+
+```sql
+-- 语法 1
+DROP INDEX idx_name ON table_name;
+-- 语法 2
+ALTER TABLE table_name DROP INDEX idx_name;
+```
+
+
+
 ## 项目实战
+
+### 创建普通表
+
+```sql
+drop table if exists kongyu.my_user_basic;
+create table if not exists kongyu.my_user_basic
+(
+    id          bigint      not null auto_increment comment '主键',
+    create_time datetime(3) not null default current_timestamp(3) comment '数据创建时间',
+    name        varchar(20) not null comment '姓名',
+    age         int comment '年龄',
+    score       double comment '分数',
+    birthday    date comment '生日',
+    province    varchar(50) comment '所在省份',
+    city        varchar(50) comment '所在城市',
+    date_time   datetime(3) comment '自定义时间'
+)
+DUPLICATE KEY(id)
+COMMENT "普通用户表"
+DISTRIBUTED BY HASH(`id`) BUCKETS AUTO
+PROPERTIES (
+    "replication_allocation" = "tag.location.default: 1"
+);
+show create table my_user_basic\G;
+```
+
+**插入数据**
+
+```sql
+insert into kongyu.my_user_basic (name, age, score, birthday, province, city, date_time) values
+('张三', 25, 89.5, '1998-05-12', '北京市', '北京市', '2024-12-23 14:30:00.123'),
+('李四', 30, 95.0, '1993-03-08', '上海市', '上海市', '2024-12-23 15:00:00.123'),
+('王五', 22, 78.0, '2001-11-20', '广东省', '广州市', '2024-12-23 15:30:00.123'),
+('赵六', 28, 88.0, '1995-07-15', '浙江省', '杭州市', '2024-12-23 16:00:00.123'),
+('孙七', 35, 92.5, '1988-02-25', '四川省', '成都市', '2024-12-23 16:30:00.123');
+```
+
+**查看数据**
+
+```sql
+select * from kongyu.my_user_basic;
+```
+
+
+
+### 创建主键表
+
+```sql
+drop table if exists kongyu.my_user_unique;
+create table if not exists kongyu.my_user_unique
+(
+    id          bigint      not null auto_increment comment '主键',
+    create_time datetime(3) not null default current_timestamp(3) comment '数据创建时间',
+    name        varchar(20) not null comment '姓名',
+    age         int comment '年龄',
+    score       double comment '分数',
+    birthday    date comment '生日',
+    province    varchar(50) comment '所在省份',
+    city        varchar(50) comment '所在城市',
+    date_time   datetime(3) comment '自定义时间'
+)
+UNIQUE KEY(id)
+COMMENT "普通用户表"
+DISTRIBUTED BY HASH(`id`) BUCKETS AUTO
+PROPERTIES (
+    "replication_allocation" = "tag.location.default: 1"
+);
+show create table my_user_unique\G;
+```
+
+**插入数据**
+
+```sql
+insert into kongyu.my_user_unique (name, age, score, birthday, province, city, date_time) values
+('张三', 25, 89.5, '1998-05-12', '北京市', '北京市', '2024-12-23 14:30:00.123'),
+('李四', 30, 95.0, '1993-03-08', '上海市', '上海市', '2024-12-23 15:00:00.123'),
+('王五', 22, 78.0, '2001-11-20', '广东省', '广州市', '2024-12-23 15:30:00.123'),
+('赵六', 28, 88.0, '1995-07-15', '浙江省', '杭州市', '2024-12-23 16:00:00.123'),
+('孙七', 35, 92.5, '1988-02-25', '四川省', '成都市', '2024-12-23 16:30:00.123');
+```
+
+**查看数据**
+
+```sql
+select * from kongyu.my_user_unique;
+```
+
+
 
 ### 自增自动动态分区表
 
@@ -535,48 +695,134 @@ select * from kongyu.my_user;
 
 ## 导出到MinIO
 
-使用[Export](https://doris.apache.org/zh-CN/docs/data-operate/export/export-manual)
+### Export
+
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/data-operate/export/export-manual)
+
+**导出全表**
 
 ```sql
-EXPORT TABLE example_tbl_auto_increment2 TO "s3://test/export/file_" 
+EXPORT TABLE example_tbl_unique TO "s3://data/doris/export/example_tbl_unique_" 
 PROPERTIES (
     "format" = "csv_with_names",
     "column_separator" = ",",
-    "line_delimiter" = "\r\n"
+    "line_delimiter" = "\r\n",
+    "max_file_size" = "512MB"
 ) WITH s3 (
-    "s3.endpoint" = "http://dev.minio.lingo.local",
+    "s3.endpoint" = "http://192.168.5.217:9000",
     "s3.region" = "us-east-1",
     "s3.secret_key"="Admin@123",
     "s3.access_key" = "admin",
     "use_path_style"="true"
 );
-show export\G
+SHOW EXPORT FROM kongyu ORDER BY StartTime DESC\G;
 ```
 
-使用[Select Into Outfile](https://doris.apache.org/zh-CN/docs/data-operate/export/outfile)
+**条件导出**
 
 ```sql
-SELECT * FROM example_tbl_auto_increment2
-INTO OUTFILE "s3://test/export/file_"
+EXPORT TABLE lingo.traffic_flow
+WHERE pass_time BETWEEN '2025-01-13 00:00:00' AND '2025-01-14 00:00:00'
+TO "s3://data/doris/traffic_flow/20250113/file_"
+PROPERTIES (
+    "format" = "csv_with_names",
+    "column_separator" = ",",
+    "line_delimiter" = "\r\n",
+    "max_file_size" = "512MB"
+) WITH s3 (
+    "s3.endpoint" = "http://192.168.5.217:9000",
+    "s3.region" = "us-east-1",
+    "s3.secret_key"="Admin@123",
+    "s3.access_key" = "admin",
+    "use_path_style"="true"
+);
+SHOW EXPORT FROM lingo ORDER BY StartTime DESC\G;
+```
+
+**分区导出**
+
+```sql
+-- 查看分区
+show partitions from lingo.vehicle\G;
+-- 导出
+EXPORT TABLE lingo.vehicle
+PARTITION (p2025_02,p20250113000000)
+TO "s3://data/doris/export/20250113/vehicle_"
+PROPERTIES (
+    "format" = "csv_with_names",
+    "column_separator" = ",",
+    "line_delimiter" = "\r\n",
+    "max_file_size" = "512MB"
+) WITH s3 (
+    "s3.endpoint" = "http://192.168.5.217:9000",
+    "s3.region" = "us-east-1",
+    "s3.secret_key"="Admin@123",
+    "s3.access_key" = "admin",
+    "use_path_style"="true"
+);
+SHOW EXPORT FROM lingo ORDER BY StartTime DESC LIMIT 1\G;
+```
+
+- timeout: 导出作业的超时时间，默认为2小时，单位是秒
+
+其他参数可以使用 `mysql> help EXPORT;` 查看
+
+
+
+### Select Into Outfile
+
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/data-operate/export/outfile)
+
+**全表导出**
+
+```sql
+SELECT * FROM example_tbl_unique
+INTO OUTFILE "s3://data/doris/export/example_tbl_unique_"
 FORMAT AS csv_with_names
 PROPERTIES(
     "column_separator" = ",", 
     "line_delimiter" = "\r\n",
-    "s3.endpoint" = "http://dev.minio.lingo.local",
+    "s3.endpoint" = "http://192.168.5.217:9000",
     "s3.region" = "us-east-1",
-    "s3.access_key"= "admin",
-    "s3.secret_key" = "Admin@123",
+    "s3.secret_key"="Admin@123",
+    "s3.access_key" = "admin",
     "use_path_style"="true",
-    "max_file_size" = "2048MB"
+    "max_file_size" = "512MB"
 );
 ```
 
+**查询SQL导出**
+
+```sql
+SELECT * FROM traffic_flow
+WHERE pass_time BETWEEN '2025-01-13 08:00:00' AND '2025-01-13 08:05:00'
+AND device_ip = '192.168.11.66'
+INTO OUTFILE "s3://data/doris/export/traffic_flow_"
+FORMAT AS csv_with_names
+PROPERTIES(
+    "column_separator" = ",", 
+    "line_delimiter" = "\r\n",
+    "s3.endpoint" = "http://192.168.5.217:9000",
+    "s3.region" = "us-east-1",
+    "s3.secret_key"="Admin@123",
+    "s3.access_key" = "admin",
+    "use_path_style"="true",
+    "max_file_size" = "512MB"
+);
+```
+
+
+
 ## 导出到本地
+
+导出到本地文件系统功能默认是关闭的。这个功能仅用于本地调试和开发，请勿用于生产环境。
+
+如要开启这个功能请在 fe.conf 中添加 enable_outfile_to_local=true 并且重启 FE。
 
 使用[Export](https://doris.apache.org/zh-CN/docs/data-operate/export/export-manual)
 
 ```sql
-EXPORT TABLE example_tbl_auto_increment2 TO "file:///tmp/file_" 
+EXPORT TABLE example_tbl_unique TO "file:///tmp/doris/file_" 
 PROPERTIES (
     "format" = "csv_with_names",
     "column_separator" = ","
@@ -595,7 +841,13 @@ PROPERTIES(
 );
 ```
 
-使用[MySQL Dump](https://doris.apache.org/zh-CN/docs/data-operate/export/export-with-mysql-dump)
+
+
+## MySQL Dump
+
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/data-operate/export/export-with-mysql-dump)
+
+通过 mysqldump 工具导出数据或者表结构
 
 ```
 mysqldump -h127.0.0.1 -P9030 -uroot --no-tablespaces --databases demo --tables example_tbl_auto_increment2 > my_table.sql
@@ -681,6 +933,39 @@ id,name,value
 10,Eve,500
 3,Updated Name,999
 EOF
+```
+
+
+
+## Insert Into Select
+
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/data-operate/import/import-way/insert-into-manual#%E5%8F%82%E8%80%83%E6%89%8B%E5%86%8C)
+
+INSERT INTO 支持将 Doris 查询的结果导入到另一个表中。INSERT INTO 是一个同步导入方式，执行导入后返回导入结果。可以通过请求的返回判断导入是否成功。INSERT INTO 可以保证导入任务的原子性，要么全部导入成功，要么全部导入失败。
+
+**创建新表接受数据**
+
+```sql
+CREATE TABLE lingo.traffic_flow_custom LIKE lingo.traffic_flow;
+```
+
+**导入数据**
+
+```sql
+INSERT INTO lingo.traffic_flow_custom
+SELECT * FROM lingo.traffic_flow WHERE id = 2614577717;
+```
+
+**查看数据**
+
+```sql
+SELECT * FROM lingo.traffic_flow_custom LIMIT 10;
+```
+
+**清空数据**
+
+```sql
+TRUNCATE TABLE lingo.traffic_flow_custom;
 ```
 
 
