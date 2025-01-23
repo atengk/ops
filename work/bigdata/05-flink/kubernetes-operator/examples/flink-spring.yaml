@@ -1,0 +1,27 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: flink-spring
+  namespace: ateng-flink
+spec:
+  image: registry.lingo.local/service/flink:1.19-java8
+  flinkVersion: v1_19
+  flinkConfiguration:
+    taskmanager.numberOfTaskSlots: "3"
+    user.artifacts.raw-http-enabled: "true"
+  serviceAccount: flink
+  jobManager:
+    replicas: 1
+    resource:
+      memory: "1g"
+      cpu: 1
+  taskManager:
+    resource:
+      memory: "2g"
+      cpu: 1
+  job:
+    jarURI: http://192.168.1.12:9000/test/flink/flink-cluster-v1.0.jar
+    args:
+      - --class=local.ateng.java.flink.sql.SQLGenerator
+      - --method=run
+    parallelism: 3

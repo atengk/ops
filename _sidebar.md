@@ -320,6 +320,7 @@
             - [高可用集群](work/bigdata/05-flink/cluster-ha/)
             - [YARN](work/bigdata/05-flink/yarn/)
             - [Kubernetes Operator](work/bigdata/05-flink/kubernetes-operator/)
+            - [Operator使用文档](work/bigdata/05-flink/kubernetes-operator/examples/)
             - [Flink CDC](work/bigdata/05-flink/cdc/)
             - [使用文档](work/bigdata/05-flink/OPS.md)
     - 调度平台

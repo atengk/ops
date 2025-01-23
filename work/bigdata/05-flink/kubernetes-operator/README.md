@@ -51,6 +51,25 @@ kubectl logs -n flink-operator -f --tail=200 deploy/flink-kubernetes-operator
 
 
 
+## 创建服务账户
+
+创建后续应用任务的命名空间，都运行在该命名空间下
+
+**创建命名空间**
+
+```
+kubectl create ns ateng-flink
+```
+
+**创建serviceacount**
+
+```
+kubectl create -n ateng-flink serviceaccount flink
+kubectl create clusterrolebinding crb-ateng-flink --clusterrole=edit --serviceaccount=ateng-flink:flink
+```
+
+
+
 ## 创建任务
 
 **创建任务**
@@ -78,6 +97,7 @@ spec:
       cpu: 1
   job:
     jarURI: local:///opt/flink/examples/streaming/TopSpeedWindowing.jar
+    entryClass: org.apache.flink.streaming.examples.windowing.TopSpeedWindowing
     parallelism: 2
 EOF
 ```
@@ -97,15 +117,15 @@ kubectl get -n ateng-flink pod,svc -l app=flink-basic
 kubectl logs -n ateng-flink -f --tail=200 -l app=flink-basic
 ```
 
-
-
-## 删除服务
-
 **删除应用**
 
 ```bash
 kubectl delete -n ateng-flink flinkdep flink-basic
 ```
+
+
+
+## 删除服务
 
 **删除operator**
 

@@ -1,20 +1,136 @@
-# 使用kubernetes-operator部署Flink应用到Kubernetes
+# Flink Operator使用文档
 
-### 命名空间
 
-**创建命名空间和serviceacount**
 
+## 最小化部署
+
+### 无依赖模式
+
+在使用Maven打包时，Flink相关的依赖作用域都是设置为provided，适用于这种情况，但是要注意涉及到的相关依赖要保证image镜像中存在，如果不存在参考依赖模式或者重新制作镜像将相关依赖COPY进去。
+
+**创建应用**
+
+```bash
+kubectl apply -f flink-spring.yaml
 ```
-# 创建namespace
-kubectl create ns flink-job
-# 创建serviceaccount
-kubectl create -n flink-job serviceaccount flink-service-account
-kubectl create clusterrolebinding flink-role-binding-flink --clusterrole=edit --serviceaccount=flink:flink-service-account
+
+**查看应用**
+
+查看应用
+
+```bash
+kubectl get -n ateng-flink flinkdep flink-spring
+```
+
+查看pod
+
+```bash
+kubectl get -n ateng-flink pod,svc -l app=flink-spring
+kubectl logs -n ateng-flink -f --tail=200 -l app=flink-spring
+```
+
+**删除应用**
+
+```bash
+kubectl delete -f flink-spring.yaml
+```
+
+### 依赖模式
+
+将任务需要的依赖作用域设置为compile，例如我这里是需要用到Kafka Connector，pom.xml的依赖配置如下
+
+```xml
+<!-- Apache Flink 连接器基础库库 -->
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-connector-base</artifactId>
+    <version>${flink.version}</version>
+    <scope>compile</scope>
+</dependency>
+<!-- Apache Flink Kafka 连接器库 -->
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-connector-kafka</artifactId>
+    <version>${flink-kafka.version}</version>
+    <scope>compile</scope>
+</dependency>
+```
+
+**创建应用**
+
+```bash
+kubectl apply -f flink-spring-dep.yaml
+```
+
+**查看应用**
+
+查看应用
+
+```bash
+kubectl get -n ateng-flink flinkdep flink-spring-dep
+```
+
+查看pod
+
+```bash
+kubectl get -n ateng-flink pod,svc -l app=flink-spring-dep
+kubectl logs -n ateng-flink -f --tail=200 -l app=flink-spring-dep
+```
+
+**删除应用**
+
+```bash
+kubectl delete -f flink-spring-dep.yaml
 ```
 
 
 
-## 配置文件
+## 标准部署
+
+以生成模拟数据并打印中的任务为例
+
+**创建应用**
+
+```bash
+kubectl apply -f flink-standard-myapp.yaml
+```
+
+**查看应用**
+
+查看pod
+
+```bash
+kubectl get -n ateng-flink pod,svc,pvc -l app=flink-standard
+kubectl logs -n ateng-flink -f --tail=200 -l app=flink-standard
+```
+
+查看应用
+
+```bash
+kubectl get -n ateng-flink flinkdep flink-standard
+kubectl get -n ateng-flink sessionjob flink-spring-datagen
+```
+
+**单独创建任务**
+
+当 `Total Task Slots` 无法满足当前任务时，Flink Operator会自动扩展 `Task Managers` 节点数量
+
+```bash
+kubectl apply -f flink-standard-myapp-job.yaml
+```
+
+**删除应用**
+
+```bash
+kubectl delete -n ateng-flink sessionjob flink-spring-datagen flink-spring-kafka
+kubectl delete -n ateng-flink flinkdep flink-standard
+```
+
+
+
+## 参数优化部署
+
+### 编辑配置文件
 
 以**flink-standard-myapp.yaml**配置文件为例，建议修改以下参数：
 
@@ -29,8 +145,36 @@ kubectl create clusterrolebinding flink-role-binding-flink --clusterrole=edit --
 
 1. **spec.job.parallelism**：和参数**taskmanager.numberOfTaskSlots**决定容器**taskManager**的数量，并行度/numberOfTaskSlots(向上取整)=taskManager数量。
 
-## 部署
+### 部署应用
 
-如果已经部署了FlinkDeployment和FlinkSessionJob，需要更新的时候需要注意，只修改了FlinkSessionJob可以直接apply，其他情况先删除yaml再重新创建。
+**创建应用**
 
-如果只是更新Flink jar包，只需要删除FlinkSessionJob再重新创建。
+```bash
+kubectl apply -f flink-standard-myapp-prod.yaml
+```
+
+**查看应用**
+
+查看pod
+
+```bash
+kubectl get -n ateng-flink pod,svc,pvc -l app=flink-standard
+kubectl logs -n ateng-flink -f --tail=200 -l app=flink-standard
+```
+
+查看应用
+
+```bash
+kubectl get -n ateng-flink flinkdep flink-standard
+kubectl get -n ateng-flink sessionjob flink-spring-datagen
+```
+
+**删除应用**
+
+```bash
+kubectl delete -n ateng-flink sessionjob flink-spring-datagen
+kubectl delete -n ateng-flink flinkdep flink-standard
+```
+
+
+

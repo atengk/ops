@@ -1,14 +1,14 @@
 apiVersion: flink.apache.org/v1beta1
 kind: FlinkSessionJob
 metadata:
-  name: flink-spring-datagen-sql
+  name: flink-spring-kafka
   namespace: ateng-flink
 spec:
   deploymentName: flink-standard
   job:
-    jarURI: http://192.168.1.12:9000/test/flink/flink-cluster-v1.0.jar
+    jarURI: http://192.168.1.12:9000/test/flink/flink-cluster-kafka-v1.0.jar
     args:
-      - --class=local.ateng.java.flink.sql.SQLGenerator
+      - --class=local.ateng.java.flink.stream.DataStreamGeneratorToKafka
       - --method=run
     ## 和参数taskmanager.numberOfTaskSlots决定容器taskManager的数量，并行度/numberOfTaskSlots(向上取整)=taskManager数量。
     parallelism: 3
