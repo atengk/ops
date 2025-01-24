@@ -107,7 +107,7 @@ http_port = 9040
 rpc_port = 9020
 query_port = 9030
 edit_log_port = 9010
-arrow_flight_sql_port = -1
+arrow_flight_sql_port = 9031
 log_roll_size_mb = 1024
 # INFO, WARN, ERROR, FATAL
 sys_log_level = INFO
@@ -196,7 +196,7 @@ mysql> show frontends\G;
           HttpPort: 9040
          QueryPort: 9030
            RpcPort: 9020
-ArrowFlightSqlPort: -1
+ArrowFlightSqlPort: 9031
               Role: FOLLOWER
           IsMaster: true
          ClusterId: 1160913624
@@ -240,7 +240,7 @@ be_port = 9060
 webserver_port = 9070
 heartbeat_service_port = 9050
 brpc_port = 9080
-arrow_flight_sql_port = -1
+arrow_flight_sql_port = 9032
 storage_root_path = /data/service/doris/storage
 jdbc_drivers_dir = ${DORIS_HOME}/jdbc_drivers
 # INFO, WARNING, ERROR, FATAL
@@ -302,7 +302,7 @@ mysql> SHOW BACKENDS\G;
                  BePort: 9060
                HttpPort: 9070
                BrpcPort: 9080
-     ArrowFlightSqlPort: -1
+     ArrowFlightSqlPort: 9032
           LastStartTime: 2024-12-25 09:50:11
           LastHeartbeat: 2024-12-25 09:54:51
                   Alive: true
@@ -628,7 +628,9 @@ Username: admin
 Password: Admin@123
 ```
 
-**使用mysql协议**
+**使用MySQL协议**
+
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/db-connect/database-connect)
 
 ```
 Address: 192.168.1.131:9030
@@ -637,3 +639,43 @@ Password: Admin@123
 ```
 
 例如使用mysql客户端：`mysql -uadmin -pAdmin@123 -h192.168.1.113 -P9030`
+
+**使用Arrow Flight SQL协议**
+
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/db-connect/arrow-flight-sql-connect)
+
+```
+Address: 192.168.1.131:9031
+Username: admin
+Password: Admin@123
+url: jdbc:arrow-flight-sql://192.168.1.131:9031?useServerPrepStmts=false&cachePrepStmts=true&useSSL=false&useEncryption=false
+driver-class-name: org.apache.arrow.driver.jdbc.ArrowFlightJdbcDriver
+```
+
+注意：使用 Java 9 或更高版本时，必须通过在 Java 命令中添加 --add-opens=java.base/java.nio=org.apache.arrow.memory.core,ALL-UNNAMED 来暴露某些 JDK 内部结构
+
+依赖：
+
+```xml
+<properties>
+    <arrow.version>18.1.0</arrow.version>
+</properties>
+<dependencies>
+    <dependency>
+        <groupId>org.apache.arrow</groupId>
+        <artifactId>flight-sql-jdbc-core</artifactId>
+        <version>${arrow.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>5.4.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.httpcomponents.core5</groupId>
+        <artifactId>httpcore5</artifactId>
+        <version>5.3.2</version>
+    </dependency>
+</dependencies>
+```
+

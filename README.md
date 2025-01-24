@@ -2,7 +2,7 @@
 
 - 网站管理员：[阿腾](http://wpa.qq.com/msgrd?v=3&uin=2385569970&Menu=yes)
 
-> 如果左侧点击无反应需要刷新以下页面哦~~
+> 如果左侧点击无反应再刷新一下页面哦~~
 
 ## 概述
 
@@ -322,7 +322,7 @@
             - [单机](work/bigdata/05-spark/standalone/)
             - [集群](work/bigdata/05-spark/cluster/)
             - [高可用集群](work/bigdata/05-spark/cluster-ha/)
-            - [YARN](work/bigdata/05-spark/yarn)
+            - [YARN](work/bigdata/05-spark/yarn/)
             - [Kubernetes Operator](work/bigdata/05-spark/kubernetes-operator/)
             - [集成Hive](work/bigdata/05-spark/hive/)
             - [使用文档](work/bigdata/05-spark/OPS.md)
@@ -330,8 +330,9 @@
             - [单机](work/bigdata/05-flink/standalone/)
             - [集群](work/bigdata/05-flink/cluster/)
             - [高可用集群](work/bigdata/05-flink/cluster-ha/)
-            - [YARN](work/bigdata/05-flink/yarn)
+            - [YARN](work/bigdata/05-flink/yarn/)
             - [Kubernetes Operator](work/bigdata/05-flink/kubernetes-operator/)
+            - [Operator使用文档](work/bigdata/05-flink/kubernetes-operator/examples/)
             - [Flink CDC](work/bigdata/05-flink/cdc/)
             - [使用文档](work/bigdata/05-flink/OPS.md)
     - 调度平台

@@ -705,7 +705,7 @@ YARN ResourceManager（资源管理器）是 Apache Hadoop YARN（Yet Another Re
 **编辑配置文件**
 
 ```
-[admin@bigdata02 ~]$ sudo tee /etc/systemd/system/hadoop-yarn-resourcemanager.service <<"EOF"
+[admin@bigdata01 ~]$ sudo tee /etc/systemd/system/hadoop-yarn-resourcemanager.service <<"EOF"
 [Unit]
 Description=Hadoop YARN ResourceManager
 Documentation=https://hadoop.apache.org
@@ -791,7 +791,7 @@ bigdata01设置JobHistoryServer
 Hadoop JobHistoryServer 是 Hadoop 生态系统中的一个关键组件，它负责跟踪和存储 MapReduce 作业（Job）的历史信息
 
 ```
-[admin@bigdata02 ~]$ sudo tee /etc/systemd/system/hadoop-mapreduce-historyserver.service <<"EOF"
+[admin@bigdata01 ~]$ sudo tee /etc/systemd/system/hadoop-mapreduce-historyserver.service <<"EOF"
 [Unit]
 Description=Hadoop MapReduce HistoryServer
 Documentation=https://hadoop.apache.org
