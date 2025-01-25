@@ -1,129 +1,15 @@
 # Spark运维
 
-
-
-## Spark on YARN 动态资源配置
-
-拷贝依赖包到所有yarn节点上
-
-```
-cp $SPARK_HOME/yarn/spark-3.5.4-yarn-shuffle.jar $HADOOP_HOME/share/hadoop/yarn/
-```
-
-yarn-site.xml修改配置
-
-> 修改yarn.nodemanager.aux-services配置
->
-> 新增yarn.nodemanager.aux-services.spark_shuffle.class配置
-
-```
-$ vi $HADOOP_HOME/etc/hadoop/yarn-site.xml
-<configuration>
-    ...
-    <!-- Spark on YARN动态资源配置-->
-    <property>
-        <name>yarn.nodemanager.aux-services</name>
-        <value>spark_shuffle,mapreduce_shuffle</value>
-    </property>
-    <property>
-        <name>yarn.nodemanager.aux-services.spark_shuffle.class</name>
-        <value>org.apache.spark.network.yarn.YarnShuffleService</value>
-    </property>
-</configuration>
-```
-
-重启集群所有NodeManager
-
-```
-
-```
-
-配置spark-defaults.conf
-
-```
-$ vi $SPARK_HOME/conf/spark-defaults.conf
-...
-## 开启动态资源以及申请的Executors数最值
-spark.shuffle.service.enabled           true
-spark.shuffle.service.port              7337
-spark.shuffle.service.removeShuffle     true
-spark.dynamicAllocation.enabled         true
-spark.dynamicAllocation.initExectors    2
-spark.dynamicAllocation.minExecutors    2
-spark.dynamicAllocation.maxExecutors    30
-```
-
-启动spark任务
-
-```
-spark-submit --master yarn \
-    --class org.apache.spark.examples.SparkPi \
-    --deploy-mode cluster \
-    $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.4.jar 10000
-```
-
-
-
-# Spark 开发
-
-## 快速开始
-
-### 创建表
-
-```sql
--- 创建表
-CREATE TABLE user
-(
-    id BIGINT,
-    uuid STRING,
-    name STRING,
-    region STRING,
-    age INT,
-    email STRING,
-    salary INT,
-    score DOUBLE,
-    date_time TIMESTAMP
-)
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY ',' -- 设置CSV文件中的字段分隔符为逗号
-STORED AS TEXTFILE;
-
--- 导入数据
-LOAD DATA INPATH 'hdfs://bigdata01/data/my_user.csv' INTO TABLE user;
-```
-
-### 提交程序
-
-```shell
-$ cat run.sh
-#!/bin/bash
-set -x
-
-CLASS_NAME="${1:-local.kongyu.mySpark.core.MyRDD}"
-DEPLOY_MODE="${2:-client}"
-
-spark-submit \
-    --master yarn \
-    --name app_${CLASS_NAME} \
-    --class ${CLASS_NAME} \
-    --deploy-mode ${DEPLOY_MODE} \
-    MySpark-1.0.jar
-
-$ chmod +x run.sh
-$ ./run.sh local.kongyu.mySpark.core.MyRDD cluster
-```
-
-### 查看日志
-
-进入Spark History Server查看日志
-
-```shell
-http://bigdata01:18080/
-```
-
-
+# Spark SQL
 
 ## 创建表
+
+### 进入SparkSQL
+
+```
+$ spark-sql
+spark-sql (default)>
+```
 
 ### 创建数据库
 
@@ -131,7 +17,7 @@ http://bigdata01:18080/
 -- 创建数据库并设置hdfs存储位置和注释
 CREATE DATABASE IF NOT EXISTS my_database
 COMMENT 'This is a sample database for demonstration purposes.'
-LOCATION 'hdfs://bigdata01:8020/hive/warehouse/my_database';
+LOCATION 'hdfs://server01:8020/hive/warehouse/my_database';
 -- 查看数据库信息
 DESCRIBE DATABASE my_database;
 -- 切换到my_database
@@ -319,9 +205,49 @@ select * from user_properties;
 
 
 
-## 创建外部关系型数据库表
+## 创建外部表
 
 ### MySQL
+
+下载依赖
+
+```
+wget -P tools https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
+```
+
+拷贝依赖到jars下后再启动spark-sql
+
+```
+cp tools/mysql-connector-j-8.0.33.jar $SPARK_HOME/jars
+```
+
+进入SparkSQL
+
+```
+$ spark-sql
+spark-sql (default)> use my_database;
+spark-sql (my_database)>
+```
+
+MySQL创建表
+
+```sql
+DROP TABLE IF EXISTS my_user;
+CREATE TABLE IF NOT EXISTS my_user (
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,          -- 用户唯一标识，主键自动递增
+    name        VARCHAR(50) DEFAULT NULL,                   -- 增加name字段长度，并设置默认值为NULL
+    age         INT DEFAULT NULL,                           -- 年龄，默认为NULL
+    score       DOUBLE DEFAULT 0.0,                         -- 成绩，默认为0.0
+    birthday    DATE DEFAULT NULL,                          -- 生日，默认为NULL
+    province    VARCHAR(50) DEFAULT NULL,                   -- 省份，增加字段长度
+    city        VARCHAR(50) DEFAULT NULL,                   -- 城市，增加字段长度
+    create_time TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3),  -- 创建时间，默认当前时间
+    INDEX idx_name (name),                                  -- 如果name经常用于查询，可以考虑为其加索引
+    INDEX idx_province_city (province, city)                -- 如果经常根据省市进行查询，创建联合索引
+);
+```
+
+创建表
 
 ```sql
 -- 创建表
@@ -331,20 +257,60 @@ USING org.apache.spark.sql.jdbc
 OPTIONS (
   driver "com.mysql.cj.jdbc.Driver",
   url "jdbc:mysql://192.168.1.10:35725/kongyu",
-  dbtable "user",
+  dbtable "my_user",
   user 'root',
   password 'Admin@123'
 );
 -- 查看信息
 DESCRIBE EXTENDED user_ext_mysql;
 -- 插入数据
-INSERT INTO user_ext_mysql 
-VALUES (8888,'a4770d5c844a4f33.5.4a738958b531f','李强','宁夏回族自治区',24,'blankenshipwilliam@example.org',26206,62.23,CAST('1997-04-21 11:35:17' AS TIMESTAMP));
+INSERT INTO user_ext_mysql (name, age, score, birthday, province, city) VALUES ('阿腾', 25, 99.99, CAST('2025-01-24 12:12:12' AS TIMESTAMP), '重庆', '重庆');
 -- 查看数据
 select * from user_ext_mysql;
 ```
 
 ### PostgreSQL
+
+下载依赖
+
+```
+wget -P tools https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar
+```
+
+拷贝依赖到jars下后再启动spark-sql
+
+```
+cp tools/postgresql-42.7.1.jar $SPARK_HOME/jars
+```
+
+进入SparkSQL
+
+```
+$ spark-sql
+spark-sql (default)> use my_database;
+spark-sql (my_database)>
+```
+
+PostgreSQL创建表
+
+```sql
+DROP TABLE IF EXISTS my_user;
+CREATE TABLE IF NOT EXISTS my_user (
+    id          BIGSERIAL PRIMARY KEY,                         -- BIGSERIAL 自动递增主键
+    name        VARCHAR(50) DEFAULT NULL,                      -- 增加 name 字段长度，默认 NULL
+    age         INTEGER DEFAULT NULL,                          -- 使用 INTEGER 替代 INT
+    score       DOUBLE PRECISION DEFAULT 0.0,                  -- 使用 DOUBLE PRECISION
+    birthday    DATE DEFAULT NULL,                             -- 生日字段，默认 NULL
+    province    VARCHAR(50) DEFAULT NULL,                      -- 省份字段，增加长度
+    city        VARCHAR(50) DEFAULT NULL,                      -- 城市字段，增加长度
+    create_time TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)      -- 创建时间字段，默认当前时间
+);
+-- 创建普通索引
+CREATE INDEX idx_name ON my_user(name);                       -- 为 name 字段创建普通索引
+CREATE INDEX idx_province_city ON my_user(province, city);     -- 为 province 和 city 字段创建联合索引
+```
+
+创建表
 
 ```sql
 -- 创建表
@@ -354,52 +320,509 @@ USING org.apache.spark.sql.jdbc
 OPTIONS (
   driver "org.postgresql.Driver",
   url "jdbc:postgresql://192.168.1.10:32297/kongyu",
-  dbtable "public.user",
+  dbtable "public.my_user",
   user 'postgres',
   password 'Lingo@local_postgresql_5432'
 );
 -- 查看信息
 DESCRIBE EXTENDED user_ext_postgresql;
 -- 插入数据
-INSERT INTO user_ext_postgresql 
-VALUES (8888,'a4770d5c844a4f33.5.4a738958b531f','李强','宁夏回族自治区',24,'blankenshipwilliam@example.org',26206,62.23,CAST('1997-04-21 11:35:17' AS TIMESTAMP));
+INSERT INTO user_ext_postgresql (id, name, age, score, birthday, province, city) VALUES (10000, '阿腾', 25, 99.99, CAST('2025-01-24 12:12:12' AS TIMESTAMP), '重庆', '重庆');
 -- 查看数据
 select * from user_ext_postgresql;
 ```
 
+### Doris
 
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/ecosystem/spark-doris-connector#%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B)
 
-# Java8 和 Spark  SpringBoot2
+下载依赖
 
-## 打包运行Spark On YARN
-
-配置hive文件
-
-> 如果Spark配置了Hive，则需要将**hive-site.xml**配置文件拷贝到$SPARK_HOME/conf下
-
-```shell
-ln -s $HIVE_HOME/conf/hive-site.xml $SPARK_HOME/conf/hive-site.xml
+```
+wget -P tools https://repo1.maven.org/maven2/org/apache/doris/spark-doris-connector-spark-3.5/24.0.0/spark-doris-connector-spark-3.5-24.0.0.jar
 ```
 
-提交任务到yarn（客户端模式），适用于开发测试
+拷贝依赖到jars下后再启动spark-sql
 
-> 传入参数指定需要运行的程序**spark.sql**，对应MySparkStart的配置
-
-```shell
-spark-submit \
-    --master yarn \
-    --deploy-mode client \
-    MySparkOnSpring-1.0.jar spark.sql
+```
+cp tools/spark-doris-connector-spark-3.5-24.0.0.jar $SPARK_HOME/jars
 ```
 
-提交任务到yarn（集群模式），适用于生产
+进入SparkSQL
 
-> 传入参数指定需要运行的程序**spark.sql**，对应MySparkStart的配置
-
-```shell
-spark-submit \
-    --master yarn \
-    --name APP_Spark_on_Spring_Cluster \
-    --deploy-mode cluster \
-    MySparkOnSpring-1.0.jar spark.sql
 ```
+$ spark-sql
+spark-sql (default)> use my_database;
+spark-sql (my_database)>
+```
+
+Doris创建表
+
+```sql
+-- 创建表
+drop table if exists my_user_doris;
+create table if not exists my_user_doris
+(
+    id          bigint      not null auto_increment comment '主键',
+    create_time datetime(3) not null default current_timestamp(3) comment '数据创建时间',
+    name        varchar(20) not null comment '姓名',
+    age         int comment '年龄',
+    score       double comment '分数',
+    birthday    datetime(3) comment '生日',
+    province    varchar(50) comment '所在省份',
+    city        varchar(50) comment '所在城市'
+)
+UNIQUE KEY(id)
+COMMENT "用户表"
+DISTRIBUTED BY HASH(id) BUCKETS AUTO
+PROPERTIES (
+    "replication_allocation" = "tag.location.default: 1"
+);
+show create table my_user_doris;
+-- 插入数据
+insert into my_user_doris (name, age, score, birthday, province, city)
+values  ('阿腾', 25, 118.124, '1993-03-15 06:34:51.619', '重庆市', '重庆市'),
+        ('沈烨霖', 36, 8.124, '1993-03-15 06:34:51.619', '吉林省', '荣成'),
+        ('宋文博', 28, 26.38, '1986-05-17 21:06:30.511', '广西省', '阳江'),
+        ('萧伟宸', 1, 9.699, '1991-04-02 18:21:24.825', '福建省', '厦门');
+```
+
+SparkSQL创建Doris表
+
+```sql
+CREATE TEMPORARY VIEW spark_doris
+   USING doris
+   OPTIONS(
+   "table.identifier"="kongyu.my_user_doris",
+   "fenodes"="192.168.1.12:9040",
+   "user"="admin",
+   "password"="Admin@123"
+);
+```
+
+查看数据
+
+```sql
+select * from spark_doris;
+```
+
+插入数据
+
+```sql
+insert into spark_doris (id, name, age, score, birthday, province, city, create_time)
+values  (1, '阿腾', 25, 118.124, '1993-03-15 06:34:51.619', '重庆市', '重庆市', now()),
+        (2, '沈烨霖', 36, 8.124, '1993-03-15 06:34:51.619', '吉林省', '荣成', now()),
+        (3, '宋文博', 28, 26.38, '1986-05-17 21:06:30.511', '广西省', '阳江', now()),
+        (4, '萧伟宸', 1, 9.699, '1991-04-02 18:21:24.825', '福建省', '厦门', now());
+```
+
+
+
+## Catalog
+
+在 Spark SQL 中，**Catalog** 是用于管理数据库、表、视图、函数和其他元数据的接口。通过 Catalog，可以方便地操作元数据，也可以查看和管理当前 Spark 会话中的临时表、全局视图以及用户定义的函数。
+
+### Doris
+
+参考：[官方文档](https://doris.apache.org/zh-CN/docs/ecosystem/spark-doris-connector#dataframe-3)
+
+下载依赖
+
+```
+wget -P tools https://repo1.maven.org/maven2/org/apache/doris/spark-doris-connector-spark-3.5/24.0.0/spark-doris-connector-spark-3.5-24.0.0.jar
+```
+
+拷贝依赖到jars下后再启动spark-sql
+
+```
+cp tools/spark-doris-connector-spark-3.5-24.0.0.jar $SPARK_HOME/jars
+```
+
+编辑配置文件，添加Doris Catalog的配置
+
+```
+$ vi $SPARK_HOME/conf/spark-defaults.conf
+## Spark Doris Catalog
+spark.sql.catalog.doris_catalog=org.apache.doris.spark.catalog.DorisTableCatalog
+spark.sql.catalog.doris_catalog.doris.fenodes=192.168.1.12:9040
+spark.sql.catalog.doris_catalog.doris.query.port=9030
+spark.sql.catalog.doris_catalog.doris.user=admin
+spark.sql.catalog.doris_catalog.doris.password=Admin@123
+spark.sql.defaultCatalog=doris_catalog
+```
+
+进入SparkSQL
+
+```
+$ spark-sql
+```
+
+查看Catalog
+
+```
+spark-sql ()> SHOW CATALOGS;
+doris_catalog
+spark_catalog
+```
+
+查看当前使用的Catalog
+
+```
+spark-sql ()> SELECT current_catalog();
+doris_catalog
+```
+
+切换Catalog
+
+```
+spark-sql ()> use doris_catalog;
+```
+
+查看数据库
+
+```
+spark-sql ()> SHOW DATABASES IN doris_catalog;
+__internal_schema
+kongyu_flink
+kongyu
+mysql
+```
+
+查看表
+
+```
+spark-sql ()> SHOW TABLES IN doris_catalog.kongyu;
+my_user
+example_tbl_unique
+sink_my_user_spark
+user_info
+my_user_doris
+```
+
+在Doris中创建表
+
+```sql
+-- 创建表
+drop table if exists kongyu.my_user_doris;
+create table if not exists kongyu.my_user_doris
+(
+    id          bigint      not null auto_increment comment '主键',
+    create_time datetime(3) not null default current_timestamp(3) comment '数据创建时间',
+    name        varchar(20) not null comment '姓名',
+    age         int comment '年龄',
+    score       double comment '分数',
+    birthday    datetime(3) comment '生日',
+    province    varchar(50) comment '所在省份',
+    city        varchar(50) comment '所在城市'
+)
+UNIQUE KEY(id)
+COMMENT "用户表"
+DISTRIBUTED BY HASH(id) BUCKETS AUTO
+PROPERTIES (
+    "replication_allocation" = "tag.location.default: 1"
+);
+show create table kongyu.my_user_doris;
+-- 插入数据
+insert into kongyu.my_user_doris (name, age, score, birthday, province, city)
+values  ('阿腾', 25, 118.124, '1993-03-15 06:34:51.619', '重庆市', '重庆市'),
+        ('沈烨霖', 36, 8.124, '1993-03-15 06:34:51.619', '吉林省', '荣成'),
+        ('宋文博', 28, 26.38, '1986-05-17 21:06:30.511', '广西省', '阳江'),
+        ('萧伟宸', 1, 9.699, '1991-04-02 18:21:24.825', '福建省', '厦门');
+```
+
+查看表数据
+
+```sql
+spark-sql ()> select * from doris_catalog.kongyu.my_user_doris;
+1       2025-01-25 08:55:38.202 阿腾    25      118.124 1993-03-15 06:34:51.619 重庆市  重庆市
+4       2025-01-25 08:55:38.202 萧伟宸  1       9.699   1991-04-02 18:21:24.825 福建省  厦门
+2       2025-01-25 08:55:38.202 沈烨霖  36      8.124   1993-03-15 06:34:51.619 吉林省  荣成
+3       2025-01-25 08:55:38.202 宋文博  28      26.38   1986-05-17 22:06:30.511 广西省  阳江
+Time taken: 0.206 seconds, Fetched 4 row(s)
+```
+
+插入数据
+
+```sql
+insert into doris_catalog.kongyu.my_user_doris (id, name, age, score, birthday, province, city, create_time)
+values  (1, '阿腾', 25, 118.124, '1993-03-15 06:34:51.619', '重庆市', '重庆市', now()),
+        (2, '沈烨霖', 36, 8.124, '1993-03-15 06:34:51.619', '吉林省', '荣成', now()),
+        (3, '宋文博', 28, 26.38, '1986-05-17 21:06:30.511', '广西省', '阳江', now()),
+        (4, '萧伟宸', 1, 9.699, '1991-04-02 18:21:24.825', '福建省', '厦门', now());
+```
+
+
+
+### Iceberg
+
+参考：[使用Iceberg文档](https://kongyu666.github.io/ops/#/work/bigdata/06-iceberg/?id=spark)
+
+**下载依赖包**
+
+iceberg-spark-runtime，用于spark集成iceberg
+
+```
+wget -P tools/ https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.5_2.12/1.6.1/iceberg-spark-runtime-3.5_2.12-1.6.1.jar
+```
+
+iceberg-aws-bundle，用于spark集成iceberg后数据写入s3（MinIO）中
+
+```
+wget -P tools/ https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/1.6.1/iceberg-aws-bundle-1.6.1.jar
+```
+
+postgresql，用于连接数据库的JDBC驱动
+
+```
+wget -P tools/ https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar
+```
+
+**拷贝依赖**
+
+```
+cp tools/{iceberg-spark-runtime-3.5_2.12-1.6.1.jar,iceberg-aws-bundle-1.6.1.jar,postgresql-42.7.1.jar} $SPARK_HOME/jars
+```
+
+**编辑配置文件**
+
+配置Iceberg Catalog的信息
+
+```
+$ vi $SPARK_HOME/conf/spark-defaults.conf
+## Spark Iceberg Catalog
+spark.sql.extensions                   org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+spark.sql.catalog.iceberg_catalog                 org.apache.iceberg.spark.SparkCatalog
+spark.sql.catalog.iceberg_catalog.warehouse       s3://iceberg-bucket/warehouse
+spark.sql.catalog.iceberg_catalog.s3.endpoint     http://192.168.1.13:9000
+spark.sql.catalog.iceberg_catalog.io-impl         org.apache.iceberg.aws.s3.S3FileIO
+spark.sql.catalog.iceberg_catalog.catalog-impl    org.apache.iceberg.jdbc.JdbcCatalog
+spark.sql.catalog.iceberg_catalog.uri             jdbc:postgresql://192.168.1.10:32297/iceberg
+spark.sql.catalog.iceberg_catalog.jdbc.user       postgres
+spark.sql.catalog.iceberg_catalog.jdbc.password   Lingo@local_postgresql_5432
+spark.sql.catalog.iceberg_catalog.jdbc.schema-version V1
+spark.sql.defaultCatalog               iceberg_catalog
+spark.sql.catalogImplementation        in-memory
+EOF
+```
+
+**配置MinIO环境变量**
+
+```
+cat >> $SPARK_HOME/conf/spark-env.sh <<EOF
+## MinIO Config
+export AWS_ACCESS_KEY_ID=admin
+export AWS_SECRET_ACCESS_KEY=Lingo@local_minio_9000
+export AWS_REGION=us-east-1
+EOF
+```
+
+**启动SparkSQL**
+
+```
+spark-sql
+```
+
+**Catalog使用**
+
+查看Catalog，其他Catalog不会显示出来，但是可以直接USE
+
+```
+spark-sql ()> SHOW CATALOGS;
+doris_catalog
+iceberg_catalog
+spark_catalog
+```
+
+查看当前使用的Catalog
+
+```
+spark-sql ()> SELECT current_catalog();
+iceberg_catalog
+```
+
+切换Catalog
+
+```
+spark-sql ()> use iceberg_catalog;
+```
+
+**创建表**
+
+```
+create database iceberg_catalog.spark;
+use iceberg_catalog.spark;
+CREATE TABLE my_user (
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP,
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP
+) USING iceberg;
+DESCRIBE EXTENDED my_user;
+```
+
+**插入数据**
+
+```
+INSERT INTO my_user VALUES 
+(1, 'Alice', 30, 85.5, TIMESTAMP '1993-01-15 10:00:00', 'Beijing', 'Beijing', TIMESTAMP '2023-07-01 10:00:00'),
+(2, 'Bob', 25, 90.0, TIMESTAMP '1998-06-20 14:30:00', 'Shanghai', 'Shanghai', TIMESTAMP '2023-07-01 11:00:00'),
+(3, 'Carol', 28, 95.0, TIMESTAMP '1995-12-05 09:45:00', 'Guangdong', 'Guangzhou', TIMESTAMP '2023-07-02 09:00:00');
+```
+
+**查看数据**
+
+```
+SELECT * FROM my_user;
+SELECT count(*) FROM my_user;
+```
+
+
+
+## 数据查询
+
+### 数据准备
+
+进入 `tools/` 目录下，将 `my_user_data.zip` 数据包解压，然后上传到hdfs中
+
+```
+cd tools/
+unzip -d my_user_data my_user_data.zip
+hadoop fs -put my_user_data /data
+hadoop fs -ls /data/my_user_data
+```
+
+### 创建表导入数据
+
+```
+$ spark-sql
+spark-sql (default)> use my_database;
+spark-sql (my_database)>
+```
+
+为了方便测试，这里创建文本类型的表并导入数据，生产环境建议使用PARQUET
+
+```
+CREATE TABLE my_user (
+  id BIGINT,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday DATE,
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP
+) COMMENT 'User Information'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+TBLPROPERTIES ("skip.header.line.count"="1");
+DESCRIBE EXTENDED my_user;
+```
+
+导入数据
+
+```
+LOAD DATA INPATH '/data/my_user_data/my_user_big.csv' INTO TABLE my_user;
+```
+
+查看数据
+
+```
+select * from my_user limit 10;
+```
+
+### 聚合查询
+
+**计算总数**
+
+```
+SELECT COUNT(*) AS total_count FROM my_user;
+```
+
+**计算平均值**
+
+```
+SELECT AVG(score) AS average_score FROM my_user;
+```
+
+**计算最大值和最小值**
+
+```
+SELECT MAX(score) AS max_score, MIN(score) AS min_score FROM my_user;
+```
+
+**按列分组聚合**
+
+```
+SELECT city, AVG(score) AS average_score
+FROM my_user
+GROUP BY city;
+```
+
+### 复杂查询
+
+**子查询**
+
+```
+SELECT count(*) AS count
+FROM my_user
+WHERE score > (SELECT AVG(score) FROM my_user);
+```
+
+**聚合与分组结合**
+
+```
+SELECT city, COUNT(*) AS count, AVG(score) AS average_score
+FROM my_user
+GROUP BY city
+HAVING count > 1500;
+```
+
+**排序与限制**
+
+```
+SELECT id, name, score
+FROM my_user
+ORDER BY score DESC
+LIMIT 5;
+```
+
+**使用窗口函数**
+
+> **分区**：首先，整个结果集会根据 `province` 列的值分成多个分区。每个分区包含具有相同 `province` 值的所有行。
+>
+> **排序**：在每个分区内，数据会根据 `score` 列的值进行降序排序。
+>
+> **行号**：`ROW_NUMBER()` 为每个分区内的行分配一个唯一的递增整数值，按照排序规则（`score DESC`）赋值。排序后的第一行将获得值1，第二行将获得值2，以此类推。
+
+```
+SELECT id, name, score,
+       ROW_NUMBER() OVER (PARTITION BY city ORDER BY score DESC) AS row_num
+FROM my_user
+LIMIT 1000;
+```
+
+**联合查询（UNION）**
+
+```
+SELECT COUNT(*)
+FROM (
+SELECT id, name, score FROM my_user WHERE age = 24
+UNION
+SELECT id, name, score FROM my_user WHERE city = '北京市'
+) result;
+```
+
+**复杂过滤条件**
+
+```
+SELECT *
+FROM my_user
+WHERE (age BETWEEN 25 AND 35) AND (score > 80.0 OR city = 'Shanghai')
+LIMIT 10;
+```
+
+

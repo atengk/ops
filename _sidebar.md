@@ -312,6 +312,7 @@
             - [高可用集群](work/bigdata/05-spark/cluster-ha/)
             - [YARN](work/bigdata/05-spark/yarn/)
             - [Kubernetes Operator](work/bigdata/05-spark/kubernetes-operator/)
+            - [Operator使用文档](work/bigdata/05-spark/kubernetes-operator/examples/)
             - [集成Hive](work/bigdata/05-spark/hive/)
             - [使用文档](work/bigdata/05-spark/OPS.md)
         - Flink

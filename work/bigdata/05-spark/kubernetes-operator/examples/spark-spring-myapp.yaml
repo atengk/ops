@@ -2,25 +2,25 @@ apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
   name: spark-spring-myapp
-  namespace: spark-operator
+  namespace: ateng-spark
 spec:
   type: Java
   mode: cluster
   image: "registry.lingo.local/service/spark:3.5.4"
   imagePullPolicy: Always
+  proxyUser: admin
   #mainClass: org.apache.spark.examples.SparkPi
   arguments:
-    - "--class=local.kongyu.spark.task.sql.MySparkSqlTask"
+    - "--class=local.ateng.java.spark.sql.SQLCount"
     - "--method=run"
-  #mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.5.4.jar"
-  mainApplicationFile: "http://192.168.1.12:9000/test/spark/spark-spring-1.0.jar"
+  mainApplicationFile: "http://192.168.1.12:9000/test/spark/spark-cluster-v1.0.jar"
   sparkVersion: "3.5.4"
   sparkUIOptions:
     serviceType: NodePort
   dynamicAllocation:
     enabled: true
     initialExecutors: 1
-    maxExecutors: 2
+    maxExecutors: 5
     minExecutors: 1
   restartPolicy:
     type: Never
@@ -34,12 +34,12 @@ spec:
         value: Asia/Shanghai      
     labels:
       version: 3.5.4
-      app.kubernetes.io/name: spark-standard-myapp
+      app.kubernetes.io/name: spark-spring-myapp
       app.kubernetes.io/component: driver
     hostAliases:
-      - ip: "192.168.1.115"
+      - ip: "192.168.1.18"
         hostnames:
-          - "bigdata01"
+          - "server01"
     serviceAccount: spark-operator-spark
   executor:
     cores: 2
@@ -52,12 +52,12 @@ spec:
         value: Asia/Shanghai      
     labels:
       version: 3.5.4
-      app.kubernetes.io/name: spark-standard-myapp
+      app.kubernetes.io/name: spark-spring-myapp
       app.kubernetes.io/component: executor
     hostAliases:
-      - ip: "192.168.1.115"
+      - ip: "192.168.1.18"
         hostnames:
-          - "bigdata01"
+          - "server01"
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:

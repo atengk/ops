@@ -139,14 +139,13 @@ sparkctl -n ateng-spark list
 **查看pod**
 
 ```sh
-kubectl get -n ateng-spark pods 
+kubectl get -n ateng-spark pods
 ```
 
 **查看日志**
 
 ```
 kubectl logs -n ateng-spark --tail=200 spark-pi-driver
-sparkctl -n ateng-spark log spark-pi
 ```
 
 **删除应用**

@@ -921,28 +921,40 @@ CREATE TABLE my_user_window_kafka_datagen (
 
 ```sql
 SELECT
-  age,
-  COUNT(name) AS cnt,
-  TUMBLE_START(event_time, INTERVAL '2' MINUTE) AS window_start,
-  TUMBLE_END(event_time, INTERVAL '2' MINUTE) AS window_end
-FROM my_user_window_kafka_datagen
-GROUP BY
-  age,
-  TUMBLE(event_time, INTERVAL '2' MINUTE);
+  window_start,
+  window_end,
+  window_time,
+  avg(score) as avg_score,
+  max(age) as age_max,
+  count(id) as id_count
+FROM TABLE(
+  TUMBLE(
+    TABLE my_user_window_kafka_datagen,
+    DESCRIPTOR(event_time),
+    INTERVAL '2' MINUTE
+  )
+)
+GROUP BY window_start, window_end, window_time;
 ```
 
 处理时间滚动窗口(2分钟)查询
 
 ```sql
 SELECT
-  age,
-  COUNT(name) AS cnt,
-  TUMBLE_START(PROCTIME(), INTERVAL '2' MINUTE) AS window_start,
-  TUMBLE_END(PROCTIME(), INTERVAL '2' MINUTE) AS window_end
-FROM my_user_window_kafka_datagen
-GROUP BY
-  age,
-  TUMBLE(PROCTIME(), INTERVAL '2' MINUTE);
+  window_start,
+  window_end,
+  window_time,
+  avg(score) as avg_score,
+  max(age) as age_max,
+  count(id) as id_count
+FROM TABLE(
+  TUMBLE(
+    TABLE my_user_window_kafka_datagen,
+    DESCRIPTOR(proc_time),
+    INTERVAL '2' MINUTE
+  )
+)
+GROUP BY window_start, window_end, window_time;
 ```
 
 
@@ -966,7 +978,7 @@ GROUP BY
 ```sql
 SET parallelism.default = 3;
 CREATE TABLE my_user_window_kafka (
-  eventTime TIMESTAMP(3) METADATA FROM 'timestamp' VIRTUAL,
+  my_timestamp TIMESTAMP(3) METADATA FROM 'timestamp' VIRTUAL,
   my_partition BIGINT METADATA FROM 'partition' VIRTUAL,
   my_offset BIGINT METADATA FROM 'offset' VIRTUAL,
   id BIGINT NOT NULL,
@@ -986,7 +998,7 @@ CREATE TABLE my_user_window_kafka (
   'properties.auto.commit.interval.ms' = '1000',
   'properties.partition.discovery.interval.ms' = '10000',
   -- 'earliest-offset', 'latest-offset', 'group-offsets', 'timestamp' and 'specific-offsets'
-  'scan.startup.mode' = 'group-offsets',
+  'scan.startup.mode' = 'latest-offset',
   'properties.bootstrap.servers' = '192.168.1.10:9094',
   'format' = 'json'
 );
@@ -1020,35 +1032,74 @@ FROM my_user_window_kafka_datagen;
 
 ```sql
 SELECT
-  age,
-  COUNT(name) AS cnt,
-  TUMBLE_START(createTime, INTERVAL '2' MINUTE) AS window_start,
-  TUMBLE_END(createTime, INTERVAL '2' MINUTE) AS window_end
-FROM my_user_window_kafka
-GROUP BY
-  age,
-  TUMBLE(createTime, INTERVAL '2' MINUTE);
+  window_start,
+  window_end,
+  window_time,
+  avg(score) as avg_score,
+  max(age) as age_max,
+  count(id) as id_count
+FROM TABLE(
+  TUMBLE(
+    TABLE my_user_window_kafka,
+    DESCRIPTOR(createTime),
+    INTERVAL '2' MINUTE
+  )
+)
+GROUP BY window_start, window_end, window_time;
 ```
 
 处理时间滚动窗口(2分钟)查询
 
 ```sql
 SELECT
-  age,
-  COUNT(name) AS cnt,
-  TUMBLE_START(PROCTIME(), INTERVAL '2' MINUTE) AS window_start,
-  TUMBLE_END(PROCTIME(), INTERVAL '2' MINUTE) AS window_end
-FROM my_user_window_kafka
-GROUP BY
-  age,
-  TUMBLE(PROCTIME(), INTERVAL '2' MINUTE);
+  window_start,
+  window_end,
+  window_time,
+  avg(score) as avg_score,
+  max(age) as age_max,
+  count(id) as id_count
+FROM TABLE(
+  TUMBLE(
+    TABLE my_user_window_kafka,
+    DESCRIPTOR(eventTime),
+    INTERVAL '2' MINUTE
+  )
+)
+GROUP BY window_start, window_end, window_time;
 ```
 
 
 
 ### Catalog
 
-#### 实时写入数据到Hive
+Catalog 提供了元数据信息，例如数据库、表、分区、视图以及数据库或其他外部系统中存储的函数和信息。
+
+数据处理最关键的方面之一是管理元数据。 元数据可以是临时的，例如临时表、或者通过 TableEnvironment 注册的 UDF。 元数据也可以是持久化的，例如 Hive Metastore 中的元数据。Catalog 提供了一个统一的API，用于管理元数据，并使其可以从 Table API 和 SQL 查询语句中来访问。
+
+参考：[官方文档](https://nightlies.apache.org/flink/flink-docs-release-1.19/zh/docs/dev/table/catalogs)
+
+#### Hive
+
+参考：[官方文档](https://nightlies.apache.org/flink/flink-docs-release-1.19/zh/docs/connectors/table/hive/overview/)
+
+下载依赖
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-sql-connector-hive-3.1.3_2.12/1.19.1/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar
+```
+
+拷贝依赖到lib下后再启动sql client，需要重启Flink服务
+
+```
+cp lib/flink-sql-connector-hive-3.1.3_2.12-1.19.1.jar $FLINK_HOME/lib/
+```
+
+启动SQL Client
+
+```
+$FLINK_HOME/bin/sql-client.sh
+SET sql-client.execution.result-mode=tableau;
+```
 
 创建
 
@@ -1149,7 +1200,7 @@ select count(*) from my_user_hive_flink;
 
 
 
-#### 实时写入数据到Hive（MinIO）
+#### Hive（MinIO）
 
 添加依赖和重启服务
 
@@ -1190,6 +1241,8 @@ use catalog hive_catalog;
 ```
 
 在hive中创建表
+
+> 参考：[Hive创建外部存储MinIO表](https://kongyu666.github.io/ops/#/work/bigdata/04-hive/OPS?id=%e5%a4%96%e9%83%a8%e8%a1%a8%ef%bc%88minio%ef%bc%89)
 
 ```
 $ beeline -u jdbc:hive2://bigdata01:10000 -n admin
@@ -1269,6 +1322,29 @@ select count(*) from my_user_hive_flink_minio;
 
 #### JDBC(MySQL)
 
+参考：[官方文档](https://nightlies.apache.org/flink/flink-docs-release-1.19/zh/docs/connectors/table/jdbc/#jdbc-catalog)
+
+下载依赖
+
+```
+wget -P lib https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/8.0.33/mysql-connector-j-8.0.33.jar
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-connector-jdbc/3.2.0-1.19/flink-connector-jdbc-3.2.0-1.19.jar
+```
+
+拷贝依赖到lib下后再启动sql clientt，需要重启Flink服务
+
+```
+cp lib/mysql-connector-j-8.0.33.jar $FLINK_HOME/lib/
+cp lib/flink-connector-jdbc-3.2.0-1.19.jar $FLINK_HOME/lib/
+```
+
+启动SQL Client
+
+```
+$FLINK_HOME/bin/sql-client.sh
+SET sql-client.execution.result-mode=tableau;
+```
+
 创建
 
 ```
@@ -1291,6 +1367,409 @@ show catalogs;
 
 ```
 use catalog mysql_catalog;
+```
+
+查看数据库
+
+```
+show databases;
+```
+
+查看表
+
+```
+use kongyu;
+show tables;
+```
+
+MySQL创建表
+
+```sql
+-- 创建表
+DROP TABLE IF EXISTS `my_user_flink_catalog`;
+CREATE TABLE IF NOT EXISTS `my_user_flink_catalog` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '自增ID' primary key,
+  `name` varchar(255) NOT NULL COMMENT '用户姓名',
+  `age` int COMMENT '用户年龄',
+  `score` double COMMENT '分数',
+  `birthday` datetime(3) COMMENT '用户生日',
+  `province` varchar(255) COMMENT '用户所在省份',
+  `city` varchar(255) COMMENT '用户所在城市',
+  `create_time` datetime(3) DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间',
+  KEY `idx_name` (`name`),
+  KEY `idx_province_city` (`province`, `city`),
+  KEY `idx_create_time` (`create_time`)
+) COMMENT='用户表';
+-- 插入数据
+insert into my_user_flink_catalog (name, age, score, birthday, province, city)
+values  ('阿腾', 25, 118.124, '1993-03-15 06:34:51.619', '重庆市', '重庆市'),
+        ('沈烨霖', 36, 8.124, '1993-03-15 06:34:51.619', '吉林省', '荣成'),
+        ('宋文博', 28, 26.38, '1986-05-17 21:06:30.511', '广西省', '阳江'),
+        ('萧伟宸', 1, 9.699, '1991-04-02 18:21:24.825', '福建省', '厦门');
+```
+
+查看数据
+
+```
+select * from my_user_flink_catalog limit 10;
+```
+
+数据生成
+
+```
+CREATE TABLE default_catalog.default_database.my_user (
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP(3),
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP_LTZ(3)
+) WITH (
+  'connector' = 'datagen',
+  'rows-per-second' = '100',
+  'fields.id.min' = '1',
+  'fields.id.max' = '100000',
+  'fields.name.length' = '10',
+  'fields.age.min' = '18',
+  'fields.age.max' = '60',
+  'fields.score.min' = '0',
+  'fields.score.max' = '100',
+  'fields.province.length' = '5',
+  'fields.city.length' = '5'
+);
+```
+
+写入数据
+
+```
+set execution.checkpointing.interval=120s;
+insert into my_user_flink_catalog
+select
+  id,
+  name,
+  age,
+  score,
+  birthday,
+  province,
+  city,
+  create_time
+from
+default_catalog.default_database.my_user;
+```
+
+
+
+#### JDBC(PostgreSQL)
+
+参考：[官方文档](https://nightlies.apache.org/flink/flink-docs-release-1.19/zh/docs/connectors/table/jdbc/#jdbc-catalog)
+
+下载依赖
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar
+wget -P lib https://repo1.maven.org/maven2/org/apache/flink/flink-connector-jdbc/3.2.0-1.19/flink-connector-jdbc-3.2.0-1.19.jar
+```
+
+拷贝依赖到lib下后再启动sql clientt，需要重启Flink服务
+
+```
+cp lib/postgresql-42.7.1.jar $FLINK_HOME/lib/
+cp lib/flink-connector-jdbc-3.2.0-1.19.jar $FLINK_HOME/lib/
+```
+
+启动SQL Client
+
+```
+$FLINK_HOME/bin/sql-client.sh
+SET sql-client.execution.result-mode=tableau;
+```
+
+创建
+
+```
+CREATE CATALOG postgresql_catalog WITH (
+    'type' = 'jdbc',
+    'base-url' = 'jdbc:postgresql://192.168.1.10:32297',
+    'username' = 'postgres',
+    'password' = 'Lingo@local_postgresql_5432',
+    'default-database' = 'kongyu_flink'
+);
+```
+
+查看
+
+```
+show catalogs;
+```
+
+切换postgresql_catalog
+
+```
+use catalog postgresql_catalog;
+```
+
+查看数据库
+
+```
+show databases;
+```
+
+查看表
+
+> 实际的TableName前面有一个Schema
+
+```
+Flink SQL> use kongyu_flink;
+[INFO] Execute statement succeed.
+
+Flink SQL> show tables;
++---------------------------+
+|                table name |
++---------------------------+
+|             ateng.my_user |
+|            public.my_user |
+| public.my_user_postgresql |
++---------------------------+
+3 rows in set
+```
+
+PostgreSQL创建表
+
+```sql
+-- 创建表
+CREATE TABLE my_user_flink_catalog (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) DEFAULT NULL,
+  age INT DEFAULT NULL,
+  score DOUBLE PRECISION DEFAULT NULL,
+  birthday TIMESTAMP(3) DEFAULT NULL,
+  province VARCHAR(255) DEFAULT NULL,
+  city VARCHAR(255) DEFAULT NULL,
+  create_time TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)
+); 
+-- 表级注释
+COMMENT ON TABLE my_user_postgresql IS '用户表';
+-- 列级注释
+COMMENT ON COLUMN my_user_postgresql.id IS '自增ID';
+COMMENT ON COLUMN my_user_postgresql.name IS '用户姓名';
+COMMENT ON COLUMN my_user_postgresql.age IS '用户年龄';
+COMMENT ON COLUMN my_user_postgresql.score IS '分数';
+COMMENT ON COLUMN my_user_postgresql.birthday IS '用户生日';
+COMMENT ON COLUMN my_user_postgresql.province IS '用户所在省份';
+COMMENT ON COLUMN my_user_postgresql.city IS '用户所在城市';
+COMMENT ON COLUMN my_user_postgresql.create_time IS '创建时间';
+-- 插入数据
+insert into my_user_flink_catalog (name, age, score, birthday, province, city)
+values  ('阿腾', 25, 118.124, '1993-03-15 06:34:51.619', '重庆市', '重庆市'),
+        ('沈烨霖', 36, 8.124, '1993-03-15 06:34:51.619', '吉林省', '荣成'),
+        ('宋文博', 28, 26.38, '1986-05-17 21:06:30.511', '广西省', '阳江'),
+        ('萧伟宸', 1, 9.699, '1991-04-02 18:21:24.825', '福建省', '厦门');
+```
+
+查看数据
+
+```
+select * from `public.my_user_postgresql` limit 10;
+```
+
+数据生成
+
+```
+CREATE TABLE default_catalog.default_database.my_user (
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP(3),
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP_LTZ(3)
+) WITH (
+  'connector' = 'datagen',
+  'rows-per-second' = '100',
+  'fields.id.min' = '1',
+  'fields.id.max' = '100000',
+  'fields.name.length' = '10',
+  'fields.age.min' = '18',
+  'fields.age.max' = '60',
+  'fields.score.min' = '0',
+  'fields.score.max' = '100',
+  'fields.province.length' = '5',
+  'fields.city.length' = '5'
+);
+```
+
+写入数据
+
+```
+set execution.checkpointing.interval=120s;
+insert into my_user_flink_catalog
+select
+  id,
+  name,
+  age,
+  score,
+  birthday,
+  province,
+  city,
+  create_time
+from
+default_catalog.default_database.my_user;
+```
+
+#### Iceberg
+
+参考：[使用Iceberg文档](https://kongyu666.github.io/ops/#/work/bigdata/06-iceberg/?id=spark)
+
+**下载依赖包**
+
+iceberg-flink-runtime，用于flink集成iceberg
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-flink-runtime-1.19/1.6.1/iceberg-flink-runtime-1.19-1.6.1.jar
+```
+
+iceberg-aws-bundle，用于spark集成iceberg后数据写入s3（MinIO）中
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/1.6.1/iceberg-aws-bundle-1.6.1.jar
+```
+
+postgresql，用于连接数据库的JDBC驱动
+
+```
+wget -P lib https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar
+```
+
+**拷贝依赖**
+
+```
+cp lib/{iceberg-flink-runtime-1.19-1.6.1.jar,iceberg-aws-bundle-1.6.1.jar,postgresql-42.7.1.jar} $FLINK_HOME/lib
+```
+
+**配置MinIO环境变量**
+
+使用sql-client需要加载MinIO配置的环境变量到当前终端
+
+```
+cat >> /data/service/flink/config/env.conf <<EOF
+## MinIO Config
+AWS_ACCESS_KEY_ID=admin
+AWS_SECRET_ACCESS_KEY=Lingo@local_minio_9000
+AWS_REGION=us-east-1
+EOF
+export AWS_ACCESS_KEY_ID=admin
+export AWS_SECRET_ACCESS_KEY=Lingo@local_minio_9000
+export AWS_REGION=us-east-1
+```
+
+**重启服务**
+
+```
+sudo systemctl restart flink-historyserver.service flink-jobmanager.service flink-taskmanager.service
+```
+
+**创建Catalog**
+
+启动SQL Client
+
+```
+$FLINK_HOME/bin/sql-client.sh
+SET sql-client.execution.result-mode=tableau;
+```
+
+创建Catalog
+
+```
+CREATE CATALOG iceberg_catalog
+WITH (
+    'type'='iceberg',
+    'catalog-impl'='org.apache.iceberg.jdbc.JdbcCatalog',
+    'io-impl'='org.apache.iceberg.aws.s3.S3FileIO',
+    'uri'='jdbc:postgresql://192.168.1.10:32297/iceberg?user=postgres&password=Lingo@local_postgresql_5432',
+    'warehouse'='s3://iceberg-bucket/warehouse',
+    's3.endpoint'='http://192.168.1.13:9000'
+);
+```
+
+查看并切换
+
+```
+show catalogs;
+use catalog iceberg_catalog;
+```
+
+创建数据库
+
+```
+create database flink;
+use flink;
+```
+
+**创建数据源表**
+
+```
+CREATE TABLE default_catalog.default_database.my_user (
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP,
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP
+) WITH (
+  'connector' = 'datagen',
+  'rows-per-second' = '100',
+  'fields.id.min' = '1',
+  'fields.id.max' = '100000',
+  'fields.name.length' = '10',
+  'fields.age.min' = '18',
+  'fields.age.max' = '60',
+  'fields.score.min' = '0',
+  'fields.score.max' = '100',
+  'fields.province.length' = '5',
+  'fields.city.length' = '5'
+);
+```
+
+**创建表**
+
+```
+CREATE TABLE IF NOT EXISTS my_user (
+  id BIGINT NOT NULL,
+  name STRING,
+  age INT,
+  score DOUBLE,
+  birthday TIMESTAMP(3),
+  province STRING,
+  city STRING,
+  create_time TIMESTAMP_LTZ(3)
+) WITH (
+  'write.format.default' = 'parquet'
+);
+```
+
+**查看表**
+
+```
+SHOW CREATE TABLE my_user;
+```
+
+**插入数据**
+
+```
+set execution.checkpointing.interval=120s;
+insert into my_user select * from default_catalog.default_database.my_user;
+```
+
+**查看数据**
+
+```
+SELECT * FROM my_user;
+SELECT count(*) FROM my_user;
 ```
 
 
