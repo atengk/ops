@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticvue
+  labels:
+    app: elasticvue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticvue
+  template:
+    metadata:
+      labels:
+        app: elasticvue
+    spec:
+      containers:
+      - name: elasticvue
+        image: registry.lingo.local/service/elasticvue:1.4.0
+        ports:
+        - name: tcp-8080
+          containerPort: 8080
+          protocol: TCP
+        env:
+          - name: TZ
+            value: Asia/Shanghai
+        volumeMounts:
+        - name: host-time
+          mountPath: /etc/localtime
+      volumes:
+      - name: host-time
+        hostPath:
+          path: /etc/localtime
+          type: ''
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticvue
+  labels:
+    app: elasticvue
+spec:
+  ports:
+    - name: http-8080
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: elasticvue
+  type: NodePort

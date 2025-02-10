@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch-head
+  labels:
+    app: elasticsearch-head
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch-head
+  template:
+    metadata:
+      labels:
+        app: elasticsearch-head
+    spec:
+      containers:
+      - name: elasticsearch-head
+        image: registry.lingo.local/service/elasticsearch-head:kongyu
+        ports:
+        - name: tcp-9100
+          containerPort: 9100
+          protocol: TCP
+        env:
+          - name: TZ
+            value: Asia/Shanghai
+        volumeMounts:
+        - name: host-time
+          mountPath: /etc/localtime
+      volumes:
+      - name: host-time
+        hostPath:
+          path: /etc/localtime
+          type: ''
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch-head
+  labels:
+    app: elasticsearch-head
+spec:
+  ports:
+    - name: http-9100
+      protocol: TCP
+      port: 9100
+      targetPort: 9100
+  selector:
+    app: elasticsearch-head
+  type: NodePort
