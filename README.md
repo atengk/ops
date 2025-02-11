@@ -8,6 +8,11 @@
 
 欢迎来到阿腾的运维知识库网站！
 
+## 参考
+
+- [开发知识库网站](https://kongyu666.github.io/dev/)
+- [运维知识库网站](https://kongyu666.github.io/ops/)
+
 ## 目录
 
 - Linux Service
@@ -216,7 +221,7 @@
             - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
             - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
             - [Jenkins](/work/kubernetes/service/jenkins/v2.479.1/baseic/)
-            - [Snail-Job](/work/kubernetes/service/snail-job/v1.2.0/)
+            - [Snail-Job](/work/kubernetes/service/snail-job/v1.3.0/)
             - [PowerJob](/work/kubernetes/service/powerjob/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
             - [Nacos](/work/kubernetes/service/nacos/v2.4.0/)
