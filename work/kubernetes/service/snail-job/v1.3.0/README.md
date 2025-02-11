@@ -31,7 +31,8 @@ curl -o snail_job_postgre.sql https://gitee.com/aizuda/snail-job/raw/vsj1.3.0/do
 
 修改deploy.yaml配置文件
 
-- 数据库配置：修改环境变量PARAMS为实际的数据库信息
+- 配置文件修改：ConfigMap中的application-prod.yml根据实际需求修改
+- 资源配置：Deployment中的resources和args中的相关参数
 
 
 - 其他：其他配置按照具体环境修改
@@ -73,7 +74,7 @@ Password: admin
 
 进入后输入初始的账号密码，然后再修改
 
-![image-20241119112716727](./assets/image-20241119112716727.png)
+![image-20250211162831062](./assets/image-20250211162831062.png)
 
 ![image-20241119112800806](./assets/image-20241119112800806.png)
 
