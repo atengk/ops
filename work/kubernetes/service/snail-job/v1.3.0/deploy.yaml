@@ -34,7 +34,7 @@ data:
         max-count: 288
         trigger-interval: 900
       retry-max-pull-count: 10
-      rpc-type: netty
+      rpc-type: grpc
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -75,7 +75,7 @@ spec:
         ports:
         - name: http
           containerPort: 8080
-        - name: netty
+        - name: grpc
           containerPort: 17888
         env:
         - name: TZ
@@ -142,7 +142,7 @@ spec:
       port: 8080
       targetPort: 8080
       nodePort: 32681
-    - name: netty
+    - name: grpc
       protocol: TCP
       port: 17888
       targetPort: 17888
