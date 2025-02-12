@@ -1,0 +1,141 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: powerjob-server-config
+  labels:
+    app: powerjob-server
+data:
+  application.yml: |
+    spring:
+      datasource:
+        core:
+          # MySQL 驱动类名
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          # MySQL JDBC 连接 URL
+          jdbc-url: jdbc:mysql://192.168.1.10:35725/powerjob_server_demo?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&rewriteBatchedStatements=true
+          # MySQL 用户名
+          username: root
+          # MySQL 密码
+          password: Admin@123
+          # 连接池配置
+          maximum-pool-size: 20
+          minimum-idle: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: powerjob-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: powerjob-server
+  template:
+    metadata:
+      labels:
+        app: powerjob-server
+    spec:
+      containers:
+      - name: powerjob-server
+        image: registry.lingo.local/service/powerjob-server:v5.1.1
+        imagePullPolicy: IfNotPresent
+        command:
+          - java
+        args:
+          - -server
+          - -Xms512m
+          - -Xmx2048m
+          - -Dpowerjob.network.external.address=192.168.1.10
+          - -Dpowerjob.network.external.port.http=32123
+          - -Dpowerjob.network.external.port.akka=32122
+          - -jar
+          - /powerjob-server.jar
+          - --spring.profiles.active=product
+          - --spring.config.additional-location=file:/opt/application.yml
+        resources:
+          limits:
+            cpu: '2'
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        ports:
+        - name: http-server
+          containerPort: 7700
+        - name: akka
+          containerPort: 10086
+        - name: http-client
+          containerPort: 10010
+        env:
+        - name: TZ
+          value: "Asia/Shanghai"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/application.yml
+          subPath: application.yml
+        livenessProbe:
+          tcpSocket:
+            port: 10086
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 10086
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: config-volume
+        configMap:
+          name: powerjob-server-config
+      terminationGracePeriodSeconds: 60
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: powerjob-server
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/powerjob-server
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: powerjob-server
+  labels:
+    app: powerjob-server
+spec:
+  selector:
+    app: powerjob-server
+  ports:
+    - name: http-server
+      protocol: TCP
+      port: 7700
+      targetPort: 7700
+      nodePort: 32121
+    - name: tcp-akka
+      protocol: TCP
+      port: 10086
+      targetPort: 10086
+      nodePort: 32122
+    - name: http-client
+      protocol: TCP
+      port: 10010
+      targetPort: 10010
+      nodePort: 32123
+  type: NodePort

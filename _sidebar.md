@@ -205,7 +205,7 @@
             - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
             - [Jenkins](/work/kubernetes/service/jenkins/v2.479.1/baseic/)
             - [Snail-Job](/work/kubernetes/service/snail-job/v1.3.0/)
-            - [PowerJob](/work/kubernetes/service/powerjob/)
+            - [PowerJob](/work/kubernetes/service/powerjob/v5.1.1/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
             - [Nacos](/work/kubernetes/service/nacos/v2.4.0/)
             - [Seata](/work/kubernetes/service/seata/v2.0.0/)
