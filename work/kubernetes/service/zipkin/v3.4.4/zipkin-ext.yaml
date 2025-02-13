@@ -1,0 +1,358 @@
+---
+# Source: zipkin/templates/networkpolicy.yaml
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: zipkin
+  namespace: "kongyu"
+  labels:
+    app.kubernetes.io/instance: zipkin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/version: 3.4.4
+    helm.sh/chart: zipkin-1.1.3
+    app.kubernetes.io/component: zipkin
+    app.kubernetes.io/part-of: zipkin
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: zipkin
+      app.kubernetes.io/name: zipkin
+      app.kubernetes.io/component: zipkin
+      app.kubernetes.io/part-of: zipkin
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+    - {}
+  ingress:
+    - ports:
+        - port: 9411
+---
+# Source: zipkin/templates/pdb.yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: zipkin
+  namespace: "kongyu"
+  labels:
+    app.kubernetes.io/instance: zipkin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/version: 3.4.4
+    helm.sh/chart: zipkin-1.1.3
+    app.kubernetes.io/component: zipkin
+    app.kubernetes.io/part-of: zipkin
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: zipkin
+      app.kubernetes.io/name: zipkin
+      app.kubernetes.io/component: zipkin
+      app.kubernetes.io/part-of: zipkin
+---
+# Source: zipkin/templates/service-account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: zipkin
+  namespace: "kongyu"
+  labels:
+    app.kubernetes.io/instance: zipkin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/version: 3.4.4
+    helm.sh/chart: zipkin-1.1.3
+    app.kubernetes.io/component: zipkin
+    app.kubernetes.io/part-of: zipkin
+automountServiceAccountToken: false
+---
+# Source: zipkin/templates/externaldb-secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zipkin-externaldb
+  namespace: "kongyu"
+  labels:
+    app.kubernetes.io/instance: zipkin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/version: 3.4.4
+    helm.sh/chart: zipkin-1.1.3
+    app.kubernetes.io/component: zipkin
+    app.kubernetes.io/part-of: zipkin
+type: Opaque
+data:
+  db-password: "QWRtaW5AMTIz"
+---
+# Source: zipkin/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zipkin-tls-pass
+  namespace: "kongyu"
+  labels:
+    app.kubernetes.io/instance: zipkin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/version: 3.4.4
+    helm.sh/chart: zipkin-1.1.3
+    app.kubernetes.io/component: zipkin
+    app.kubernetes.io/part-of: zipkin
+type: Opaque
+data:
+  keystore-password: "OWlSendXT2V2Yg=="
+---
+# Source: zipkin/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zipkin
+  namespace: "kongyu"
+  labels:
+    app.kubernetes.io/instance: zipkin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/version: 3.4.4
+    helm.sh/chart: zipkin-1.1.3
+    app.kubernetes.io/component: zipkin
+    app.kubernetes.io/part-of: zipkin
+data:
+  Error: 'error converting YAML to JSON: yaml: line 5: did not find expected key'
+---
+# Source: zipkin/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin
+  namespace: "kongyu"
+  labels:
+    app.kubernetes.io/instance: zipkin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/version: 3.4.4
+    helm.sh/chart: zipkin-1.1.3
+    app.kubernetes.io/component: zipkin
+    app.kubernetes.io/part-of: zipkin
+spec:
+  type: NodePort
+  sessionAffinity: None
+  externalTrafficPolicy: "Cluster"
+  ports:
+    - name: http
+      port: 9411
+      targetPort: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/instance: zipkin
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/component: zipkin
+    app.kubernetes.io/part-of: zipkin
+---
+# Source: zipkin/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zipkin
+  namespace: "kongyu"
+  labels:
+    app.kubernetes.io/instance: zipkin
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: zipkin
+    app.kubernetes.io/version: 3.4.4
+    helm.sh/chart: zipkin-1.1.3
+    app.kubernetes.io/component: zipkin
+    app.kubernetes.io/part-of: zipkin
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: zipkin
+      app.kubernetes.io/name: zipkin
+      app.kubernetes.io/component: zipkin
+      app.kubernetes.io/part-of: zipkin
+  template:
+    metadata:
+      annotations:
+        checksum/config: cd386a3d008201daec5b415ea192935a59892f3feb7e9e30556d8e5f1e018471
+      labels:
+        app.kubernetes.io/instance: zipkin
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: zipkin
+        app.kubernetes.io/version: 3.4.4
+        helm.sh/chart: zipkin-1.1.3
+        app.kubernetes.io/component: zipkin
+        app.kubernetes.io/part-of: zipkin
+    spec:
+      serviceAccountName: zipkin
+      
+      automountServiceAccountToken: false
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: zipkin
+                    app.kubernetes.io/name: zipkin
+                    app.kubernetes.io/component: zipkin
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/zipkin
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: Always
+        supplementalGroups: []
+        sysctls: []
+      initContainers:
+        - name: wait-for-cassandra
+          image: registry.lingo.local/bitnami/cassandra:5.0.3
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          command:
+            - bash
+          args:
+            - -ec
+            - |
+        
+              set -o errexit
+              set -o nounset
+              set -o pipefail
+        
+              . /opt/bitnami/scripts/libos.sh
+        
+              check_cassandra_keyspace_schema() {
+                  echo "SELECT 1" | cqlsh -u $CASSANDRA_USERNAME -p $CASSANDRA_PASSWORD -e "SELECT keyspace_name FROM system_schema.keyspaces WHERE keyspace_name='${CASSANDRA_KEYSPACE}';"
+              }
+        
+              info "Connecting to the Cassandra instance $CQLSH_HOST:$CQLSH_PORT"
+              if ! retry_while "check_cassandra_keyspace_schema" 12 30; then
+                  error "Could not connect to the database server"
+                  exit 1
+              else
+                  info "Connection check success"
+              fi
+          env:
+            - name: CQLSH_HOST
+              value: "cassandra"
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: CQLSH_PORT
+              value: "9042"
+            - name: CASSANDRA_USERNAME
+              value: "cassandra"
+            - name: CASSANDRA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zipkin-externaldb
+                  key: db-password
+            - name: CASSANDRA_KEYSPACE
+              value: cassandra
+      containers:
+        - name: zipkin
+          image: registry.lingo.local/bitnami/zipkin:3.4.4
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsGroup: 1001
+            runAsNonRoot: true
+            runAsUser: 1001
+            seLinuxOptions: {}
+            seccompProfile:
+              type: RuntimeDefault
+          command:
+            - /bin/bash
+          args:
+            - -ec
+            - |
+              # We need to load all the secret env vars to the system
+              for file in $(find /bitnami/zipkin/secrets -type f); do
+                  env_var_name="$(basename $file)"
+                  echo "Exporting $env_var_name"
+                  export $env_var_name="$(< $file)"
+              done
+              exec start-zipkin
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: TZ
+              value: Asia/Shanghai
+          envFrom:
+            - configMapRef:
+                name: zipkin
+          ports:
+            - name: http
+              containerPort: 9411
+          livenessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            httpGet:
+              path: /info
+              port: http
+              scheme: HTTP
+          readinessProbe:
+            failureThreshold: 5
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+          volumeMounts:
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+            - name: keystore-password
+              mountPath: /bitnami/zipkin/secrets/keystore-password
+            - name: database-password
+              mountPath: /bitnami/zipkin/secrets/database
+      volumes:
+        - name: empty-dir
+          emptyDir: {}
+        - name: database-password
+          secret:
+            secretName: zipkin-externaldb
+            items:
+              - key: db-password
+                path: CASSANDRA_PASSWORD
+        - name: keystore-password
+          secret:
+            secretName: zipkin-tls-pass
+            items:
+              - key: keystore-password
+                path: ARMERIA_SSL_KEY_STORE_PASSWORD

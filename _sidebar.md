@@ -106,9 +106,16 @@
         - [kubesphere4](/work/kubernetes/deploy/kubesphere/v4.1.2/)
         - [kubeadm](/work/kubernetes/deploy/kubeadm/v1.23.12/)
         - [kubevirt](/work/kubernetes/deploy/kubevirt/deploy/v1.3.0/)
+        - [helm](/work/kubernetes/deploy/helm/)
     - 镜像仓库
         - [Harbor](/work/kubernetes/deploy/harbor/v2.12.0/)
         - [Registry](/work/kubernetes/deploy/harbor/registry/)
+    - 网络服务
+        - [Calico](/work/kubernetes/deploy/network/calico/)
+        - [Flannel](/work/kubernetes/deploy/network/flannel/)
+        - [Cilium](/work/kubernetes/deploy/network/cilium/)
+        - [插件](/work/kubernetes/deploy/network/plugins/)
+        - [卸载网络](/work/kubernetes/deploy/network/uninstall.md)
     - 存储服务
         - openebs
             - [localpv](/work/kubernetes/deploy/storage/openebs/localpv-provisioner/v4.1.0/)
@@ -148,9 +155,9 @@
                 - [配置metrics](/work/kubernetes/service/mysql/v8.4.3/metrics/)
             - Doris
                 - [集群模式2](/work/kubernetes/service/doris/v2.1.7/)
-                - [集群模式3l](/work/kubernetes/service/doris/v3.0.3/)
+                - [集群模式3](/work/kubernetes/service/doris/v3.0.3/)
             - Clickhouse
-                - [集群模式](/work/kubernetes/service/clickhouse/v23.12.2/)
+                - [集群模式](/work/kubernetes/service/clickhouse/v25.1.3/)
             - ElasticSearch7
                 - [单机模式](/work/kubernetes/service/elasticsearch/v7.17.26/all-in-one/)
                 - [认证模式](/work/kubernetes/service/elasticsearch/v7.17.26/auth/)
@@ -180,6 +187,8 @@
                 - [HTTPS模式](/work/kubernetes/service/etcd/v3.5.17/https/)
             - FoundationDB
                 - [安装文档](/work/kubernetes/service/foundationdb/v7.1.38/)
+            - Cassandra
+                - [安装文档](/work/kubernetes/service/cassandra/v5.0.3/)
         - 消息队列
             - RabbitMQ
                 - [集群模式](/work/kubernetes/service/rabbitmq/v4.0.2/)
@@ -213,6 +222,8 @@
             - [SkyWalking](/work/kubernetes/service/springboot-admin/v3.3.0/)
             - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
             - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
+            - [Zipkin](/work/kubernetes/service/zipkin/v3.4.4/)
+            - [Jaeger](/work/kubernetes/service/jaeger/v2.3.0/)
         - 大数据
             - [Zookeeper](/work/kubernetes/service/zookeeper/v3.9.3/)
             - [Flink](/work/kubernetes/service/flink/v1.19.1/)

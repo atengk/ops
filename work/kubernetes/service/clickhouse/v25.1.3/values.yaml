@@ -1,0 +1,131 @@
+global:
+  defaultStorageClass: ""
+  security:
+    allowInsecureImages: true
+fullnameOverride: "clickhouse"
+image:
+  registry: registry.lingo.local
+  repository: bitnami/clickhouse
+  tag: "25.1.3"
+  pullPolicy: IfNotPresent
+  debug: false
+clusterName: default
+shards: 2
+replicaCount: 3
+distributeReplicasByZone: false
+auth:
+  username: admin
+  password: "Admin@123"
+keeper:
+  enabled: false
+extraEnvVars:
+  - name: TZ
+    value: "Asia/Shanghai"
+resourcesPreset: "none"
+resources: {}
+affinity: {}
+nodeSelector: {}
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: "1Gi"
+#   requests:
+#     cpu: "500m"
+#     memory: "512Mi"
+# ## Allowed values: `soft` or `hard`
+# #podAffinityPreset: "soft"  ## 调度到同一节点
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/clickhouse="true"
+  type: "soft"
+  key: "kubernetes.service/clickhouse"
+  values:
+    - "true"
+service:
+  type: NodePort
+  ports:
+    http: 8123
+    https: 443
+    tcp: 9000
+    tcpSecure: 9440
+    keeper: 2181
+    keeperSecure: 3181
+    keeperInter: 9444
+    mysql: 9004
+    postgresql: 9005
+    interserver: 9009
+    metrics: 8001
+  nodePorts:
+    http: ""
+    https: ""
+    tcp: ""
+    tcpSecure: ""
+    keeper: ""
+    keeperSecure: ""
+    keeperInter: ""
+    mysql: ""
+    postgresql: ""
+    interserver: ""
+    metrics: ""
+externalAccess:
+  enabled: true
+  service:
+    type: NodePort
+    ports:
+      http: 80
+      https: 443
+      tcp: 9000
+      tcpSecure: 9440
+      keeper: 2181
+      keeperSecure: 3181
+      keeperInter: 9444
+      mysql: 9004
+      postgresql: 9005
+      interserver: 9009
+      metrics: 8001
+    nodePorts:
+      http: []
+      https: []
+      tcp: []
+      tcpSecure: []
+      keeper: []
+      keeperSecure: []
+      keeperInter: []
+      mysql: []
+      postgresql: []
+      interserver: []
+      metrics: []
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 100Gi
+metrics:
+  enabled: false
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "{{ .Values.containerPorts.metrics }}"
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    annotations: {}
+    labels: {}
+    jobLabel: ""
+    honorLabels: false
+    interval: ""
+    scrapeTimeout: ""
+    metricRelabelings: []
+    relabelings: []
+    selector: {}
+  prometheusRule:
+    enabled: false
+    namespace: ""
+    additionalLabels: {}
+    rules: []
+externalZookeeper:
+  servers:
+    - zookeeper-0.zookeeper-headless
+    - zookeeper-1.zookeeper-headless
+    - zookeeper-2.zookeeper-headless
+  port: 2888
+zookeeper:
+  enabled: false

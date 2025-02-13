@@ -1,0 +1,3 @@
+bitnami/cassandra:5.0.2
+bitnami/cassandra-exporter:2.3.8
+bitnami/os-shell:12

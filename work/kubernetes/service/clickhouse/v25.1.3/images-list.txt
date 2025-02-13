@@ -1,0 +1,2 @@
+bitnami/os-shell:12
+bitnami/clickhouse:25.1.3

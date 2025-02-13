@@ -1,0 +1,2 @@
+bitnami/cassandra:5.0.3
+bitnami/zipkin:3.4.4

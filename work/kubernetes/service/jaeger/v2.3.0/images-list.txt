@@ -1,0 +1,2 @@
+bitnami/jaeger:2.3.0
+bitnami/cassandra:5.0.3
