@@ -1,0 +1,112 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: dm8
+  labels:
+    app: dm8
+spec:
+  replicas: 1
+  serviceName: dm8-headless
+  selector:
+    matchLabels:
+      app: dm8
+  template:
+    metadata:
+      labels:
+        app: dm8
+    spec:
+      #nodeSelector:
+      #  kubernetes.io/hostname: server02.lingo.local
+      containers:
+        - name: dm8
+          image: registry.lingo.local/service/dm8:v20241230
+          ports:
+            - name: tcp-5236
+              containerPort: 5236
+              protocol: TCP
+          env:
+            - name: DMINIT_OPTS
+              value: "path=/data PAGE_SIZE=32 EXTENT_SIZE=32 CASE_SENSITIVE=n UNICODE_FLAG=0 DB_NAME=dmdb INSTANCE_NAME=dmserver PORT_NUM=5236 LOG_SIZE=256 BUFFER=1000 SYSDBA_PWD=Admin@123 SYSAUDITOR_PWD=Admin@123"
+          resources:
+            limits:
+              cpu: '4'
+              memory: 8Gi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          livenessProbe:
+            tcpSocket:
+              port: 5236
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 5236
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          imagePullPolicy: IfNotPresent
+      terminationGracePeriodSeconds: 60
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/dm8
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+  volumeClaimTemplates:
+    - kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: openebs-hostpath
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dm8-headless
+  labels:
+    app: dm8
+spec:
+  ports:
+    - name: tcp-5236
+      protocol: TCP
+      port: 5236
+      targetPort: 5236
+  selector:
+    app: dm8
+  clusterIP: None
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: dm8
+  labels:
+    app: dm8
+spec:
+  ports:
+    - name: tcp-5236
+      protocol: TCP
+      port: 5236
+      targetPort: 5236
+  selector:
+    app: dm8
+  type: NodePort
