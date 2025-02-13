@@ -97,6 +97,7 @@
         - [elastic-view](/work/docker/service/elastic-view/)
         - [jenkins](/work/docker/service/jenkins/)
         - [jumpserver](/work/docker/service/jumpserver/)
+        - [达梦数据库](/work/docker/service/dm8/v20241230/)
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
@@ -189,6 +190,8 @@
                 - [安装文档](/work/kubernetes/service/foundationdb/v7.1.38/)
             - Cassandra
                 - [安装文档](/work/kubernetes/service/cassandra/v5.0.3/)
+            - 达梦数据库
+                - [安装文档](/work/kubernetes/service/dm8/v20241230/)
         - 消息队列
             - RabbitMQ
                 - [集群模式](/work/kubernetes/service/rabbitmq/v4.0.2/)
