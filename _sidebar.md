@@ -78,6 +78,7 @@
     - Dockerfile
         - [jdk21](/work/docker/dockerfile/java/debian/jdk21/)
         - [springboot app](/work/docker/dockerfile/java/debian/application/jdk21/)
+        - [springboot app auto](/work/docker/dockerfile/java/debian/application/jdk8-auto/)
     - 服务安装文档
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)
@@ -98,6 +99,7 @@
         - [jenkins](/work/docker/service/jenkins/)
         - [jumpserver](/work/docker/service/jumpserver/)
         - [达梦数据库](/work/docker/service/dm8/v20241230/)
+        - [SpringBoot2应用](/work/docker/service/java/springboot2/)
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
