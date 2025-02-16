@@ -1,0 +1,2 @@
+bitnami/os-shell:12
+bitnami/logstash:8.16.1

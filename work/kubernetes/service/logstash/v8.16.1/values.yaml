@@ -1,0 +1,76 @@
+global:
+  defaultStorageClass: ""
+  security:
+    allowInsecureImages: true
+fullnameOverride: "logstash"
+image:
+  registry: registry.lingo.local
+  repository: bitnami/logstash
+  tag: "8.16.1"
+  pullPolicy: IfNotPresent
+  debug: false
+extraEnvVars:
+  - name: TZ
+    value: Asia/Shanghai
+input: |-
+  http { port => 8080 }
+  tcp {
+      port => 5000
+      codec => json_lines {
+          target => "data"
+      }
+  }
+extraInput: ""
+filter: ""
+output: |-
+  # 控制台打印
+  stdout {}
+  # 输出到Elasticsearch，使用身份验证
+  elasticsearch {
+    hosts => ["http://elasticsearch.lingo-service-dev:9200"]
+    user => "elastic"
+    password => "Admin@123"
+    index => "logstash-logs-%{+YYYY.MM.dd}"  # 按日期创建索引
+  }
+existingConfiguration: ""
+replicaCount: 1
+resourcesPreset: "none"
+resources: {}
+affinity: {}
+nodeSelector: {}
+# resources:
+#   limits:
+#     cpu: "1"
+#     memory: "1Gi"
+#   requests:
+#     cpu: "500m"
+#     memory: "512Mi"
+# ## Allowed values: `soft` or `hard`
+# #podAffinityPreset: "soft"  ## 调度到同一节点
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/logstash="true"
+  type: "soft"
+  key: "kubernetes.service/logstash"
+  values:
+    - "true"
+extraContainerPorts:
+  - name: tcp-5000
+    containerPort: 5000
+    protocol: TCP
+service:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+      protocol: TCP
+  extraPorts:
+    - name: tcp-5000
+      port: 5000
+      targetPort: tcp-5000
+      protocol: TCP
+networkPolicy:
+  enabled: false
+persistence:
+  enabled: false
+  size: 2Gi
