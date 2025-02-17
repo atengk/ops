@@ -1,8 +1,9 @@
 - Linux Service
-    - 服务器配置
+    - 服务器管理
         - [基础配置](/work/service/00-basic/)
         - [网络配置](/work/service/network/)
         - [升级OpenSSH](/work/service/openssh/v9.9/)
+        - [系统性能监控](/work/linux/metrics/)
     - 存储服务
         - [网络文件共享 NFS](work/service/nfs/)
         - [网络文件共享 Samba](work/service/samba/)
@@ -224,7 +225,7 @@
             - [Nacos](/work/kubernetes/service/nacos/v2.4.0/)
             - [Seata](/work/kubernetes/service/seata/v2.0.0/)
             - [Sentinel](/work/kubernetes/service/sentinel/)
-            - [SkyWalking](/work/kubernetes/service/springboot-admin/v3.3.0/)
+            - [SkyWalking](/work/kubernetes/service/skywalking/v10.1.0/)
             - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
             - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
             - [Zipkin](/work/kubernetes/service/zipkin/v3.4.4/)

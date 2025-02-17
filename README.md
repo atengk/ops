@@ -8,18 +8,23 @@
 
 欢迎来到阿腾的运维知识库网站！
 
-## 参考
+## 特别文档专栏
+
+- Snail Job：🚀 灵活，可靠和快速的分布式任务重试和分布式任务调度平台。Kubernetes上安装请参考：[安装文档](/work/kubernetes/service/snail-job/v1.3.0/)
+
+## 知识库网站
 
 - [开发知识库网站](https://kongyu666.github.io/dev/)
 - [运维知识库网站](https://kongyu666.github.io/ops/)
 
-## 目录
+## 文档目录
 
 - Linux Service
-    - 服务器配置
+    - 服务器管理
         - [基础配置](/work/service/00-basic/)
         - [网络配置](/work/service/network/)
         - [升级OpenSSH](/work/service/openssh/v9.9/)
+        - [系统性能监控](/work/linux/metrics/)
     - 存储服务
         - [网络文件共享 NFS](work/service/nfs/)
         - [网络文件共享 Samba](work/service/samba/)
@@ -95,6 +100,7 @@
     - Dockerfile
         - [jdk21](/work/docker/dockerfile/java/debian/jdk21/)
         - [springboot app](/work/docker/dockerfile/java/debian/application/jdk21/)
+        - [springboot app auto](/work/docker/dockerfile/java/debian/application/jdk8-auto/)
     - 服务安装文档
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)
@@ -114,6 +120,8 @@
         - [elastic-view](/work/docker/service/elastic-view/)
         - [jenkins](/work/docker/service/jenkins/)
         - [jumpserver](/work/docker/service/jumpserver/)
+        - [达梦数据库](/work/docker/service/dm8/v20241230/)
+        - [SpringBoot2应用](/work/docker/service/java/springboot2/)
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
@@ -206,6 +214,8 @@
                 - [安装文档](/work/kubernetes/service/foundationdb/v7.1.38/)
             - Cassandra
                 - [安装文档](/work/kubernetes/service/cassandra/v5.0.3/)
+            - 达梦数据库
+                - [安装文档](/work/kubernetes/service/dm8/v20241230/)
         - 消息队列
             - RabbitMQ
                 - [集群模式](/work/kubernetes/service/rabbitmq/v4.0.2/)
@@ -236,11 +246,12 @@
             - [Nacos](/work/kubernetes/service/nacos/v2.4.0/)
             - [Seata](/work/kubernetes/service/seata/v2.0.0/)
             - [Sentinel](/work/kubernetes/service/sentinel/)
-            - [SkyWalking](/work/kubernetes/service/springboot-admin/v3.3.0/)
+            - [SkyWalking](/work/kubernetes/service/skywalking/v10.1.0/)
             - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
             - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
             - [Zipkin](/work/kubernetes/service/zipkin/v3.4.4/)
             - [Jaeger](/work/kubernetes/service/jaeger/v2.3.0/)
+            - [Logstash](/work/kubernetes/service/logstash/v8.16.1/)
         - 大数据
             - [Zookeeper](/work/kubernetes/service/zookeeper/v3.9.3/)
             - [Flink](/work/kubernetes/service/flink/v1.19.1/)

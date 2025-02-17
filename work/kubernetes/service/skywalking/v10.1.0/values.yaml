@@ -1,0 +1,69 @@
+nameOverride: ""
+fullnameOverride: "ateng-skywalking"
+initContainer:
+  image: registry.lingo.local/service/busybox
+  tag: '1.30'
+
+oap:
+  name: oap
+  image:
+    repository: registry.lingo.local/service/skywalking-oap-server
+    tag: 10.1.0
+    pullPolicy: IfNotPresent
+  #storageType: elasticsearch
+  storageType: postgresql
+  ports:
+    # add more ports here if you need, for example
+    # zabbix: 10051
+    grpc: 11800
+    rest: 12800
+  replicas: 2
+  service:
+    type: NodePort
+  javaOpts: -Xmx1g -Xms1g
+  antiAffinity: "soft"
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - preference:
+          matchExpressions:
+            - key: kubernetes.service/skywalking
+              operator: In
+              values:
+                - "true"
+        weight: 1
+  resources: {}
+  env:
+    TZ: "Asia/Shanghai"
+
+ui:
+  name: ui
+  replicas: 1
+  image:
+    repository: registry.lingo.local/service/skywalking-ui
+    tag: 10.1.0
+    pullPolicy: IfNotPresent
+  service:
+    type: NodePort
+    externalPort: 80
+    internalPort: 8080
+  env:
+    TZ: "Asia/Shanghai"
+    
+elasticsearch:
+  enabled: false
+  config:               # For users of an existing elasticsearch cluster,takes effect when `elasticsearch.enabled` is false
+    port:
+      http: 9200
+    host: elasticsearch.lingo-service-dev # es service on kubernetes or host
+    user: "elastic"         # [optional]
+    password: "Admin@123"     # [optional]
+
+postgresql:
+  enabled: false # Whether to start a demo postgresql deployment, don't use this for production.
+  config:
+    # The hostname of your own postgresql service, this only takes effect when postgresql.enabled is false.
+    host: postgresql.lingo-service-dev
+  auth:
+    username: postgres
+    password: "Lingo@local_postgresql_5432"
+    database: ateng_skywalking
