@@ -17,13 +17,13 @@
     - 查看：[Java开发网站](https://kongyu666.github.io/dev/)
 - **Linux部署服务**：🐧
     - 提供Linux平台上的服务部署操作手册，助力在Linux环境中高效管理和运行服务。
-    - 参考：[部署文档](https://chatgpt.com/work/service/README.md)
+    - 参考：[部署文档](/work/service/README.md)
 - **Docker部署服务**：🐳
     - 为Docker环境中的服务部署提供全面支持，提升容器化应用的管理与运维效率。
-    - 参考：[部署文档](https://chatgpt.com/work/docker/service/catalog.md)
+    - 参考：[部署文档](/work/docker/service/catalog.md)
 - **Kubernetes部署服务**：☸️
     - 详细介绍在Kubernetes环境下部署与管理服务的最佳实践，支持构建可扩展的分布式系统。
-    - 参考：[部署文档](https://chatgpt.com/work/kubernetes/service/catalog.md)
+    - 参考：[部署文档](/work/kubernetes/service/catalog.md)
 - **Snail Job**：🚀
     - 提供灵活、可靠且高效的分布式任务重试与调度平台。
     - Kubernetes部署服务可参考：[部署文档](/work/kubernetes/service/snail-job/v1.3.0/)
