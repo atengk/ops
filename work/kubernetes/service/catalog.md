@@ -1,0 +1,127 @@
+# Kubernetes 部署服务目录
+
+- 数据存储
+    - Redis
+        - [单机模式](/work/kubernetes/service/redis/v7.4.1/standalone/)
+        - [主从模式](/work/kubernetes/service/redis/v7.4.1/replication/)
+        - [哨兵模式](/work/kubernetes/service/redis/v7.4.1/sentinel/)
+        - [集群模式](/work/kubernetes/service/redis/v7.4.1/cluster/)
+    - Mariadb Galera
+        - [Galera集群](/work/kubernetes/service/mariadb/v11.4.4/)
+    - PostgreSQL
+        - [单机模式](/work/kubernetes/service/postgresql/v17.2.0/standalone/)
+        - [主从模式](/work/kubernetes/service/postgresql/v17.2.0/replication/)
+        - [集群模式](/work/kubernetes/service/postgresql/v17.2.0/ha/)
+    - MongoDB
+        - [单机模式](/work/kubernetes/service/mongodb/v8.0.3/standalone/)
+        - [副本集群模式](/work/kubernetes/service/mongodb/v8.0.3/replicaset/)
+        - [分配集群模式](/work/kubernetes/service/mongodb/v8.0.3/sharded/)
+    - MySQL
+        - [单机模式](/work/kubernetes/service/mysql/v8.4.3/standalone/)
+        - [主从模式](/work/kubernetes/service/mysql/v8.4.3/replication/)
+        - [配置metrics](/work/kubernetes/service/mysql/v8.4.3/metrics/)
+    - Doris
+        - [集群模式2](/work/kubernetes/service/doris/v2.1.7/)
+        - [集群模式3](/work/kubernetes/service/doris/v3.0.3/)
+    - Clickhouse
+        - [集群模式](/work/kubernetes/service/clickhouse/v25.1.3/)
+    - ElasticSearch7
+        - [单机模式](/work/kubernetes/service/elasticsearch/v7.17.26/all-in-one/)
+        - [认证模式](/work/kubernetes/service/elasticsearch/v7.17.26/auth/)
+        - [HTTPS模式](/work/kubernetes/service/elasticsearch/v7.17.26/https/)
+        - [HTTPS模式(自定义证书)](/work/kubernetes/service/elasticsearch/v7.17.26/https-custom/)
+        - [Kibana](/work/kubernetes/service/kibana/v7.17.26/)
+        - [Elastic View可视化](/work/kubernetes/service/elasticsearch/elastic-view/)
+    - ElasticSearch8
+        - [单机模式](/work/kubernetes/service/elasticsearch/v8.16.1/all-in-one/)
+        - [认证模式](/work/kubernetes/service/elasticsearch/v8.16.1/auth/)
+        - [HTTPS模式](/work/kubernetes/service/elasticsearch/v8.16.1/https/)
+        - [HTTPS模式(自定义证书)](/work/kubernetes/service/elasticsearch/v8.16.1/https-custom/)
+        - [Kibana](/work/kubernetes/service/kibana/v7.17.26/)
+        - [Elastic View可视化](/work/kubernetes/service/elasticsearch/elastic-view/)
+    - OpenSearch1
+        - [单机模式](/work/kubernetes/service/opensearch/v1.3.19/all-in-one/)
+        - [HTTPS模式(自定义证书)](/work/kubernetes/service/opensearch/v1.3.19/https-custom/)
+        - [Elastic View可视化](/work/kubernetes/service/opensearch/elastic-view/)
+    - OpenSearch2
+        - [单机模式](/work/kubernetes/service/opensearch/v2.18.0/all-in-one/)
+        - [HTTPS模式](/work/kubernetes/service/opensearch/v2.18.0/https/)
+        - [HTTPS模式(自定义证书)](/work/kubernetes/service/opensearch/v2.18.0/https-custom/)
+        - [Elastic View可视化](/work/kubernetes/service/opensearch/elastic-view/)
+    - ETCD
+        - [集群模式](/work/kubernetes/service/etcd/v3.5.17/basic/)
+        - [认证模式](/work/kubernetes/service/etcd/v3.5.17/http-auth/)
+        - [HTTPS模式](/work/kubernetes/service/etcd/v3.5.17/https/)
+    - FoundationDB
+        - [安装文档](/work/kubernetes/service/foundationdb/v7.1.38/)
+    - Cassandra
+        - [安装文档](/work/kubernetes/service/cassandra/v5.0.3/)
+    - 达梦数据库
+        - [安装文档](/work/kubernetes/service/dm8/v20241230/)
+- 消息队列
+    - RabbitMQ
+        - [集群模式](/work/kubernetes/service/rabbitmq/v4.0.2/)
+    - Kafka
+        - [单机模式](/work/kubernetes/service/kafka/v3.8.1/standalone/)
+        - [集群模式](/work/kubernetes/service/kafka/v3.8.1/cluster/)
+        - [高可用集群模式](/work/kubernetes/service/kafka/v3.8.1/cluster-ha/)
+        - [认证模式](/work/kubernetes/service/kafka/v3.8.1/auth/)
+    - Kafka UI
+        - [Kafka可视化](/work/kubernetes/service/kafka-ui/v0.7.2/)
+- 存储服务
+    - MinIO
+        - [单机模式](/work/kubernetes/service/minio/v2024.11.7/standalone/)
+        - [集群模式](/work/kubernetes/service/minio/v2024.11.7/distributed/)
+    - Harbor
+        - [http模式](/work/kubernetes/service/harbor/v2.12.0/http/)
+        - [ingress模式](/work/kubernetes/service/harbor/v2.12.0/ingress-http/)
+        - [https模式](/work/kubernetes/service/harbor/v2.12.0/https/)
+        - [https模式(自定义证书)](/work/kubernetes/service/harbor/v2.12.0/https-custom/)
+- 开发工具
+    - [Spring Boot应用](/work/kubernetes/service/springboot-app/v1.1/)
+    - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
+    - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
+    - [Jenkins](/work/kubernetes/service/jenkins/v2.479.1/baseic/)
+    - [Snail-Job](/work/kubernetes/service/snail-job/v1.3.0/)
+    - [PowerJob](/work/kubernetes/service/powerjob/v5.1.1/)
+    - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
+    - [Nacos](/work/kubernetes/service/nacos/v2.4.0/)
+    - [Seata](/work/kubernetes/service/seata/v2.0.0/)
+    - [Sentinel](/work/kubernetes/service/sentinel/)
+    - [SkyWalking](/work/kubernetes/service/skywalking/v10.1.0/)
+    - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
+    - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
+    - [Zipkin](/work/kubernetes/service/zipkin/v3.4.4/)
+    - [Jaeger](/work/kubernetes/service/jaeger/v2.3.0/)
+    - [Logstash](/work/kubernetes/service/logstash/v8.16.1/)
+- 大数据
+    - [Zookeeper](/work/kubernetes/service/zookeeper/v3.9.3/)
+    - [Flink](/work/kubernetes/service/flink/v1.19.1/)
+    - [Spark](/work/kubernetes/service/spark/v3.5.4/)
+    - [DolphinScheduler](/work/kubernetes/service/dolphinscheduler/v3.2.2/)
+    - Doris2
+        - [集群模式](/work/kubernetes/service/doris/v2.1.7/)
+    - Doris3
+        - [集群模式](/work/kubernetes/service/doris/v3.0.3/)
+- 负载均衡和网络
+    - [MetalLB](/work/kubernetes/service/metallb/v0.14.8/)
+    - [External-DNS](/work/kubernetes/service/external-dns/v0.15.0/)
+    - [HAProxy](/work/kubernetes/service/haproxy/v3.0.2/)
+    - [Nginx](/work/kubernetes/service/nginx/v1.27.0/)
+    - [Multus-CNI](/work/kubernetes/service/multus-cni/)
+- 其他
+    - [Cert-Manager](/work/kubernetes/service/cert-manager/v1.16.2/)
+    - [安装Windows系统](/work/kubernetes/service/windows/)
+    - [Stirling-PDF](/work/kubernetes/service/Stirling-PDF/)
+- KubeBlocks
+    - [安装](/work/kubernetes/service/kubeblocks/deploy/)
+    - [mysql](/work/kubernetes/service/kubeblocks/service/mysql/)
+    - [postgresql](/work/kubernetes/service/kubeblocks/service/postgresql/)
+    - [redis](/work/kubernetes/service/kubeblocks/service/redis/)
+    - [kafka](/work/kubernetes/service/kubeblocks/service/kafka/)
+    - [备份](/work/kubernetes/service/kubeblocks/backup/)
+- 堡垒机
+    - [JumpServer](/work/kubernetes/service/jumpserver/v4.3.1/)
+    - [Nexterm](/work/kubernetes/service/nexterm/v1.0.2/)
+- 共享文件
+    - [kodbox](/work/kubernetes/service/kodbox/v1.52/)

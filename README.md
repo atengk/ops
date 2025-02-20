@@ -8,19 +8,26 @@
 
 欢迎来到阿腾的运维知识库网站！
 
+这里汇集了运维相关的技术文档，帮助开发者和运维人员解决在系统部署、管理、监控等方面的问题。
+
 ## 特别文档专栏
 
-- **Java开发文档**：🔥 涵盖Java开发的各类技术文档和实践，深入理解和掌握Java技术栈。，参考：[链接](https://kongyu666.github.io/dev/)
-
-- **Snail Job**：🚀 灵活，可靠和快速的分布式任务重试和分布式任务调度平台。
-    - Kubernetes上安装请参考：[安装文档](/work/kubernetes/service/snail-job/v1.3.0/)
-    - Java开发请参考：[开发文档](https://kongyu666.github.io/dev/#/work/Ateng-Java/task/snail-job/)
-
-
-## 知识库网站
-
-- [开发知识库网站](https://kongyu666.github.io/dev/)
-- [运维知识库网站](https://kongyu666.github.io/ops/)
+- **Java开发网站**：☕🔥
+     汇集了Java开发相关的技术文档和实践指南，帮助深入掌握Java技术栈。
+     查看：[Java开发网站](https://kongyu666.github.io/dev/)
+- **Linux部署服务**：🐧
+     提供Linux平台上的服务部署操作手册，助力在Linux环境中高效管理和运行服务。
+     参考：[部署文档](https://chatgpt.com/work/service/README.md)
+- **Kubernetes部署服务**：🐳
+     详细介绍在Kubernetes环境下部署与管理服务的最佳实践，支持构建可扩展的分布式系统。
+     参考：[部署文档](https://chatgpt.com/work/kubernetes/service/catalog.md)
+- **Docker部署服务**：☸️
+     为Docker环境中的服务部署提供全面支持，提升容器化应用的管理与运维效率。
+     参考：[部署文档](https://chatgpt.com/work/docker/service/catalog.md)
+- **Snail Job**：🚀
+     提供灵活、可靠且高效的分布式任务重试与调度平台。
+     Kubernetes部署服务可参考：[部署文档](/work/kubernetes/service/snail-job/v1.3.0/)
+     Java开发相关文档可参考：[开发文档](https://kongyu666.github.io/dev/#/work/Ateng-Java/task/snail-job/)
 
 ## 文档目录
 
