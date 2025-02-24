@@ -1,0 +1,73 @@
+# 大数据相关文档
+
+
+
+## 文档目录
+
+- 基础服务
+    - 基础配置
+        - [基础配置](work/bigdata/00-basic/)
+    - JDK
+        - [安装OpenJDK8](/work/bigdata/01-jdk/)
+    - Zookeeper
+        - [单机](work/bigdata/02-zookeeper/standalone/)
+        - [集群](work/bigdata/02-zookeeper/cluster/)
+        - [使用文档](work/bigdata/02-zookeeper/OPS.md)
+    - Hadoop
+        - [单机](work/bigdata/03-hadoop/standalone/)
+        - [集群](work/bigdata/03-hadoop/cluster/)
+        - [高可用集群](work/bigdata/03-hadoop/cluster-ha/)
+        - [使用文档](work/bigdata/03-hadoop/OPS.md)
+    - Kafka
+        - [单机](work/bigdata/03-kafka/standalone/)
+        - [集群](work/bigdata/03-kafka/cluster/)
+        - [高可用集群](work/bigdata/03-kafka/cluster-ha/)
+        - [使用文档](work/bigdata/03-kafka/OPS.md)
+- 数据存储
+    - HBase
+        - [单机](work/bigdata/04-hbase/standalone/)
+        - [集群](work/bigdata/04-hbase/cluster/)
+        - [高可用集群](work/bigdata/04-hbase/cluster-ha/)
+        - [使用文档](work/bigdata/04-hbase/OPS.md)
+    - Hive
+        - [单机](work/bigdata/04-hive/standalone/)
+        - [集群](work/bigdata/04-hive/cluster/)
+        - [高可用集群](work/bigdata/04-hive/cluster-ha/)
+        - [集成TEZ](work/bigdata/04-hive/tez/)
+        - [使用文档](work/bigdata/04-hive/OPS.md)
+    - Doris
+        - Doris v2.1.7
+            - [单机](work/bigdata/05-doris/v2.1.7/standalone/)
+            - [集群](work/bigdata/05-doris/v2.1.7/cluster/)
+            - [高可用集群](work/bigdata/05-doris/v2.1.7/cluster-ha/)
+        - Doris v3.0.3
+            - [单机](work/bigdata/05-doris/v3.0.3/standalone/)
+            - [集群](work/bigdata/05-doris/v3.0.3/cluster/)
+            - [高可用集群](work/bigdata/05-doris/v3.0.3/cluster-ha/)
+        - [使用文档](work/bigdata/05-doris/OPS.md)
+    - Iceberg
+        - [使用文档](work/bigdata/06-iceberg/)
+- 数据计算
+    - Spark
+        - [单机](work/bigdata/05-spark/standalone/)
+        - [集群](work/bigdata/05-spark/cluster/)
+        - [高可用集群](work/bigdata/05-spark/cluster-ha/)
+        - [YARN](work/bigdata/05-spark/yarn/)
+        - [Kubernetes Operator](work/bigdata/05-spark/kubernetes-operator/)
+        - [Operator使用文档](work/bigdata/05-spark/kubernetes-operator/examples/)
+        - [集成Hive](work/bigdata/05-spark/hive/)
+        - [使用文档](work/bigdata/05-spark/OPS.md)
+    - Flink
+        - [单机](work/bigdata/05-flink/standalone/)
+        - [集群](work/bigdata/05-flink/cluster/)
+        - [高可用集群](work/bigdata/05-flink/cluster-ha/)
+        - [YARN](work/bigdata/05-flink/yarn/)
+        - [Kubernetes Operator](work/bigdata/05-flink/kubernetes-operator/)
+        - [Operator使用文档](work/bigdata/05-flink/kubernetes-operator/examples/)
+        - [Flink CDC](work/bigdata/05-flink/cdc/)
+        - [使用文档](work/bigdata/05-flink/OPS.md)
+- 调度平台
+    - Dolphinscheduler
+        - [单机](work/bigdata/06-dolphinscheduler/standalone/)
+        - [集群](work/bigdata/06-dolphinscheduler/cluster/)
+

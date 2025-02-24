@@ -24,6 +24,11 @@
 - **Kubernetes部署服务**：☸️
     - 详细介绍在Kubernetes环境下部署与管理服务的最佳实践，支持构建可扩展的分布式系统。
     - 参考：[部署文档](/work/kubernetes/service/catalog.md)
+- **大数据部署与使用**：📊
+    - 涵盖基础服务、数据存储、计算框架及调度平台等，助力大数据系统的部署与优化。
+    - 参考：[使用文档](/work/bigdata/)
+
+
 - **Snail Job**：🚀
     - 提供灵活、可靠且高效的分布式任务重试与调度平台。
     - Kubernetes部署服务可参考：[部署文档](/work/kubernetes/service/snail-job/v1.3.0/)
