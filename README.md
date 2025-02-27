@@ -27,8 +27,6 @@
 - **大数据部署与使用**：📊
     - 涵盖基础服务、数据存储、计算框架及调度平台等，助力大数据系统的部署与优化。
     - 参考：[使用文档](/work/bigdata/)
-
-
 - **Snail Job**：🚀
     - 提供灵活、可靠且高效的分布式任务重试与调度平台。
     - Kubernetes部署服务可参考：[部署文档](/work/kubernetes/service/snail-job/v1.3.0/)
@@ -269,6 +267,7 @@
             - [Zipkin](/work/kubernetes/service/zipkin/v3.4.4/)
             - [Jaeger](/work/kubernetes/service/jaeger/v2.3.0/)
             - [Logstash](/work/kubernetes/service/logstash/v8.16.1/)
+            - [chat2db数据库管理工具](/work/kubernetes/service/chat2db/v0.3.7/)
         - 大数据
             - [Zookeeper](/work/kubernetes/service/zookeeper/v3.9.3/)
             - [Flink](/work/kubernetes/service/flink/v1.19.1/)

@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chat2db-config
+  labels:
+    app: chat2db
+data:
+  application.yml: |
+    ateng:
+      name: 阿腾
+      date: 2024-02-27
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: chat2db
+spec:
+  serviceName: "chat2db"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat2db
+  template:
+    metadata:
+      labels:
+        app: chat2db
+    spec:
+      containers:
+      - name: chat2db
+        image: registry.lingo.local/service/chat2db:0.3.7
+        imagePullPolicy: IfNotPresent
+        command:
+          - java
+        args:
+          - -server
+          - -Xms512m
+          - -Xmx2048m
+          - -Dloader.path=lib
+          - -jar
+          - chat2db-server-web-start.jar
+          - --spring.profiles.active=release
+          - --spring.config.additional-location=file:/opt/application.yml
+        resources:
+          limits:
+            cpu: '2'
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        ports:
+        - name: http
+          containerPort: 10824
+        env:
+        - name: TZ
+          value: "Asia/Shanghai"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/application.yml
+          subPath: application.yml
+        - name: chat2db-storage
+          mountPath: /root/.chat2db
+        livenessProbe:
+          tcpSocket:
+            port: 10824
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 10824
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: config-volume
+        configMap:
+          name: chat2db-config
+      terminationGracePeriodSeconds: 60
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: chat2db
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/chat2db
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+  volumeClaimTemplates:
+  - metadata:
+      name: chat2db-storage
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      #storageClassName: standard  # 可以根据你的存储需求调整存储类
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat2db
+  labels:
+    app: chat2db
+spec:
+  selector:
+    app: chat2db
+  ports:
+    - name: http
+      protocol: TCP
+      port: 10824
+      targetPort: 10824
+      nodePort: 30824
+  type: NodePort
