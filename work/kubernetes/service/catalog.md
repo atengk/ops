@@ -95,6 +95,7 @@
     - [Jaeger](/work/kubernetes/service/jaeger/v2.3.0/)
     - [Logstash](/work/kubernetes/service/logstash/v8.16.1/)
     - [chat2db数据库管理工具](/work/kubernetes/service/chat2db/v0.3.7/)
+    - [drawDB数据库编辑器](/work/kubernetes/service/drawdb/)
 - 大数据
     - [Zookeeper](/work/kubernetes/service/zookeeper/v3.9.3/)
     - [Flink](/work/kubernetes/service/flink/v1.19.1/)
