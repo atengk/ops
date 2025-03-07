@@ -1,5 +1,11 @@
 # 使用Nginx
 
+参考文档：
+
+- [博客](https://mp.weixin.qq.com/s/MCGyZ3oQgdu_a1zD5fm4Mg)
+
+
+
 ## 简单的示例
 
 创建一个简单的示例，来测试Nginx是否正常

@@ -64,7 +64,7 @@ spec:
           securityContext:
             runAsUser: 1001
             runAsGroup: 1001
-        # 下载源码Jar
+        # 下载依赖zip包
         - name: download-dependency
           image: registry.lingo.local/service/busybox:1.36.1
           command:

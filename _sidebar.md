@@ -80,6 +80,7 @@
         - [jdk21](/work/docker/dockerfile/java/debian/jdk21/)
         - [springboot app](/work/docker/dockerfile/java/debian/application/jdk21/)
         - [springboot app auto](/work/docker/dockerfile/java/debian/application/jdk8-auto/)
+        - [springboot app cmd](/work/docker/dockerfile/java/debian/application/jdk21-cmd/)
     - 服务安装文档
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)
