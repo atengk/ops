@@ -5,12 +5,6 @@ metadata:
   name: nacos-cm
 data:
   mode: standalone
-  mysql.host: "192.168.1.10"
-  mysql.dbname: "ateng_nacos"
-  mysql.port: "35725"
-  mysql.user: "root"
-  mysql.password: "Admin@123"
-  mysql.param: "connectTimeout=1000&socketTimeout=3000&autoReconnect=true"
   jvm.xms: 2g
   jvm.xmx: 2g
   nacos.auth.enable: "true"
@@ -120,43 +114,13 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: metadata.namespace
-            - name: SPRING_DATASOURCE_PLATFORM
-              value: "mysql"
+            - name: EMBEDDED_STORAGE
+              value: "embedded"
             - name: MODE
               valueFrom:
                 configMapKeyRef:
                   name: nacos-cm
                   key: mode
-            - name: MYSQL_SERVICE_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: nacos-cm
-                  key: mysql.host
-            - name: MYSQL_SERVICE_DB_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: nacos-cm
-                  key: mysql.dbname
-            - name: MYSQL_SERVICE_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: nacos-cm
-                  key: mysql.port
-            - name: MYSQL_SERVICE_USER
-              valueFrom:
-                configMapKeyRef:
-                  name: nacos-cm
-                  key: mysql.user
-            - name: MYSQL_SERVICE_PASSWORD
-              valueFrom:
-                configMapKeyRef:
-                  name: nacos-cm
-                  key: mysql.password
-            - name: MYSQL_SERVICE_DB_PARAM
-              valueFrom:
-                configMapKeyRef:
-                  name: nacos-cm
-                  key: mysql.param
             - name: NACOS_AUTH_ENABLE
               valueFrom:
                 configMapKeyRef:
@@ -197,6 +161,8 @@ spec:
               mountPath: /home/nacos/plugins/peer-finder
             - name: nacos-logs
               mountPath: /home/nacos/logs
+            - name: nacos-data
+              mountPath: /home/nacos/data
           livenessProbe:
             httpGet:
               path: /nacos/v1/console/server/state
@@ -255,4 +221,13 @@ spec:
       resources:
         requests:
           storage: 10Gi
-      #storageClassName: standard  # 可以根据你的存储需求调整存储类
+      #storageClassName: standard
+  - metadata:
+      name: nacos-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+      #storageClassName: standard

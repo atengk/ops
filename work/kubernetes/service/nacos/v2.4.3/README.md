@@ -10,6 +10,8 @@ Nacos通常与微服务架构中的其他组件一起使用，像是 Spring Clou
 
 
 
+## 单机模式
+
 **导入SQL**
 
 下载SQL文件，将SQL导入MySQL中。
@@ -44,7 +46,7 @@ kubectl apply -n kongyu -f deploy.yaml
 **查看服务**
 
 ```
-kubectl get -n kongyu pod,svc -l app=nacos
+kubectl get -n kongyu pod,svc,pvc -l app=nacos
 ```
 
 **查看日志**
@@ -63,17 +65,84 @@ Password: Admin@123
 
 输入自定义密码
 
-![image-20250307150322629](./assets/image-20250307150322629.png)
+![image-20250310140736072](./assets/image-20250310140736072.png)
+
+**删除服务**
+
+```
+kubectl delete -n kongyu -f deploy.yaml
+kubectl delete -n kongyu pvc -l app=nacos
+```
+
+## 集群模式
+
+**导入SQL**
+
+下载SQL文件，将SQL导入MySQL中。
+
+```
+curl -L -O https://raw.githubusercontent.com/alibaba/nacos/2.4.3/distribution/conf/mysql-schema.sql
+```
+
+**自定义配置**
+
+修改deploy-cluster.yaml配置文件
+
+- 副本数：replicas
+- 资源配置：StatefulSet中的resources相关参数
+- 配置文件：ConfigMap中的数据库和JVM等相关信息
+- 服务端口：如果需要修改**Service**的NodePort端口映射，那么需要保证server和client-rpc是加1000的关系
+
+
+- 其他：其他配置按照具体环境修改
+
+**创建标签，运行在标签节点上**
+
+```
+kubectl label nodes server03.lingo.local kubernetes.service/nacos="true"
+```
+
+**创建服务**
+
+```
+kubectl apply -n kongyu -f deploy-cluster.yaml
+```
+
+**查看服务**
+
+```
+kubectl get -n kongyu pod,svc,pvc -l app=nacos
+```
+
+**查看日志**
+
+```java
+kubectl logs -f --tail=200 -n kongyu nacos-0
+```
+
+**访问服务**
+
+```
+URL：http://192.168.1.10:30648/nacos
+Username: nacos
+Password: Admin@123
+```
+
+输入自定义密码
+
+![image-20250310140736072](./assets/image-20250310140736072.png)
 
 **服务扩缩容**
 
 ```
-kubectl scale statefulset nacos --replicas=3 -n kongyu
+kubectl scale statefulset nacos --replicas=5 -n kongyu
+kubectl get -n kongyu pod,svc,pvc -l app=nacos
 ```
 
 **删除服务**
 
 ```
 kubectl delete -n kongyu -f deploy.yaml
+kubectl delete -n kongyu pvc -l app=nacos
 ```
 
