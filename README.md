@@ -259,7 +259,7 @@
             - [Snail-Job](/work/kubernetes/service/snail-job/v1.3.0/)
             - [PowerJob](/work/kubernetes/service/powerjob/v5.1.1/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
-            - [Nacos](/work/kubernetes/service/nacos/v2.4.0/)
+            - [Nacos](/work/kubernetes/service/nacos/v2.4.3/)
             - [Seata](/work/kubernetes/service/seata/v2.0.0/)
             - [Sentinel](/work/kubernetes/service/sentinel/)
             - [SkyWalking](/work/kubernetes/service/skywalking/v10.1.0/)
