@@ -19,5 +19,6 @@
 - [jenkins](/work/docker/service/jenkins/)
 - [jumpserver](/work/docker/service/jumpserver/)
 - [达梦数据库](/work/docker/service/dm8/v20241230/)
-- [SpringBoot2应用](/work/docker/service/java/springboot2/)
-- [Nacos](/work/docker/service/nacos/)
+- [springboot应用](/work/docker/service/java/springboot2/)
+- [nacos](/work/docker/service/nacos/)
+- [rocketmq](/work/docker/service/rocketmq/)
