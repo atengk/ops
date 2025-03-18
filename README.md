@@ -137,7 +137,9 @@
         - [jenkins](/work/docker/service/jenkins/)
         - [jumpserver](/work/docker/service/jumpserver/)
         - [达梦数据库](/work/docker/service/dm8/v20241230/)
-        - [SpringBoot2应用](/work/docker/service/java/springboot2/)
+        - [springboot应用](/work/docker/service/java/springboot2/)
+        - [nacos](/work/docker/service/nacos/)
+        - [rocketmq](/work/docker/service/rocketmq/)
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
@@ -260,7 +262,7 @@
             - [PowerJob](/work/kubernetes/service/powerjob/v5.1.1/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
             - [Nacos](/work/kubernetes/service/nacos/v2.4.3/)
-            - [Seata](/work/kubernetes/service/seata/v2.0.0/)
+            - [Seata](/work/kubernetes/service/seata/)
             - [Sentinel](/work/kubernetes/service/sentinel/)
             - [SkyWalking](/work/kubernetes/service/skywalking/v10.1.0/)
             - [禅道](/work/kubernetes/service/zentao/v20.7.1/)

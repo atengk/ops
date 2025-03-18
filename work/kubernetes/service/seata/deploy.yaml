@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seata-server-config
+data:
+  application.yml: |
+    server:
+      port: 7091
+    spring:
+      application:
+        name: seata-server
+    logging:
+      config: classpath:logback-spring.xml
+      file:
+        path: ${log.home:${user.home}/logs/seata}
+    console:
+      user:
+        username: admin
+        password: Admin@123
+    seata:
+      config:
+        type: file
+      registry:
+        type: file
+      store:
+        mode: file
+      security:
+        secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+        tokenValidityInMilliseconds: 1800000
+        csrf-ignore-urls: /metadata/v1/**
+        ignore:
+          urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error,/vgroup/v1/**
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seata-server
+  labels:
+    app: seata-server
+spec:
+  type: NodePort
+  ports:
+    - port: 8091
+      protocol: TCP
+      name: netty
+    - port: 7091
+      protocol: TCP
+      name: http
+  selector:
+    app: seata-server
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: seata-server
+  labels:
+    app: seata-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: seata-server
+  template:
+    metadata:
+      labels:
+        app: seata-server
+    spec:
+      containers:
+        - name: seata-server
+          image: registry.lingo.local/service/seata-server:2.3.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: netty
+              containerPort: 8091
+              protocol: TCP
+            - name: http
+              containerPort: 7091
+              protocol: TCP
+          volumeMounts:
+            - name: seata-config
+              mountPath: /seata-server/conf/application.yml
+              subPath: 'application.yml'
+          livenessProbe:
+            httpGet:
+              path: /version.json
+              port: 7091
+              scheme: HTTP
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /version.json
+              port: 7091
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+          env:
+          - name: TZ
+            value: "Asia/Shanghai"
+          - name: JVM_XMX
+            value: "2g"
+          - name: JVM_XMS
+            value: "512m"
+          resources:
+            limits:
+              cpu: '2'
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: seata-config
+          configMap:
+            name: seata-server-config
+            items:
+              - key: application.yml
+                path: application.yml
+      terminationGracePeriodSeconds: 60
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: seata-server
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/seata-server
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1

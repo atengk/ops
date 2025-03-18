@@ -1,3 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-dashboard
+  labels:
+    app: sentinel-dashboard
+spec:
+  selector:
+    app: sentinel-dashboard
+  ports:
+    - name: dashboard
+      protocol: TCP
+      port: 8858
+      targetPort: 8858
+      nodePort: 38858
+    - name: transport
+      protocol: TCP
+      port: 8719
+      targetPort: 8719
+      nodePort: 38719
+  type: NodePort
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,44 +36,72 @@ spec:
     spec:
       containers:
       - name: sentinel-dashboard
-        image: registry.lingo.local/service/sentinel-dashboard:1.8.7
+        image: registry.lingo.local/service/sentinel-dashboard:1.8.8
         imagePullPolicy: IfNotPresent
         ports:
         - name: dashboard
           containerPort: 8858
         - name: transport
           containerPort: 8719
+        command:
+          - java
+        args:
+          - -server
+          - -Xms512m
+          - -Xmx2048m
+          - -Dproject.name=sentinel-dashboard
+          - -Dserver.port=8858
+          - -Dcsp.sentinel.api.port=8719
+          - -Dcsp.sentinel.dashboard.server=sentinel-dashboard:8858
+          - -Dsentinel.dashboard.auth.username=admin
+          - -Dsentinel.dashboard.auth.password=Admin@123
+          - -jar
+          - app.jar
         env:
         - name: TZ
           value: "Asia/Shanghai"
+        resources:
+          limits:
+            cpu: '2'
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
         livenessProbe:
-          tcpSocket:
-            port: 8719
+          httpGet:
+            path: /version
+            port: 8858
+            scheme: HTTP
+          initialDelaySeconds: 30
           timeoutSeconds: 1
           periodSeconds: 10
           successThreshold: 1
           failureThreshold: 3
         readinessProbe:
-          tcpSocket:
-            port: 8719
+          httpGet:
+            path: /version
+            port: 8858
+            scheme: HTTP
+          initialDelaySeconds: 10
           timeoutSeconds: 1
           periodSeconds: 10
           successThreshold: 1
-          failureThreshold: 3
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: sentinel-dashboard
-  labels:
-    app: sentinel-dashboard
-spec:
-  selector:
-    app: sentinel-dashboard
-  ports:
-    - name: dashboard
-      protocol: TCP
-      port: 8858
-      targetPort: 8858
-  type: NodePort
-
+      terminationGracePeriodSeconds: 60
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: sentinel-dashboard
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/sentinel-dashboard
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
