@@ -7,46 +7,6 @@ Seata（Simple Extensible Autonomous Transaction Architecture）是一款开源�
 
 
 
-## 使用file
-
-**自定义配置**
-
-修改deploy.yaml配置文件
-
-- 资源配置：resources相关参数
-- 命令参数：根据实际情况修改java的相关参数
-
-
-- 其他：其他配置按照具体环境修改
-
-**创建标签，运行在标签节点上**
-
-```
-kubectl label nodes server03.lingo.local kubernetes.service/seata-server="true"
-```
-
-**创建服务**
-
-```
-kubectl apply -n kongyu -f deploy.yaml
-```
-
-**查看服务**
-
-```
-kubectl get -n kongyu pod,svc -l app=seata-server
-```
-
-**查看日志**
-
-```
-kubectl logs -n kongyu -f deploy/seata-server
-```
-
-
-
-## 使用Nacos+JDBC
-
 **下载SQL**
 
 将下载的SQL导入对应的数据库
@@ -124,6 +84,10 @@ Password: Admin@123
 Nacos查看服务
 
 ![image-20250318163444837](./assets/image-20250318163444837.png)
+
+Nacos创建配置文件
+
+![image-20250318173107632](./assets/image-20250318173107632.png)
 
 **删除服务**
 

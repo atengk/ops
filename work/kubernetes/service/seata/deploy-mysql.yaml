@@ -30,6 +30,7 @@ data:
       registry:
         type: nacos
         nacos:
+          cluster: atengSeata
           server-addr: ${seata.config.nacos.server-addr}
           namespace: ${seata.config.nacos.namespace}
           group: ${seata.config.nacos.group}
