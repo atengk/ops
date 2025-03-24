@@ -54,13 +54,21 @@
     - TLS证书
         - [cfssl创建证书](/work/service/tls/tls-cfssl/v1.6.5/)
         - [openssl创建证书](/work/service/tls/tls-openssl/)
+- 监控服务
+    - [Beszel](/work/service/beszel/)
 - 其他服务
     - [内网穿透FRP](/work/service/frp/)
     - [CoreDNS](/work/service/coredns/)
-- 开发工具
+- 开发服务
     - OpenJDK
         - [OpenJDK8](/work/service/openjdk/openjdk8/)
         - [OpenJDK11](/work/service/openjdk/openjdk11/)
         - [OpenJDK17](/work/service/openjdk/openjdk17/)
         - [OpenJDK21](/work/service/openjdk/openjdk21/)
         - [使用文档](/work/service/openjdk/OPS.md)
+    - SpringCloud Alibaba
+        - [Nacos](/work/service/springcloudalibaba/nacos)
+        - [Sentinel](/work/service/springcloudalibaba/sentinel/)
+        - [Seata](/work/service/springcloudalibaba/seata/)
+        - [RocketMQ](/work/service/springcloudalibaba/rocketmq/standalone/)
+
