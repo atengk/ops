@@ -84,6 +84,77 @@ curl -u elastic:Admin@123 http://elasticsearch:9200/
 curl -u elastic:Admin@123 http://192.168.1.10:33328/
 ```
 
+查看集群节点信息
+
+```
+curl -u elastic:Admin@123 http://elasticsearch:9200/_cat/nodes?v
+```
+
+查看集群健康状态
+
+```
+curl -u elastic:Admin@123 http://elasticsearch:9200/_cluster/health?pretty
+```
+
+查看已安装的插件
+
+```
+curl -u elastic:Admin@123 http://elasticsearch:9200/_cat/plugins?v
+```
+
+创建索引
+
+```
+curl -u elastic:Admin@123 -X PUT "http://localhost:9200/my_index" -H 'Content-Type: application/json' -d'
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  }
+}'
+```
+
+查询索引的设置
+
+```
+curl -u elastic:Admin@123 -X GET "http://localhost:9200/my_index/_settings?pretty"
+```
+
+查看索引列表
+
+```
+curl -u elastic:Admin@123 http://localhost:9200/_cat/indices?v
+```
+
+写入数据
+
+```
+curl -u elastic:Admin@123 -X POST "http://localhost:9200/my_index/_doc" -H 'Content-Type: application/json' -d'
+{
+  "title": "OpenSearch Introduction",
+  "content": "OpenSearch is a distributed search engine.",
+  "tags": ["search", "analytics", "open source"],
+  "timestamp": "2024-12-05T10:00:00"
+}'
+```
+
+查询数据
+
+```
+curl -u elastic:Admin@123 -X GET "http://localhost:9200/my_index/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "match_all": {}
+  }
+}'
+```
+
+删除索引
+
+```
+curl -u elastic:Admin@123 -X DELETE "http://localhost:9200/my_index"
+```
+
 **服务扩缩容**
 
 > 将服务扩展至3个副本，服务至少2个副本

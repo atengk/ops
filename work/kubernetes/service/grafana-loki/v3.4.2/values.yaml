@@ -1,0 +1,685 @@
+global:
+  defaultStorageClass: ""
+  security:
+    allowInsecureImages: true
+fullnameOverride: "grafana-loki"
+loki:
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/grafana-loki
+    tag: "3.4.2"
+    pullPolicy: IfNotPresent
+  configuration: |
+    auth_enabled: false
+
+    server:
+      http_listen_port: {{ .Values.loki.containerPorts.http }}
+      grpc_listen_port: {{ .Values.loki.containerPorts.grpc }}
+    common:
+      compactor_address: http://{{ include "grafana-loki.compactor.fullname" . }}:{{ .Values.compactor.service.ports.http }}
+
+    distributor:
+      ring:
+        kvstore:
+          store: memberlist
+
+    memberlist:
+      join_members:
+        - {{ include "grafana-loki.gossip-ring.fullname" . }}
+
+    ingester:
+      lifecycler:
+        ring:
+          kvstore:
+            store: memberlist
+          replication_factor: 1
+      chunk_idle_period: 30m
+      chunk_block_size: 262144
+      chunk_encoding: snappy
+      chunk_retain_period: 1m
+      wal:
+        dir: {{ .Values.loki.dataDir }}/wal
+
+    limits_config:
+      retention_period: 336h
+      reject_old_samples: true
+      reject_old_samples_max_age: 168h
+      max_cache_freshness_per_query: 10m
+      split_queries_by_interval: 15m
+      allow_structured_metadata: true
+
+    schema_config:
+      configs:
+      - from: 2020-10-24
+        store: boltdb-shipper
+        object_store: filesystem
+        schema: v11
+        index:
+          prefix: index_
+          period: 24h
+      - from: 2024-03-12
+        store: tsdb
+        object_store: filesystem
+        schema: v12
+        index:
+          period: 24h
+          prefix: index_
+      - from: 2024-04-23
+        object_store: filesystem
+        store: tsdb
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+
+    storage_config:
+      boltdb_shipper:
+        active_index_directory: {{ .Values.loki.dataDir }}/loki/index
+        cache_location: {{ .Values.loki.dataDir }}/loki/cache
+        cache_ttl: 168h
+        {{- if .Values.indexGateway.enabled }}
+        index_gateway_client:
+          server_address: {{ (printf "dns:///%s:9095" (include "grafana-loki.index-gateway.fullname" .)) }}
+        {{- end }}
+      filesystem:
+        directory: {{ .Values.loki.dataDir }}/chunks
+      index_queries_cache_config:
+        {{- if .Values.memcachedindexqueries.enabled }}
+        memcached:
+          batch_size: 100
+          parallelism: 100
+        memcached_client:
+          consistent_hash: true
+          addresses: dns+{{ include "grafana-loki.memcached-index-queries.host" . }}
+          service: http
+        {{- end }}
+      tsdb_shipper:
+        active_index_directory: {{ .Values.loki.dataDir }}/loki/tsdb-index
+        cache_location: {{ .Values.loki.dataDir }}/loki/tsdb-cache
+        {{- if .Values.indexGateway.enabled }}
+        index_gateway_client:
+          server_address: {{ (printf "dns:///%s:9095" (include "grafana-loki.index-gateway.fullname" .)) }}
+        {{- end }}
+
+    query_scheduler:
+      max_outstanding_requests_per_tenant: 32768
+
+    querier:
+      max_concurrent: 16
+
+    chunk_store_config:
+      {{- if .Values.memcachedchunks.enabled }}
+      chunk_cache_config:
+        memcached:
+          batch_size: 100
+          parallelism: 100
+        memcached_client:
+          consistent_hash: true
+          addresses: dns+{{ include "grafana-loki.memcached-chunks.host" . }}
+      {{- end }}
+      {{- if .Values.memcachedindexwrites.enabled }}
+      write_dedupe_cache_config:
+        memcached:
+          batch_size: 100
+          parallelism: 100
+        memcached_client:
+          consistent_hash: true
+          addresses: dns+{{ include "grafana-loki.memcached-index-writes.host" . }}
+      {{- end }}
+
+    table_manager:
+      retention_deletes_enabled: false
+      retention_period: 0s
+
+    query_range:
+      align_queries_with_step: true
+      max_retries: 5
+      cache_results: true
+      results_cache:
+        cache:
+          {{- if .Values.memcachedfrontend.enabled }}
+          memcached_client:
+            consistent_hash: true
+            addresses: dns+{{ include "grafana-loki.memcached-frontend.host" . }}
+            max_idle_conns: 16
+            timeout: 500ms
+            update_interval: 1m
+          {{- else }}
+          embedded_cache:
+            enabled: true
+            max_size_mb: 4096
+            ttl: 24h
+          {{- end }}
+    {{- if not .Values.queryScheduler.enabled }}
+    frontend_worker:
+      frontend_address: {{ include "grafana-loki.query-frontend.fullname" . }}:{{ .Values.queryFrontend.service.ports.grpc }}
+    {{- end }}
+
+    frontend:
+      log_queries_longer_than: 5s
+      compress_responses: true
+      tail_proxy_url: http://{{ include "grafana-loki.querier.fullname" . }}:{{ .Values.querier.service.ports.http }}
+
+    compactor:
+      working_directory: {{ .Values.loki.dataDir }}/loki/retention
+      compaction_interval: 10m
+      retention_enabled: true
+      retention_delete_delay: 2h
+      retention_delete_worker_count: 150
+      delete_request_store: filesystem
+
+    ruler:
+      storage:
+        type: local
+        local:
+          directory: {{ .Values.loki.dataDir }}/conf/rules
+      ring:
+        kvstore:
+          store: memberlist
+      rule_path: /tmp/loki/scratch
+      alertmanager_url: https://alertmanager.xx
+      external_url: https://alertmanager.xx
+
+  overrideConfiguration: {}
+compactor:
+  enabled: true
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: true
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+gateway:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/nginx
+    tag: "1.27.4"
+    pullPolicy: IfNotPresent
+  auth:
+    enabled: false
+    username: "user"
+    password: ""
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: NodePort
+    ports:
+      http: 80
+    nodePorts:
+      http: ""
+indexGateway:
+  enabled: false
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/nginx
+    tag: "1.27.4"
+    pullPolicy: IfNotPresent
+  auth:
+    enabled: false
+    username: "user"
+    password: ""
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: false
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+distributor:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+ingester:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: true
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+querier:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: true
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+queryFrontend:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+queryScheduler:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+ruler:
+  enabled: false
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: true
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+tableManager:
+  enabled: false
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+promtail:
+  enabled: true
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-loki="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-loki"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  configuration: |
+    server:
+      log_level: {{ .Values.promtail.logLevel }}
+      http_listen_port: {{ .Values.promtail.containerPorts.http }}
+      grpc_listen_port: {{ .Values.promtail.containerPorts.grpc }}
+
+    clients:
+      - url: http://{{ include "grafana-loki.gateway.fullname" . }}:{{ .Values.gateway.service.ports.http }}/loki/api/v1/push
+        {{- if .Values.gateway.auth.enabled }}
+        basic_auth:
+          # The username to use for basic auth
+          username: {{ .Values.gateway.auth.username }}
+          password_file: /bitnami/promtail/conf/secrets/password
+        {{- end }}
+    positions:
+      filename: /run/promtail/positions.yaml
+
+    scrape_configs:
+      # See also https://github.com/grafana/loki/blob/master/production/ksonnet/promtail/scrape_config.libsonnet for reference
+      - job_name: kubernetes-pods
+        pipeline_stages:
+          - cri: {}
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels:
+              - __meta_kubernetes_pod_controller_name
+            regex: ([0-9a-z-.]+?)(-[0-9a-f]{8,10})?
+            action: replace
+            target_label: __tmp_controller_name
+          - source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+              - __meta_kubernetes_pod_label_app
+              - __tmp_controller_name
+              - __meta_kubernetes_pod_name
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: app
+          - source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_component
+              - __meta_kubernetes_pod_label_component
+            regex: ^;*([^;]+)(;.*)?$
+            action: replace
+            target_label: component
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_pod_node_name
+            target_label: node_name
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_namespace
+            target_label: namespace
+          - action: replace
+            replacement: $1
+            separator: /
+            source_labels:
+            - namespace
+            - app
+            target_label: job
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_pod_name
+            target_label: pod
+          - action: replace
+            source_labels:
+            - __meta_kubernetes_pod_container_name
+            target_label: container
+          - action: replace
+            replacement: /var/log/pods/*$1/*.log
+            separator: /
+            source_labels:
+            - __meta_kubernetes_pod_uid
+            - __meta_kubernetes_pod_container_name
+            target_label: __path__
+          - action: replace
+            regex: true/(.*)
+            replacement: /var/log/pods/*$1/*.log
+            separator: /
+            source_labels:
+            - __meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash
+            - __meta_kubernetes_pod_annotation_kubernetes_io_config_hash
+            - __meta_kubernetes_pod_container_name
+            target_label: __path__
+
+  existingSecret: ""
+  logLevel: info
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+  service:
+    type: ClusterIP
+    ports:
+      http: 3100
+      grpc: 9095
+    nodePorts:
+      http: ""
+
+externalMemcachedChunks:
+  host: "memcached.kongyu"
+  port: 11211
+memcachedchunks:
+  enabled: false
+externalMemcachedFrontend:
+  host: "memcached.kongyu"
+  port: 11211
+memcachedfrontend:
+  enabled: false
+externalMemcachedIndexQueries:
+  host: "memcached.kongyu"
+  port: 11211
+memcachedindexqueries:
+  enabled: false
+externalMemcachedIndexWrites:
+  host: "memcached.kongyu"
+  port: 11211
+memcachedindexwrites:
+  enabled: false

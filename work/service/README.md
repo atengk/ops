@@ -7,16 +7,20 @@
 ## 部署服务目录
 
 - 存储服务
-    - [网络文件共享 NFS](work/service/nfs/)
-    - [网络文件共享 Samba](work/service/samba/)
-    - [网络文件共享 VSFTP](work/service/ftp/)
+    - 网络文件共享 NFS
+        - [安装使用文档](work/service/nfs/)
+    - 网络文件共享 Samba
+        - [安装使用文档](work/service/samba/)
+    - 网络文件共享 VSFTP
+        - [安装使用文档](work/service/ftp/)
     - 对象存储服务 MinIO
         - [安装文档](/work/service/minio/v20241107/)
         - [使用文档](/work/service/minio/OPS.md)
     - 分布式存储 JuiceFS
         - [安装文档](/work/service/juicefs/v1.2.1/)
         - [使用文档](/work/service/juicefs/OPS.md)
-    - [备份工具 Restic](/work/service/restic/)
+    - 备份工具 Restic
+        - [安装使用文档](/work/service/restic/)
 - 数据存储
     - MySQL
         - [安装文档](/work/service/mysql/v8.4.3/)
@@ -54,8 +58,17 @@
     - TLS证书
         - [cfssl创建证书](/work/service/tls/tls-cfssl/v1.6.5/)
         - [openssl创建证书](/work/service/tls/tls-openssl/)
-- 监控服务
-    - [Beszel](/work/service/beszel/)
+- 可观测
+    - OTLP
+        - [OpenTelemetry](/work/service/opentelemetry/)
+        - [Jaeger](/work/service/jaeger/)
+
+    - 监控
+        - [Beszel](/work/service/beszel/)
+        - [Prometheus](/work/service/prometheus/v3.2.1/)
+        - [Grafana](/work/service/grafana/v11.5.3/)
+        - [Alertmanager](/work/service/alertmanager/v0.28.1/)
+
 - 其他服务
     - [内网穿透FRP](/work/service/frp/)
     - [CoreDNS](/work/service/coredns/)

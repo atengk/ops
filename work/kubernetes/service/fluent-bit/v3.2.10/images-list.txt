@@ -1,0 +1,2 @@
+bitnami/fluent-bit:3.2.10
+bitnami/os-shell:12

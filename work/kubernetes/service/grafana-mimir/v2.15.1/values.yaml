@@ -1,0 +1,649 @@
+global:
+  defaultStorageClass: ""
+  security:
+    allowInsecureImages: true
+fullnameOverride: "grafana-mimir"
+mimir:
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/grafana-mimir
+    tag: "2.15.1"
+    pullPolicy: IfNotPresent
+  configuration: |
+    usage_stats:
+      installation_mode: helm
+    activity_tracker:
+      filepath: {{ .Values.mimir.dataDir }}/activity.log
+    alertmanager_storage:
+      {{- if .Values.minio.enabled }}
+      backend: s3
+      s3:
+        access_key_id: ${MIMIR_MINIO_ACCESS_KEY_ID}
+        secret_access_key: ${MIMIR_MINIO_SECRET_ACCESS_KEY}
+        bucket_name: alertmanager
+        endpoint: "{{ include "grafana-mimir.minio.fullname" . }}:{{ .Values.minio.service.ports.api }}"
+        insecure: {{ not .Values.minio.tls.enabled }}
+      {{- else }}
+      backend: {{ .Values.alertmanager.blockStorage.backend }}
+      {{ .Values.alertmanager.blockStorage.backend }}:
+        {{- include "common.tplvalues.render" (dict "value" .Values.alertmanager.blockStorage.config "context" $) | nindent 4 }}
+      {{- end }}
+    # This configures how the store-gateway synchronizes blocks stored in the bucket. It uses Minio by default for getting started (configured via flags) but this should be changed for production deployments.
+    blocks_storage:
+      bucket_store:
+        sync_dir: {{ .Values.mimir.dataDir }}/tsdb-sync
+        {{- if .Values.memcachedchunks.enabled }}
+        chunks_cache:
+          backend: memcached
+          memcached:
+            addresses: {{ include "grafana-mimir.memcached-chunks.host" . }}
+            timeout: 450ms
+        {{- end }}
+        {{- if .Values.memcachedindex.enabled }}
+        index_cache:
+          backend: memcached
+          memcached:
+            addresses: {{ include "grafana-mimir.memcached-index.host" . }}
+            timeout: 450ms
+        {{- end }}
+        {{- if .Values.memcachedmetadata.enabled }}
+        metadata_cache:
+          backend: memcached
+          memcached:
+            addresses: {{ include "grafana-mimir.memcached-metadata.host" . }}
+            timeout: 450ms
+        {{- end }}
+      {{- if .Values.minio.enabled }}
+      backend: s3
+      s3:
+        access_key_id: ${MIMIR_MINIO_ACCESS_KEY_ID}
+        secret_access_key: ${MIMIR_MINIO_SECRET_ACCESS_KEY}
+        bucket_name: mimir
+        endpoint: "{{ include "grafana-mimir.minio.fullname" . }}:{{ .Values.minio.service.ports.api }}"
+        insecure: {{ not .Values.minio.tls.enabled }}
+      {{- else }}
+      backend: {{ .Values.mimir.blockStorage.backend }}
+      {{ .Values.mimir.blockStorage.backend }}:
+        {{- include "common.tplvalues.render" (dict "value" .Values.mimir.blockStorage.config "context" $) | nindent 4 }}
+      {{- end }}
+      tsdb:
+        dir: {{ .Values.mimir.dataDir }}/tsdb
+    ingester:
+      compaction_interval: 30m
+      deletion_delay: 2h
+      max_closing_blocks_concurrency: 2
+      max_opening_blocks_concurrency: 4
+      symbols_flushers_concurrency: 4
+      data_dir: {{ .Values.mimir.dataDir }}/ingester
+      sharding_ring:
+        wait_stability_min_duration: 1m
+    compactor:
+      data_dir: {{ .Values.mimir.dataDir }}/compactor
+    frontend:
+      parallelize_shardable_queries: true
+      {{- if .Values.memcachedfrontend.enabled }}
+      results_cache:
+        backend: memcached
+        memcached:
+          timeout: 500ms
+          addresses: {{ include "grafana-mimir.memcached-frontend.host" . }}
+      cache_results: true
+      {{- end }}
+      {{- if .Values.queryScheduler.enabled }}
+      scheduler_address: {{ template "grafana-mimir.query-scheduler.fullname" . }}-headless.{{ .Release.Namespace }}.svc:{{ .Values.queryScheduler.service.ports.grpc }}
+      {{- end }}
+    frontend_worker:
+      grpc_client_config:
+        max_send_msg_size: 419430400 # 400MiB
+      {{- if .Values.queryScheduler.enabled }}
+      scheduler_address: {{ template "grafana-mimir.query-scheduler.fullname" . }}-headless.{{ .Release.Namespace }}.svc:{{ .Values.queryScheduler.service.ports.grpc }}
+      {{- else }}
+      frontend_address: {{ template "grafana-mimir.query-frontend.fullname" . }}-headless.{{ .Release.Namespace }}.svc:{{ .Values.queryFrontend.service.ports.grpc }}
+      {{- end }}
+    ingester:
+      ring:
+        final_sleep: 0s
+        num_tokens: 512
+        tokens_file_path: {{ .Values.mimir.dataDir }}/tokens
+        unregister_on_shutdown: false
+    ingester_client:
+      grpc_client_config:
+        max_recv_msg_size: 104857600
+        max_send_msg_size: 104857600
+    limits:
+      # Limit queries to 500 days. You can override this on a per-tenant basis.
+      max_total_query_length: 12000h
+      # Adjust max query parallelism to 16x sharding, without sharding we can run 15d queries fully in parallel.
+      # With sharding we can further shard each day another 16 times. 15 days * 16 shards = 240 subqueries.
+      max_query_parallelism: 240
+      # Avoid caching results newer than 10m because some samples can be delayed
+      # This presents caching incomplete results
+      max_cache_freshness: 10m
+    memberlist:
+      abort_if_cluster_join_fails: false
+      compression_enabled: false
+      advertise_port: {{ .Values.mimir.containerPorts.gossipRing }}
+      bind_port: {{ .Values.mimir.containerPorts.gossipRing }}
+      join_members:
+      - dns+{{ include "grafana-mimir.gossip-ring.fullname" . }}.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.mimir.gossipRing.service.ports.http }}
+    querier:
+      # With query sharding we run more but smaller queries. We must strike a balance
+      # which allows us to process more sharded queries in parallel when requested, but not overload
+      # queriers during non-sharded queries.
+      max_concurrent: 16
+    query_scheduler:
+      # Increase from default of 100 to account for queries created by query sharding
+      max_outstanding_requests_per_tenant: 800
+    server:
+      grpc_server_max_concurrent_streams: 1000
+      grpc_server_max_connection_age: 2m
+      grpc_server_max_connection_age_grace: 5m
+      grpc_server_max_connection_idle: 1m
+      http_listen_port: {{ .Values.mimir.containerPorts.http }}
+      grpc_listen_port: {{ .Values.mimir.containerPorts.grpc }}
+    api:
+      alertmanager_http_prefix: {{ .Values.mimir.httpPrefix.alertmanager }}
+      prometheus_http_prefix: {{ .Values.mimir.httpPrefix.prometheus }}
+    store_gateway:
+      sharding_ring:
+        wait_stability_min_duration: 1m
+        tokens_file_path: {{ .Values.mimir.dataDir }}/tokens
+    {{- if .Values.ruler.enabled }}
+    ruler:
+      alertmanager_url: dnssrvnoa+http://_http-metrics._tcp.{{ include "grafana-mimir.alertmanager.fullname" . }}-headless.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}/alertmanager
+      enable_api: true
+      rule_path: {{ .Values.mimir.dataDir }}/ruler
+    ruler_storage:
+      {{- if .Values.minio.enabled }}
+      backend: s3
+      s3:
+        access_key_id: ${MIMIR_MINIO_ACCESS_KEY_ID}
+        secret_access_key: ${MIMIR_MINIO_SECRET_ACCESS_KEY}
+        bucket_name: ruler
+        endpoint: "{{ include "grafana-mimir.minio.fullname" . }}:{{ .Values.minio.service.ports.api }}"
+        insecure: {{ not .Values.minio.tls.enabled }}
+      {{- else }}
+      backend: {{ .Values.ruler.blockStorage.backend }}
+      {{ .Values.ruler.blockStorage.backend }}:
+        {{- include "common.tplvalues.render" (dict "value" .Values.ruler.blockStorage.config "context" $) | nindent 4 }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.alertmanager.enabled }}
+    alertmanager:
+      data_dir: {{ .Values.mimir.dataDir }}/alert-manager
+      enable_api: true
+      external_url: {{ .Values.mimir.httpPrefix.alertmanager }}
+    {{- if .Values.minio.enabled }}
+    alertmanager_storage:
+      backend: s3
+      s3:
+        access_key_id: ${MIMIR_MINIO_ACCESS_KEY_ID}
+        secret_access_key: ${MIMIR_MINIO_SECRET_ACCESS_KEY}
+        bucket_name: ruler
+        endpoint: "{{ include "grafana-mimir.minio.fullname" . }}:{{ .Values.minio.service.ports.api }}"
+        insecure: {{ not .Values.minio.tls.enabled }}
+    {{- end }}
+    {{- end }}
+  ## @param mimir.overrideConfiguration [object] Mimir components configuration override. Values defined here takes precedence over mimir.configuration
+  ## e.g:
+  ## overrideConfiguration:
+  ##   auth_enabled: true
+  ##
+  overrideConfiguration: {}
+  httpPrefix:
+    prometheus: /prometheus
+    alertmanager: /alertmanager
+  ## config:
+  ##   access_key_id: AKIAMYACCESSKEY123456789
+  ##   secret_access_key: MYSECRETACCESSKEY
+  ##   region: us-east-1
+  ##   bucket_name: mimir
+  ##   endpoint: s3.us-east-1.amazonaws.com
+  ##   insecure: false
+  ##
+  blockStorage:
+    backend: s3
+    config: {}
+alertmanager:
+  enabled: false
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: true
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+compactor:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: true
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+distributor:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+gateway:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/nginx
+    tag: "1.27.4"
+    pullPolicy: IfNotPresent
+  auth:
+    enabled: false
+    username: "user"
+    password: ""
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: NodePort
+    ports:
+      http: 80
+    nodePorts:
+      http: ""
+ingester:
+  replicaCount: 2
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: true
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+overridesExporter:
+  enabled: false
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+querier:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+queryFrontend:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+queryScheduler:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+storeGateway:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: true
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+ruler:
+  enabled: false
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/grafana-mimir="true"
+    type: "soft"
+    key: "kubernetes.service/grafana-mimir"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  persistence:
+    enabled: true
+    size: 10Gi
+  service:
+    type: ClusterIP
+    ports:
+      http: 8080
+      grpc: 9095
+    nodePorts:
+      http: ""
+      grpc: ""
+  ## config:
+  ##   access_key_id: AKIAMYACCESSKEY123456789
+  ##   secret_access_key: MYSECRETACCESSKEY
+  ##   region: us-east-1
+  ##   bucket_name: ruler
+  ##   endpoint: s3.us-east-1.amazonaws.com
+  ##   insecure: false
+  ##
+  blockStorage:
+    backend: s3
+    config: {}
+minio:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/minio
+    tag: "2024.11.7"
+    pullPolicy: IfNotPresent
+    debug: false
+  clientImage:
+    registry: registry.lingo.local
+    repository: bitnami/minio-client
+    tag: "2024.11.17"
+  mode: standalone
+  auth:
+    rootUser: admin
+    rootPassword: ""
+  defaultBuckets: "mimir, ruler, alertmanager"
+  provisioning:
+    enabled: true
+    # We need to allow downloads in order for the UI to work
+    extraCommands:
+      - "mc anonymous set download provisioning/mimir"
+      - "mc anonymous set download provisioning/ruler"
+      - "mc anonymous set download provisioning/alertmanager"
+  service:
+    type: ClusterIP
+    loadBalancerIP: ""
+    ports:
+      api: 80
+  resourcesPreset: "none"
+  resources: {}
+  persistence:
+    size: 100Gi
+
+externalMemcachedChunks:
+  host: "memcached.kongyu"
+  port: 11211
+memcachedchunks:
+  enabled: false
+externalMemcachedFrontend:
+  host: "memcached.kongyu"
+  port: 11211
+memcachedfrontend:
+  enabled: false
+externalMemcachedIndex:
+  host: "memcached.kongyu"
+  port: 11211
+memcachedindexqueries:
+  enabled: false
+externalMemcachedMetadata:
+  host: "memcached.kongyu"
+  port: 11211
+memcachedmetadata:
+  enabled: false

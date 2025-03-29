@@ -1,0 +1,6 @@
+bitnami/grafana-mimir:2.15.1
+bitnami/nginx:1.27.4
+bitnami/os-shell:12
+bitnami/memcached:1.6.38
+bitnami/minio:2024.11.7
+bitnami/minio-client:2024.11.17

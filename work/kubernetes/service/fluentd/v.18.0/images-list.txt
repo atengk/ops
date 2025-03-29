@@ -1,0 +1,2 @@
+bitnami/fluentd:1.18.0
+bitnami/os-shell:12

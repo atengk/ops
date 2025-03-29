@@ -22,6 +22,7 @@ values.yaml是修改后的配置，可以根据环境做出适当修改
 
 - 存储类：defaultStorageClass（不填为默认）
 - 认证配置：dbUser.user dbUser.password
+- 资源配置：resources.requests resources.limits
 - 副本数量：replicaCount
 - 镜像地址：image.registry
 - 其他配置：...
@@ -46,37 +47,49 @@ helm install cassandra -n kongyu -f values.yaml cassandra-12.1.3.tgz
 
 ```
 kubectl get -n kongyu pod,svc,pvc -l app.kubernetes.io/instance=cassandra
-kubectl logs -f -n kongyu -l app.kubernetes.io/instance=cassandra
+kubectl logs -f -n kongyu cassandra-0
 ```
 
 **使用服务**
 
-创建客户端容器
+进入容器
 
 ```
-kubectl run cassandra-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/cassandra:5.0.3 --namespace kongyu --command -- bash
+kubectl exec -it -n kongyu cassandra-0 -- bash
+```
+
+查看集群数据中心的节点
+
+```
+$ nodetool status
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address         Load        Tokens  Owns (effective)  Host ID                               Rack
+UN  10.244.188.224  137.41 KiB  256     100.0%            b9e199ca-dd20-4ee0-96bc-47fbdefc81d8  rack1
 ```
 
 访问服务
 
 ```
-cqlsh -u cassandra -p Admin@123 cassandra
+cqlsh -u cassandra -p Admin@123 cassandra.kongyu
 ```
 
 使用SQL
 
 ```
-cassandra@cqlsh> SELECT release_version FROM system.local;
+cassandra@cqlsh> SELECT broadcast_address, data_center, rack, release_version FROM system.local;
 
- release_version
------------------
-           5.0.3
+ broadcast_address | data_center | rack  | release_version
+-------------------+-------------+-------+-----------------
+     10.244.188.29 | datacenter1 | rack1 |           5.0.3
 ```
 
 创建Keyspace
 
 ```
-CREATE KEYSPACE zipkin
+CREATE KEYSPACE ateng
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 ```
 
@@ -89,8 +102,8 @@ DESCRIBE KEYSPACES;
 创建表并写入数据
 
 ```
-USE zipkin;
-CREATE TABLE zipkin.traces (
+USE ateng;
+CREATE TABLE ateng.traces (
     trace_id UUID PRIMARY KEY,
     span_id UUID,
     parent_span_id UUID,
@@ -98,9 +111,19 @@ CREATE TABLE zipkin.traces (
     timestamp BIGINT,
     duration BIGINT
 );
-INSERT INTO zipkin.traces (trace_id, span_id, parent_span_id, name, timestamp, duration)
+DESCRIBE TABLES;
+INSERT INTO ateng.traces (trace_id, span_id, parent_span_id, name, timestamp, duration)
 VALUES (uuid(), uuid(), null, 'example-operation', 1617273600000, 500);
-SELECT * FROM zipkin.traces;
+SELECT * FROM ateng.traces;
+```
+
+**服务扩缩容**
+
+> 将服务扩展至3个副本
+
+```
+helm upgrade cassandra -n kongyu -f values.yaml --set replicaCount=3 cassandra-12.1.3.tgz
+kubectl get -n kongyu pod,svc,pvc -l app.kubernetes.io/instance=cassandra
 ```
 
 **删除服务以及数据**

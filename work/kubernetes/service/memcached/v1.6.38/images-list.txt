@@ -1,0 +1,3 @@
+bitnami/memcached:1.6.38
+bitnami/memcached-exporter:0.15.1
+bitnami/os-shell:12

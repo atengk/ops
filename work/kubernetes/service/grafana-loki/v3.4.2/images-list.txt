@@ -1,0 +1,4 @@
+bitnami/grafana-loki:3.4.2
+bitnami/promtail:3.4.2
+bitnami/nginx:1.27.4
+bitnami/os-shell:12

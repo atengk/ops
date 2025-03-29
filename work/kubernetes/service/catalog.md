@@ -6,6 +6,8 @@
         - [主从模式](/work/kubernetes/service/redis/v7.4.1/replication/)
         - [哨兵模式](/work/kubernetes/service/redis/v7.4.1/sentinel/)
         - [集群模式](/work/kubernetes/service/redis/v7.4.1/cluster/)
+    - Valkey
+        - [单机模式](/work/kubernetes/service/redis/valkey/v8.0.2/)
     - Mariadb Galera
         - [Galera集群](/work/kubernetes/service/mariadb/v11.4.4/)
     - PostgreSQL
@@ -58,6 +60,9 @@
         - [安装文档](/work/kubernetes/service/cassandra/v5.0.3/)
     - 达梦数据库
         - [安装文档](/work/kubernetes/service/dm8/v20241230/)
+    - Memcached
+        - [单机模式](/work/kubernetes/service/memcached/v1.6.38/standalone/)
+        - [集群模式](/work/kubernetes/service/memcached/v1.6.38/high-availability/)
 - 消息队列
     - RabbitMQ
         - [集群模式](/work/kubernetes/service/rabbitmq/v4.0.2/)
@@ -77,7 +82,16 @@
         - [ingress模式](/work/kubernetes/service/harbor/v2.12.0/ingress-http/)
         - [https模式](/work/kubernetes/service/harbor/v2.12.0/https/)
         - [https模式(自定义证书)](/work/kubernetes/service/harbor/v2.12.0/https-custom/)
-- 开发工具
+- 可观测
+    - [Prometheus](/work/kubernetes/service/prometheus/v2.55.1/)
+    - [Grafana](/work/kubernetes/service/grafana/v11.5.3/)
+    - [Grafana Loki](/work/kubernetes/service/grafana-loki/v3.4.2/)
+    - [Grafana Mimir](/work/kubernetes/service/grafana-mimir/v2.15.1/)
+    - [Grafana Tempo](/work/kubernetes/service/grafana-tempo/v2.7.2/)
+    - [Fluentd](/work/kubernetes/service/fluentd/v.18.0/)
+    - [Fluent Bit](/work/kubernetes/service/fluent-bit/v3.2.10/)
+    - [Logstash](/work/kubernetes/service/logstash/v8.16.1/)
+- 开发服务
     - [Spring Boot应用](/work/kubernetes/service/springboot-app/v1.1/)
     - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
     - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
@@ -88,12 +102,11 @@
     - [Nacos](/work/kubernetes/service/nacos/v2.4.3/)
     - [Seata](/work/kubernetes/service/seata/)
     - [Sentinel](/work/kubernetes/service/sentinel/)
-    - [SkyWalking](/work/kubernetes/service/skywalking/v10.1.0/)
     - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
     - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
-    - [Zipkin](/work/kubernetes/service/zipkin/v3.4.4/)
-    - [Jaeger](/work/kubernetes/service/jaeger/v2.3.0/)
-    - [Logstash](/work/kubernetes/service/logstash/v8.16.1/)
+    - [SkyWalking](/work/kubernetes/service/skywalking/v10.1.0/)
+    - [Zipkin](/work/kubernetes/service/zipkin/v3.5.0/)
+    - [Jaeger](/work/kubernetes/service/jaeger/v2.4.0/)
     - [chat2db数据库管理工具](/work/kubernetes/service/chat2db/v0.3.7/)
     - [drawDB数据库编辑器](/work/kubernetes/service/drawdb/)
 - 大数据
@@ -101,10 +114,8 @@
     - [Flink](/work/kubernetes/service/flink/v1.19.1/)
     - [Spark](/work/kubernetes/service/spark/v3.5.4/)
     - [DolphinScheduler](/work/kubernetes/service/dolphinscheduler/v3.2.2/)
-    - Doris2
-        - [集群模式](/work/kubernetes/service/doris/v2.1.7/)
-    - Doris3
-        - [集群模式](/work/kubernetes/service/doris/v3.0.3/)
+    - [Doris2集群模式](/work/kubernetes/service/doris/v2.1.7/)
+    - [Doris3集群模式](/work/kubernetes/service/doris/v3.0.3/)
 - 负载均衡和网络
     - [MetalLB](/work/kubernetes/service/metallb/v0.14.8/)
     - [External-DNS](/work/kubernetes/service/external-dns/v0.15.0/)

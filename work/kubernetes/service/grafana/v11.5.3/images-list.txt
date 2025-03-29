@@ -1,0 +1,2 @@
+bitnami/grafana:11.5.3
+bitnami/os-shell:12

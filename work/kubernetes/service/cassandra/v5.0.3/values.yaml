@@ -17,7 +17,7 @@ cluster:
   name: cassandra
   seedCount: 1
   numTokens: 256
-  datacenter: dc1
+  datacenter: datacenter1
   rack: rack1
   endpointSnitch: SimpleSnitch
   clientEncryption: false
@@ -28,9 +28,19 @@ jvm:
 extraEnvVars:
   - name: TZ
     value: "Asia/Shanghai"
+  - name: CASSANDRA_CFG_YAML_SASI_INDEXES_ENABLED
+    value: "true"
+  - name: CASSANDRA_ENSURE_SCHEMA
+    value: "true"
 replicaCount: 1
 resourcesPreset: "none"
-resources: {}
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 2
+    memory: 4096Mi
 affinity: {}
 nodeSelector: {}
 podAntiAffinityPreset: "soft"  ## 调度到不同节点

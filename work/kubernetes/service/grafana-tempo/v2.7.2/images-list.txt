@@ -1,0 +1,4 @@
+bitnami/grafana-tempo:2.7.2
+bitnami/grafana-tempo-query:2.7.2
+bitnami/grafana-tempo-vulture:2.7.2
+bitnami/os-shell:12

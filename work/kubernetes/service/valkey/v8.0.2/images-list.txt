@@ -1,0 +1,6 @@
+bitnami/redis-exporter:1.69.0
+bitnami/valkey:8.0.2
+bitnami/valkey-sentinel:8.0.2
+bitnami/valkey-cluster:8.0.2
+bitnami/os-shell:12
+bitnami/kubectl:1.32.3

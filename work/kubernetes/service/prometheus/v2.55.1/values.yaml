@@ -1,0 +1,166 @@
+global:
+  defaultStorageClass: ""
+  security:
+    allowInsecureImages: true
+fullnameOverride: "prometheus"
+alertmanager:
+  enabled: true
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/alertmanager
+    tag: "0.28.0"
+    pullPolicy: IfNotPresent
+  configuration: |
+    receivers:
+      - name: default-receiver
+    route:
+      group_wait: 10s
+      group_interval: 5m
+      receiver: default-receiver
+      repeat_interval: 3h
+
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/prometheus="true"
+    type: "soft"
+    key: "kubernetes.service/prometheus"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: NodePort
+    ports:
+      http: 80
+      cluster: 9094
+    nodePorts:
+      http: ""
+  persistence:
+    enabled: true
+    size: 10Gi
+server:
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/prometheus
+    tag: "2.55.1"
+    pullPolicy: IfNotPresent
+  configuration: |
+    global:
+      {{- if .Values.server.scrapeInterval }}
+      scrape_interval: {{ .Values.server.scrapeInterval }}
+      {{- end }}
+      {{- if .Values.server.scrapeTimeout }}
+      scrape_timeout: {{ .Values.server.scrapeTimeout }}
+      {{- end }}
+      {{- if .Values.server.evaluationInterval }}
+      evaluation_interval: {{ .Values.server.evaluationInterval }}
+      {{- end }}
+      external_labels:
+        monitor: {{ template "common.names.fullname" . }}
+        {{- if .Values.server.externalLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.server.externalLabels "context" $) | nindent 4 }}
+        {{- end }}
+    {{- if .Values.server.remoteWrite }}
+    remote_write: {{- include "common.tplvalues.render" (dict "value" .Values.server.remoteWrite "context" $) | nindent 4 }}
+    {{- end }}
+    scrape_configs:
+      - job_name: prometheus
+      {{- include "prometheus.scrape_config" (dict "component" "server" "context" $) | nindent 4 }}
+    {{- if .Values.alertmanager.enabled }}
+      - job_name: alertmanager
+        {{- include "prometheus.scrape_config" (dict "component" "alertmanager" "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.server.extraScrapeConfigs}}
+    {{- include "common.tplvalues.render" (dict "value" .Values.server.extraScrapeConfigs "context" $) | nindent 2 }}
+    {{- end }}
+    {{- if or .Values.alertmanager.enabled .Values.server.alertingEndpoints}}
+    alerting:
+      alertmanagers:
+        {{- if .Values.server.alertingEndpoints }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.server.alertingEndpoints "context" $) | nindent 4 }}
+        {{- end }}
+        - scheme: HTTP
+          static_configs:
+            - targets: [ "{{ printf "%s.%s.svc.%s:%d" (include "prometheus.alertmanager.fullname" .) (include "common.names.namespace" .) .Values.clusterDomain (int .Values.alertmanager.service.ports.http) }}" ]
+    rule_files:
+      - rules.yaml
+    {{- end }}
+    
+  alertingRules: {}
+  extraScrapeConfigs:
+    - job_name: "myprometheus"
+      static_configs:
+        - targets: ["prometheus:80"]
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/prometheus="true"
+    type: "soft"
+    key: "kubernetes.service/prometheus"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  routePrefix: /
+  remoteWrite: []
+  scrapeInterval: ""
+  scrapeTimeout: ""
+  evaluationInterval: ""
+  enableAdminAPI: false
+  enableRemoteWriteReceiver: false
+  enableFeatures: []
+  logLevel: info
+  logFormat: logfmt
+  retention: 10d
+  retentionSize: "0"
+  alertingEndpoints: []
+  thanos:
+    create: false
+    image:
+      registry: registry.lingo.local
+      repository: bitnami/thanos
+      tag: "0.37.2"
+      pullPolicy: IfNotPresent
+    prometheusUrl: ""
+    extraArgs: []
+    objectStorageConfig:
+      secretName: ""
+      secretKey: thanos.yaml
+    resourcesPreset: "none"
+    resources: {}
+  service:
+    type: NodePort
+    ports:
+      http: 80
+    nodePorts:
+      http: ""
+  persistence:
+    enabled: true
+    size: 100Gi

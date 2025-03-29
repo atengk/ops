@@ -1,0 +1,4 @@
+bitnami/alertmanager:0.28.0
+bitnami/prometheus:2.55.1
+bitnami/thanos:0.37.2
+bitnami/os-shell:12

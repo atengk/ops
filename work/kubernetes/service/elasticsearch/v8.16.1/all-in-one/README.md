@@ -117,6 +117,12 @@ curl -X PUT "http://localhost:9200/my_index" -H 'Content-Type: application/json'
 curl -X GET "http://localhost:9200/my_index/_settings?pretty"
 ```
 
+查看索引列表
+
+```
+curl http://localhost:9200/_cat/indices?v
+```
+
 写入数据
 
 ```
