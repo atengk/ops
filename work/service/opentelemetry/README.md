@@ -1008,7 +1008,6 @@ exporters:
     verbosity: detailed
   prometheus:
     endpoint: 0.0.0.0:8889
-    namespace: default
 
 processors:
   batch:

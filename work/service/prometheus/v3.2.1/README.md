@@ -6,6 +6,8 @@ Prometheus 是一个开源的监控和报警系统，主要用于监控分布式
 
 - [软件下载](https://prometheus.io/download/)
 
+- [告警策略配置参考](https://github.com/sretalk/prometheus-rules)
+
 
 
 ## 基础配置

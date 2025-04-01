@@ -28,3 +28,10 @@
 
 - [GitHub](https://github.com/JoeanAmier/TikTokDownloader)
 
+
+
+### WirelessMon
+
+WirelessMon中文绿色版，扫描自己附近的无线网络，查看信号强度、干扰必备
+
+- [博客](https://mp.weixin.qq.com/s/0nGgkn9z_w1pT-20CrI9Dg)

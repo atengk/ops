@@ -1,0 +1,4 @@
+bitnami/argo-cd:2.14.8
+bitnami/dex:2.42.0
+bitnami/os-shell:12
+bitnami/redis:7.4.2

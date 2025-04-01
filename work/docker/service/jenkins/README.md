@@ -4,23 +4,25 @@ Jenkins 是一个开源的自动化服务器，广泛用于实现持续集成（
 
 - [官网链接](https://www.jenkins.io/)
 
+
+
 **下载镜像**
 
 ```
-docker pull bitnami/jenkins:2.479.1
+docker pull bitnami/jenkins:2.492.2
 ```
 
 **推送到仓库**
 
 ```
-docker tag bitnami/jenkins:2.479.1 registry.lingo.local/bitnami/jenkins:2.479.1
-docker push registry.lingo.local/bitnami/jenkins:2.479.1
+docker tag bitnami/jenkins:2.492.2 registry.lingo.local/bitnami/jenkins:2.492.2
+docker push registry.lingo.local/bitnami/jenkins:2.492.2
 ```
 
 **保存镜像**
 
 ```
-docker save registry.lingo.local/bitnami/jenkins:2.479.1 | gzip -c > image-jenkins_2.479.1.tar.gz
+docker save registry.lingo.local/bitnami/jenkins:2.492.2 | gzip -c > image-jenkins_2.492.2.tar.gz
 ```
 
 **创建目录**
@@ -41,7 +43,7 @@ docker run -d --name ateng-jenkins \
   -e JENKINS_EMAIL=2385569970@qq.com \
   -e JAVA_OPTS="-server -Xms1g -Xmx2g" \
   -e TZ=Asia/Shanghai \
-  registry.lingo.local/bitnami/jenkins:2.479.1
+  registry.lingo.local/bitnami/jenkins:2.492.2
 ```
 
 **查看日志**

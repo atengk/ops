@@ -106,6 +106,12 @@ kk artifact export -m kk-manifest-ks-all.yaml -o kubekey-artifact-ks-all.tar.gz
 tar -zxvf kubekey-v3.1.7-linux-amd64.tar.gz -C /usr/bin/
 ```
 
+初始化系统依赖
+
+```
+kk init os -f kk-config-ks.yaml -a kubekey-artifact-ks.tar.gz
+```
+
 初始化镜像仓库
 
 ```

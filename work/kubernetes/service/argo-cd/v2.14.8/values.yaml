@@ -1,0 +1,237 @@
+global:
+  defaultStorageClass: ""
+  security:
+    allowInsecureImages: true
+fullnameOverride: "argo-cd"
+image:
+  registry: registry.lingo.local
+  repository: bitnami/argo-cd
+  tag: "2.14.8"
+  pullPolicy: IfNotPresent
+controller:
+  kind: Deployment
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/argo-cd="true"
+    type: "soft"
+    key: "kubernetes.service/argo-cd"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  service:
+    type: ClusterIP
+    ports:
+      metrics: 8082
+    nodePorts:
+      metrics: ""
+server:
+  replicaCount: 1
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/argo-cd="true"
+    type: "soft"
+    key: "kubernetes.service/argo-cd"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  logLevel: info
+  configEnabled: true
+  url: ""
+  ## Argo CD server config. This object will be directly rendered
+  ## @param server.config [object] Argo CD server configuration that will end on the argocd-cm Config Map
+  ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/
+  ## E.g:
+  ## repositories:
+  ##   - url: git@github.com:group/repo.git
+  ##     sshPrivateKeySecret:
+  ##       name: secret-name
+  ##       key: sshPrivateKey
+  ##   - type: helm
+  ##     url: https://charts.helm.sh/stable
+  ##     name: stable
+  ##   - type: helm
+  ##     url: https://argoproj.github.io/argo-helm
+  ##     name: argo
+  ## oidc.config:
+  ##   name: AzureAD
+  ##   issuer: https://login.microsoftonline.com/TENANT_ID/v2.0
+  ##   clientID: CLIENT_ID
+  ##   clientSecret: $oidc.azuread.clientSecret
+  ##   requestedIDTokenClaims:
+  ##     groups:
+  ##       essential: true
+  ##   requestedScopes:
+  ##     - openid
+  ##     - profile
+  ##     - email
+  ## dex.config:
+  ##    connectors:
+  ##      # GitHub example
+  ##      - type: github
+  ##        id: github
+  ##        name: GitHub
+  ##        config:
+  ##          clientID: aabbccddeeff00112233
+  ##          clientSecret: $dex.github.clientSecret
+  ##          orgs:
+  ##          - name: your-github-org
+  config:
+    ## Argo CD external base URL. Required when configuring SSO. Required when enabling dex.
+    ## E.g:
+    ## url: https://argocd.example.com
+    ##
+    url: "{{ .Values.server.url }}"
+    ## Argo CD instance label key
+    ##
+    application.instanceLabelKey: argocd.argoproj.io/instance
+    ## If Dex is enabled you need to add connectors here
+    ## dex.config: |
+    ##  connectors: []
+    ##
+    dex.config: ""
+  service:
+    type: NodePort
+    ports:
+      http: 80
+      https: 443
+    nodePorts:
+      http: ""
+      https: ""
+repoServer:
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    ports:
+      repoServer: 8081
+    nodePorts:
+      repoServer: ""
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/argo-cd="true"
+    type: "soft"
+    key: "kubernetes.service/argo-cd"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+dex:
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/dex
+    tag: "2.42.0"
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    ports:
+      http: 5556
+      grpc: 5557
+    nodePorts:
+      http: ""
+      grpc: ""
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/argo-cd="true"
+    type: "soft"
+    key: "kubernetes.service/argo-cd"
+    values:
+      - "true"
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+config:
+  ## @param config.knownHosts [string] Known hosts to be added to the known hosts list by default. Check the values to see the default value
+  ##
+  knownHosts: |
+    bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAubiN81eDcafrgMeLzaFPsw2kNvEcqTKl/VqLat/MaB33pZy0y3rJZtnqwR2qOOvbwKZYKiEO1O6VqNEBxKvJJelCq0dTXWT5pbO2gDXC6h6QDXCaHo6pOHGPUy+YBaGQRGuSusMEASYiWunYN0vCAI8QaXnWMXNMdFP3jHAJH0eDsoiGnLPBlBp4TNm6rYI74nMzgz3B9IikW4WVK+dc8KZJZWYjAuORU3jc1c/NPskD2ASinf8v3xnfXeukU0sJ5N6m5E8VLjObPEO+mN2t/FZTMZLiFqPWc/ALSqnMnnhwrNi2rbfg/rd/IpL8Le3pSBne8+seeFVBoGqzHM9yXw==
+    github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+    gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
+    gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
+    gitlab.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsj2bNKTBSpIYDEGk9KxsGh3mySTRgMtXL583qmBpzeQ+jqCMRgBqB98u3z++J1sKlXHWfM9dyhSevkMwSbhoR8XIq/U0tCNyokEi/ueaBMCvbcTHhO7FcwzY92WK4Yt0aGROY5qX2UKSeOvuP4D6TPqKF1onrSzH9bx9XUf2lEdWT/ia1NEKjunUqu1xOB/StKDHMoX4/OKyIzuS0q/T1zOATthvasJFoPrAjkohTyaDUz2LN5JoH839hViyEG82yB+MjcFV5MU3N1l1QL3cVUCh93xSaua1N85qivl+siMkPGbO5xR/En4iEY6K2XPASUEMaieWVNTRCtJ4S8H+9
+    ssh.dev.azure.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
+    vs-ssh.visualstudio.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
+  ## @param config.extraKnownHosts Add extra known hosts to the known hosts list
+  ## E.g.:
+  ##   extraKnownHosts: |
+  ##     gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
+  ##     gitlab.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsj2bNKTBSpIYDEGk9KxsGh3mySTRgMtXL583qmBpzeQ+jqCMRgBqB98u3z++J1sKlXHWfM9dyhSevkMwSbhoR8XIq/U0tCNyokEi/ueaBMCvbcTHhO7FcwzY92WK4Yt0aGROY5qX2UKSeOvuP4D6TPqKF1onrSzH9bx9XUf2lEdWT/ia1NEKjunUqu1xOB/StKDHMoX4/OKyIzuS0q/T1zOATthvasJFoPrAjkohTyaDUz2LN5JoH839hViyEG82yB+MjcFV5MU3N1l1QL3cVUCh93xSaua1N85qivl+siMkPGbO5xR/En4iEY6K2XPASUEMaieWVNTRCtJ4S8H+9
+  ##
+  extraKnownHosts: ""
+  ## @param config.createExtraKnownHosts Whether to create or not the extra known hosts configmap
+  ##
+  createExtraKnownHosts: true
+  ## @param config.styles Custom CSS styles
+  ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/custom-styles/
+  ## E.g.:
+  ## styles: |
+  ##  .nav-bar {
+  ##    background: linear-gradient(to bottom, #999, #777, #333, #222, #111);
+  ##  }
+  ##
+  styles: ""
+  ## @param config.existingStylesConfigmap Use an existing styles configmap
+  ##
+  existingStylesConfigmap: ""
+redis:
+  enabled: false
+externalRedis:
+  enabled: true
+  host: "redis.lingo-service-dev"
+  port: 6379
+  password: "Admin@123"
+redisWait:
+  enabled: false

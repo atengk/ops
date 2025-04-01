@@ -58,6 +58,9 @@
     - TLS证书
         - [cfssl创建证书](/work/service/tls/tls-cfssl/v1.6.5/)
         - [openssl创建证书](/work/service/tls/tls-openssl/)
+- DevOps
+    - [Jenkins](/work/service/jenkins/)
+    
 - 可观测
     - OTLP
         - [OpenTelemetry](/work/service/opentelemetry/)
@@ -79,6 +82,15 @@
         - [OpenJDK17](/work/service/openjdk/openjdk17/)
         - [OpenJDK21](/work/service/openjdk/openjdk21/)
         - [使用文档](/work/service/openjdk/OPS.md)
+    - Apache Maven
+        - [安装文档](/work/service/maven/v3.9.9/)
+        - [使用文档](/work/service/maven/OPS.md)
+    - Git
+        - [安装文档](/work/service/git/v2.49.0/)
+        - [使用文档](/work/service/git/OPS.md)
+    - Node.js 和 NVM
+        - [安装文档](/work/service/nvm/v0.40.2/)
+        - [使用文档](/work/service/nvm/OPS.md)
     - SpringCloud Alibaba
         - [Nacos](/work/service/springcloudalibaba/nacos)
         - [Sentinel](/work/service/springcloudalibaba/sentinel/)
