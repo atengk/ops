@@ -30,7 +30,7 @@ JAR_PATH="${SPRINGBOOT_JAR_PATH}"
 # 如果环境变量未设置，则自动寻找同一目录下的JAR文件
 if [ -z "$JAR_PATH" ]; then
   SCRIPT_DIR=$(dirname "$(realpath "$0")")
-  JAR_PATH=$(find "$SCRIPT_DIR" -maxdepth 1 -name "*.jar" -type f -printf "%T@ %p\n" | sort -nr | head -n1 | cut -d' ' -f2-)
+  JAR_PATH=$(find "$SCRIPT_DIR" -maxdepth 1 -name "*.jar" | head -n 1)
 fi
 
 if [ -z "$JAR_PATH" ]; then
@@ -63,7 +63,7 @@ LOG_LINK="$LOG_DIR/$APP_NAME-current.log"
 PID_FILE="/tmp/$APP_NAME.pid"
 
 # JVM参数
-JVM_OPTS=${JVM_OPTS:--jar -server}
+JVM_OPTS=${JVM_OPTS:--server}
 
 # Spring Boot应用参数
 SPRING_OPTS=${SPRING_OPTS:-}
@@ -143,11 +143,11 @@ start() {
   log_message "INFO" "启动 $APP_NAME..."
 
   if [ "$LOG_ENABLED" = true ]; then
-    nohup $JAVA_BIN $JVM_OPTS $JAR_PATH $SPRING_OPTS >> "$LOG_FILE" 2>&1 &
+    nohup $JAVA_BIN $JVM_OPTS -jar $JAR_PATH $SPRING_OPTS >> "$LOG_FILE" 2>&1 &
     # 更新日志链接
     ln -sf "$LOG_FILE" "$LOG_LINK"
   else
-    nohup $JAVA_BIN $JVM_OPTS $JAR_PATH $SPRING_OPTS > /dev/null 2>&1 &
+    nohup $JAVA_BIN $JVM_OPTS -jar $JAR_PATH $SPRING_OPTS > /dev/null 2>&1 &
   fi
   
   echo $! > "$PID_FILE"
@@ -243,8 +243,7 @@ status() {
 	ps -p $PID &> /dev/null
 	if [ "$?" = "0" ]
 	then
-	  log_message "INFO" "$APP_NAME 正在运行 (PID: $PID)"
-	  log_message "INFO" "$APP_NAME 运行命令： (CMD: $(ps -p $PID -o cmd --no-header))"
+	  log_message "INFO" "$APP_NAME 正在运行 (PID: $(cat $PID_FILE))"
 	else
       log_message "WARN" "$APP_NAME 未运行"
 	  rm -f $PID_FILE

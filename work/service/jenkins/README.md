@@ -66,7 +66,9 @@ echo "Author: $Author"
 
 
 
-## SSH
+## SSH Server
+
+在开始直接需要按照插件，见 `基础配置的安装插件` 章节的 `SSH 插件`
 
 ### 添加SSH服务器
 
@@ -152,3 +154,53 @@ env
 任务运行完后查看控制台输出
 
 ![image-20250401114522911](./assets/image-20250401114522911.png)
+
+
+
+## CICD: Linux部署Springboot项目
+
+请先参考 `SSH Server` 章节完成相关配置
+
+在实际开发时，使用Springboot框架，代码提交的本地Gitlab，通过提交代码的方式触发Webhook，使Jenkins触发自动构建和部署。Jenkins连接远程Linux服务器，执行脚本。在脚本中从Gitlab中拉取代码，然后使用Maven打包Jar文件，最后使用Java命令启动Jar。
+
+- [JDK安装文档](/work/service/openjdk/openjdk21/)
+- [Maven安装文档](/work/service/maven/v3.9.9/)
+- [Git安装文档](/work/service/git/v2.49.0/)
+- [NVM 和 Node.js 安装文档](/work/service/nvm/v0.40.2/)
+
+
+
+### 基础准备
+
+这一步骤是用演示的数据，在实际情况下可以跳过该步骤
+
+#### 下载代码
+
+访问 https://start.spring.io/ 网站填写相关参数下载Springboot源码。也可以通过这里设置好的参数直接下载：[链接](https://start.spring.io/starter.zip?type=maven-project&language=java&bootVersion=3.4.4&baseDir=springboot-demo&groupId=local.ateng.demo&artifactId=springboot-demo&name=springboot-demo&description=Demo%20project%20for%20Spring%20Boot&packageName=local.ateng.demo.springboot-demo&packaging=jar&javaVersion=21&dependencies=web)
+
+#### 提交Git仓库
+
+**解压文件**
+
+```
+unzip springboot-demo.zip
+cd springboot-demo/
+```
+
+**Git 全局设置**
+
+```
+git config --global user.name "阿腾"
+git config --global user.email "2385569970@qq.com"
+```
+
+**推送现有文件夹**
+
+```
+git init --initial-branch=master
+git remote add origin http://gitlab.lingo.local/kongyu/springboot-demo.git
+git add .
+git commit -m "Initial commit"
+git push -u origin master
+```
+

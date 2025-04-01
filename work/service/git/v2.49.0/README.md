@@ -25,7 +25,7 @@ ln -s /usr/local/software/git-2.49.0 /usr/local/software/git
 **安装编译软件包**
 
 ```
-sudo yum install -y gcc make openssl-devel zlib-devel curl-devel
+sudo yum install -y gcc make openssl-devel zlib-devel curl-devel gettext autoconf
 ```
 
 **编译 Git**

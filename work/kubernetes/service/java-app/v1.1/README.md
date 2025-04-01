@@ -1,10 +1,54 @@
-# SpringBoot应用
+# Java应用
+
+
+
+## JDK和JAR一体
+
+镜像制作参考文档：[构建Java容器镜像](/work/docker/dockerfile/java/)
+
+**配置修改**
+
+- 修改应用名称：全局替换`spring-app`
+- `containers`容器的启动参数、resources、探针、亲和性等
+
+**添加节点标签**
+
+创建标签，运行在标签节点上
+
+```
+kubectl label nodes server03.lingo.local kubernetes.service/spring-app="true"
+```
+
+**创建服务**
+
+```
+kubectl apply -n kongyu -f deploy-integrated.yaml
+```
+
+**查看服务**
+
+```
+kubectl get -n kongyu pod,svc -l app=spring-app
+kubectl logs -n kongyu -f --tail=200 deploy/spring-app
+```
+
+**访问服务**
+
+```
+Address: http://192.168.1.10:30808
+```
+
+**删除服务**
+
+```
+kubectl delete -n kongyu -f deploy-integrated.yaml
+```
 
 
 
 ## JDK和JAR分离
 
-JDK镜像制作参考文档：[构建JDK21容器镜像](/work/docker/dockerfile/java/debian/jdk21/)
+镜像制作参考文档：[构建Java容器镜像](/work/docker/dockerfile/java/)
 
 **上传到HTTP**
 
@@ -48,50 +92,6 @@ Address: http://192.168.1.10:30808
 
 ```
 kubectl delete -n kongyu -f deploy.yaml
-```
-
-
-
-## JDK和JAR一体
-
-Springboot Jar镜像制作参考文档：[构建Jar容器镜像](/work/docker/dockerfile/java/debian/application/jdk21-cmd/)
-
-**配置修改**
-
-- 修改应用名称：全局替换`spring-app`
-- `containers`容器的启动参数、resources、探针、亲和性等
-
-**添加节点标签**
-
-创建标签，运行在标签节点上
-
-```
-kubectl label nodes server03.lingo.local kubernetes.service/spring-app="true"
-```
-
-**创建服务**
-
-```
-kubectl apply -n kongyu -f deploy-integrated.yaml
-```
-
-**查看服务**
-
-```
-kubectl get -n kongyu pod,svc -l app=spring-app
-kubectl logs -n kongyu -f --tail=200 deploy/spring-app
-```
-
-**访问服务**
-
-```
-Address: http://192.168.1.10:30808
-```
-
-**删除服务**
-
-```
-kubectl delete -n kongyu -f deploy-integrated.yaml
 ```
 
 

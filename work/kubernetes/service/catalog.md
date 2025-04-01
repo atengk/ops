@@ -92,7 +92,7 @@
     - [Fluent Bit](/work/kubernetes/service/fluent-bit/v3.2.10/)
     - [Logstash](/work/kubernetes/service/logstash/v8.16.1/)
 - 开发服务
-    - [Spring Boot应用](/work/kubernetes/service/springboot-app/v1.1/)
+    - [Java应用](/work/kubernetes/service/java-app/v1.1/)
     - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
     - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
     - [Jenkins](/work/kubernetes/service/jenkins/v2.479.1/baseic/)

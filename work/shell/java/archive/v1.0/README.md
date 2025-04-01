@@ -11,23 +11,6 @@ chmod +x spring-app.sh
 ./spring-app.sh start
 ```
 
-查看服务状态
-
-```
-./spring-app.sh status
-```
-
-以上命令运行结果：
-
-```
-$ ./spring-app.sh start
-2025-04-01 18:04:07 [INFO] 启动 spring-app...
-2025-04-01 18:04:07 [INFO] spring-app 启动成功 (PID: 44452)
-$ ./spring-app.sh status
-2025-04-01 18:04:36 [INFO] spring-app 正在运行 (PID: 44452)
-2025-04-01 18:04:36 [INFO] spring-app 运行命令： (CMD: /usr/local/software/jdk21/bin/java -jar -server /home/admin/java/spring-app.jar)
-```
-
 
 
 ## 高级配置
@@ -51,7 +34,7 @@ export SPRINGBOOT_JAR_PATH="/data/service/application/spring-app.jar"
 **设置JVM参数**
 
 ```shell
-export JVM_OPTS="-jar -server -Xms512m -Xmx1024m"
+export JVM_OPTS="-server -Xms512m -Xmx1024m"
 ```
 
 **设置Spring Boot应用参数**
@@ -121,14 +104,6 @@ export GRACEFUL_SHUTDOWN_TIMEOUT=60
 ./spring-app.sh restart
 ```
 
-查看运行状态
-
-```
-./spring-app.sh status
-```
-
-
-
 ### 开机自启
 
 相关路径和文件请自行修改并调试
@@ -145,7 +120,7 @@ cat > /data/service/application/spring-app.env <<EOF
 SPRINGBOOT_JAR_PATH="/data/service/application/spring-app.jar"
 # 选填
 JAVA_HOME=/usr/local/software/jdk21
-JVM_OPTS="-jar -server -Xms512m -Xmx4096m"
+JVM_OPTS="-server -Xms512m -Xmx4096m"
 SPRING_OPTS="--spring.profiles.active=prod"
 LOG_ENABLED="false"
 LOG_RETENTION_DAYS=7
@@ -199,70 +174,7 @@ sudo systemctl enable --now spring-app
 **查看状态**
 
 ```shell
-sudo systemctl status spring-app
-```
-
-**查看日志**
-
-```shell
 sudo journalctl -f -u spring-app
-```
-
-
-
-### 开机自启（纯Systemd）
-
-**编辑systemd配置文件**
-
-根据实际情况修改 `ExecStart` 参数
-
-```shell
-sudo tee /etc/systemd/system/spring-app.service <<"EOF"
-[Unit]
-Description=Spring Boot Application Manager
-After=network.target
-[Service]
-Type=simple
-User=admin
-Group=ateng
-PrivateTmp=true
-WorkingDirectory=/data/service/application
-ExecStart=/usr/local/software/jdk21/bin/java \
-          -jar -server \
-          -Xms512m -Xmx4096m \
-          /data/service/application/spring-app.jar \
-          --spring.profiles.active=prod
-ExecStop=/bin/kill -SIGTERM $MAINPID
-Restart=on-failure
-RestartSec=30
-TimeoutStartSec=90
-TimeoutStopSec=120
-StartLimitIntervalSec=600
-StartLimitBurst=3
-KillMode=control-group
-KillSignal=SIGTERM
-SuccessExitStatus=143
-[Install]
-WantedBy=multi-user.target
-EOF
-```
-
-**启动服务**
-
-```shell
-sudo systemctl daemon-reload
-sudo systemctl enable --now spring-app
-```
-
-**查看状态**
-
-```shell
 sudo systemctl status spring-app
-```
-
-**查看日志**
-
-```shell
-sudo journalctl -f -u spring-app
 ```
 

@@ -78,7 +78,7 @@
             - [OpenJDK21](/work/service/openjdk/openjdk21/)
             - [使用文档](/work/service/openjdk/OPS.md)
         - Apache Maven
-            - [Maven 3.9](/work/service/maven/v3.9.9/)
+            - [安装文档](/work/service/maven/v3.9.9/)
             - [使用文档](/work/service/maven/OPS.md)
         - Git
             - [安装文档](/work/service/git/v2.49.0/)
@@ -102,14 +102,10 @@
         - [mongodb](work/shell/backups/mongodb/)
 - Docker
     - 使用文档
-        - [Docker使用文档](/work/docker/OPS.md)
-    - 安装文档
-        - [Docker安装文档](/work/docker/deploy/v27.3.1/)
+        - [安装文档](/work/docker/deploy/v27.3.1/)
+        - [使用文档](/work/docker/OPS.md)
     - Dockerfile
-        - [jdk21](/work/docker/dockerfile/java/debian/jdk21/)
-        - [springboot app](/work/docker/dockerfile/java/debian/application/jdk21/)
-        - [springboot app auto](/work/docker/dockerfile/java/debian/application/jdk8-auto/)
-        - [springboot app cmd](/work/docker/dockerfile/java/debian/application/jdk21-cmd/)
+        - [JDK和应用](/work/docker/dockerfile/java/)
     - 服务安装文档
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)
@@ -130,7 +126,7 @@
         - [jenkins](/work/docker/service/jenkins/)
         - [jumpserver](/work/docker/service/jumpserver/)
         - [达梦数据库](/work/docker/service/dm8/v20241230/)
-        - [springboot应用](/work/docker/service/java/springboot2/)
+        - [Java应用](/work/docker/service/java/)
         - [nacos](/work/docker/service/nacos/)
         - [rocketmq](/work/docker/service/rocketmq/)
 - Kubernetes
@@ -261,7 +257,7 @@
             - [Fluent Bit](/work/kubernetes/service/fluent-bit/v3.2.10/)
             - [Logstash](/work/kubernetes/service/logstash/v8.16.1/)
         - 开发服务
-            - [Spring Boot应用](/work/kubernetes/service/springboot-app/v1.1/)
+            - [Java应用](/work/kubernetes/service/java-app/v1.1/)
             - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
             - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
             - [Jenkins](/work/kubernetes/service/jenkins/v2.479.1/baseic/)
