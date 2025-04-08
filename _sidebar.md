@@ -83,6 +83,9 @@
         - Git
             - [安装文档](/work/service/git/v2.49.0/)
             - [使用文档](/work/service/git/OPS.md)
+        - Node.js
+            - [安装文档](/work/service/nodejs/v22.14.0/)
+            - [使用文档](/work/service/nodejs/OPS.md)
         - Node.js 和 NVM
             - [安装文档](/work/service/nvm/v0.40.2/)
             - [使用文档](/work/service/nvm/OPS.md)
@@ -260,7 +263,7 @@
             - [Java应用](/work/kubernetes/service/java-app/v1.1/)
             - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
             - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
-            - [Jenkins](/work/kubernetes/service/jenkins/v2.479.1/baseic/)
+            - [Jenkins](/work/kubernetes/service/jenkins/v2.492.3/baseic/)
             - [Snail-Job](/work/kubernetes/service/snail-job/v1.3.0/)
             - [PowerJob](/work/kubernetes/service/powerjob/v5.1.1/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)

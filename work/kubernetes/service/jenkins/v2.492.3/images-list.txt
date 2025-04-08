@@ -1,0 +1,3 @@
+bitnami/os-shell:12
+bitnami/jenkins-agent:0.3301.0
+bitnami/jenkins:2.492.3

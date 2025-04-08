@@ -38,7 +38,6 @@ ln -s /usr/local/software/nvm-0.40.2 /usr/local/software/nvm
 ```
 cat >> ~/.bash_profile <<"EOF"
 ## NVM_HOME
-export NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
 export NVM_HOME=/usr/local/software/nvm
 [ -s "$NVM_HOME/nvm.sh" ] && \. "$NVM_HOME/nvm.sh"
 export PATH=$PATH:$NVM_HOME/bin
@@ -48,7 +47,6 @@ source ~/.bash_profile
 
 关键参数说明：
 
-- NPM_CONFIG_REGISTRY：使用 nvm 配置 npm 镜像
 - [ -s "$NVM_HOME/nvm.sh" ] && \. "$NVM_HOME/nvm.sh"：重新启动shell，使命令 `nvm` 生效
 
 **查看版本**
@@ -109,5 +107,27 @@ $ nvm list
        v18.20.8
        v20.19.0
 ->     v22.14.0
+```
+
+**查看版本**
+
+```
+node -v
+```
+
+**配置国内镜像源**
+
+```
+export NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
+export NODEJS_ORG_MIRROR=https://npmmirror.com/mirrors/node
+```
+
+- NPM_CONFIG_REGISTRY：设置 npm（Node.js 包管理器）使用的包注册表（registry）地址
+- NODEJS_ORG_MIRROR：设置 Node.js 二进制文件（安装包、源码、nvm 等工具下载 Node.js 版本时）的镜像地址
+
+**查看配置**
+
+```
+npm config list
 ```
 

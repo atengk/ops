@@ -9,20 +9,20 @@ Jenkins 是一个开源的自动化服务器，广泛用于实现持续集成（
 **下载镜像**
 
 ```
-docker pull bitnami/jenkins:2.492.2
+docker pull bitnami/jenkins:2.492.3
 ```
 
 **推送到仓库**
 
 ```
-docker tag bitnami/jenkins:2.492.2 registry.lingo.local/bitnami/jenkins:2.492.2
-docker push registry.lingo.local/bitnami/jenkins:2.492.2
+docker tag bitnami/jenkins:2.492.3 registry.lingo.local/bitnami/jenkins:2.492.3
+docker push registry.lingo.local/bitnami/jenkins:2.492.3
 ```
 
 **保存镜像**
 
 ```
-docker save registry.lingo.local/bitnami/jenkins:2.492.2 | gzip -c > image-jenkins_2.492.2.tar.gz
+docker save registry.lingo.local/bitnami/jenkins:2.492.3 | gzip -c > image-jenkins_2.492.3.tar.gz
 ```
 
 **创建目录**
@@ -42,8 +42,9 @@ docker run -d --name ateng-jenkins \
   -e JENKINS_PASSWORD=Admin@123 \
   -e JENKINS_EMAIL=2385569970@qq.com \
   -e JAVA_OPTS="-server -Xms1g -Xmx2g" \
+  -e JENKINS_HOME=/bitnami/jenkins/home \
   -e TZ=Asia/Shanghai \
-  registry.lingo.local/bitnami/jenkins:2.492.2
+  registry.lingo.local/bitnami/jenkins:2.492.3
 ```
 
 **查看日志**
@@ -54,10 +55,28 @@ docker logs -f ateng-jenkins
 
 **使用服务**
 
+访问 Web 服务
+
 ```
 URL: http://192.168.1.12:20022
 Username: admin
 Password: Admin@123
+```
+
+进入容器内部
+
+```
+docker exec -it ateng-jenkins bash
+cd $JENKINS_HOME
+```
+
+访问数据目录
+
+> 如果后续要对该目录新增文件，需要修改相关权限
+
+```
+cd /data/container/jenkins/home
+ll
 ```
 
 **删除服务**

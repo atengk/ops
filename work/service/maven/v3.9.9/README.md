@@ -40,7 +40,7 @@ mvn --version
 
 **配置本地仓库地址**
 
-编辑 `vi /usr/local/software/maven/conf/settings.xml` 配置文件修改以下内容
+编辑 `/usr/local/software/maven/conf/settings.xml` 配置文件修改以下内容
 
 ```xml
   <localRepository>/data/download/maven/repository/</localRepository>
@@ -49,13 +49,13 @@ mvn --version
 创建目录
 
 ```
-sudo mkdir -p /data/download/maven
+sudo mkdir -p /data/download/maven/repository
 sudo chown -R admin:ateng  /data/download/maven
 ```
 
 **配置国内镜像源**
 
-编辑 `vi /usr/local/software/maven/conf/settings.xml` 配置文件修改以下内容
+编辑 `/usr/local/software/maven/conf/settings.xml` 配置文件修改以下内容
 
 ```xml
   <mirrors>

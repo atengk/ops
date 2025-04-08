@@ -340,7 +340,58 @@ docker run --rm --name springboot-demo \
 
 
 
-### 应用和镜像一体
+### 应用和镜像一体-命令
+
+**创建Dockerfile**
+
+```
+cat > Dockerfile-app <<"EOF"
+FROM registry.lingo.local/service/java:debian12_temurin_openjdk-jdk-21-jre
+COPY --chown=1001:1001 docker-entrypoint.sh docker-entrypoint.sh
+COPY --chown=1001:1001 springboot3-demo-v1.0.jar app.jar
+ENTRYPOINT ["java"]
+CMD ["-server", "-Xms128m", "-Xmx1024m", "-jar", "app.jar", "--server.port=8080"]
+EOF
+```
+
+**构建镜像**
+
+```shell
+docker build -f Dockerfile-app \
+    -t registry.lingo.local/service/java-app-integrated-cmd:debian12_temurin_openjdk-jdk-21-jre .
+```
+
+**测试镜像**
+
+自定义启动参数运行应用
+
+```
+docker run --rm --name springboot-demo \
+    -p 18080:8080 \
+    registry.lingo.local/service/java-app-integrated-cmd:debian12_temurin_openjdk-jdk-21-jre \
+    -server \
+    -Xms128m -Xmx1024m \
+    -jar app.jar \
+    --server.port=8080 \
+    --spring.profiles.active=prod
+```
+
+**推送镜像**
+
+```shell
+docker push registry.lingo.local/service/java-app-integrated-cmd:debian12_temurin_openjdk-jdk-21-jre
+```
+
+**保存镜像**
+
+```
+docker save registry.lingo.local/service/java-app-integrated-cmd:debian12_temurin_openjdk-jdk-21-jre \
+  | gzip -c > image-java-app-integrated-cmd_debian12_temurin_openjdk-jdk-21-jre.tar.gz
+```
+
+
+
+### 应用和镜像一体-脚本
 
 **创建启动脚本**
 
@@ -378,7 +429,7 @@ EOF
 
 ```shell
 docker build -f Dockerfile-app \
-    -t registry.lingo.local/service/java-app-integrated:debian12_temurin_openjdk-jdk-21-jre .
+    -t registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre .
 ```
 
 **测试镜像**
@@ -390,20 +441,20 @@ docker run --rm --name springboot-demo \
     -p 18080:8080 \
     -e JAVA_OPTS="-server -Xms128m -Xmx1024m -jar /opt/app/app.jar" \
     -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
-    registry.lingo.local/service/java-app-integrated:debian12_temurin_openjdk-jdk-21-jre
+    registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre
 ```
 
 **推送镜像**
 
 ```shell
-docker push registry.lingo.local/service/java-app-integrated:debian12_temurin_openjdk-jdk-21-jre
+docker push registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre
 ```
 
 **保存镜像**
 
 ```
-docker save registry.lingo.local/service/java-app-integrated:debian12_temurin_openjdk-jdk-21-jre \
-  | gzip -c > image-java-app-integrated_debian12_temurin_openjdk-jdk-21-jre.tar.gz
+docker save registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre \
+  | gzip -c > image-java-app-integrated-shell_debian12_temurin_openjdk-jdk-21-jre.tar.gz
 ```
 
 

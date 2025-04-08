@@ -14,16 +14,37 @@ spec:
       labels:
         app: spring-app
     spec:
+      volumes:
+        - name: app-storage
+          emptyDir: {}
+      initContainers:
+        - name: download
+          image: registry.lingo.local/service/busybox:1.36.1
+          command:
+            - sh
+            - -c
+            - |
+              wget -O /opt/app/app.jar http://192.168.1.12:9000/test/spring/demo/integrated/springboot3-demo-v1.0.jar && \
+              ls -l /opt/app/
+          resources: {}
+          volumeMounts:
+            - name: app-storage
+              mountPath: /opt/app
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 1001
       containers:
         - name: app
-          image: registry.lingo.local/service/springboot3-demo:v1.0
+          image: registry.lingo.local/service/java:debian12_temurin_openjdk-jdk-21-jre
           command:
             - java
           args:
             - -Xms512m
             - -Xmx2048m
             - -jar
-            - /opt/app/springboot3-demo-v1.0.jar
+            - /opt/app/app.jar
+            - --server.port=8080
             - --spring.profiles.active=prod
           ports:
             - name: web
@@ -36,6 +57,10 @@ spec:
             requests:
               cpu: 500m
               memory: 512Mi
+          volumeMounts:
+            - name: app-storage
+              mountPath: /opt/app
+              readOnly: false
           livenessProbe:
             httpGet:
               path: /actuator/health
@@ -57,7 +82,7 @@ spec:
             successThreshold: 1
             failureThreshold: 3
           imagePullPolicy: IfNotPresent
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 30
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:

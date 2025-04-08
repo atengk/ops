@@ -54,6 +54,12 @@ EOF
 source ~/.bash_profile
 ```
 
+**配置全局使用**
+
+```
+sudo ln -s  /usr/local/software/git/bin/git /usr/bin/git
+```
+
 **查看版本**
 
 ```
