@@ -28,11 +28,11 @@
     - 涵盖基础服务、数据存储、计算框架及调度平台等，助力大数据系统的部署与优化。
     - 参考：[使用文档](/work/bigdata/)
 
-- **DevOps**：📊
+- **DevOps**：⚙️
     - 使用Jenkins完成应用的CICD，包括Linux、Docker、Kubernetes多方面自动化部署。
     - 参考：[使用文档](/work/service/jenkins/)
 
-- **可观测性**：📊
+- **可观测性**：🔍
     - 使用OpenTelemetry完成处理 跟踪（Tracing）、指标（Metrics）和日志（Logs） 数据。
     - 参考：[使用文档](/work/service/opentelemetry/)
 
@@ -47,8 +47,16 @@
     - 服务器管理
         - [基础配置](/work/service/00-basic/)
         - [网络配置](/work/service/network/)
-        - [升级OpenSSH](/work/service/openssh/v9.9/)
         - [系统性能监控](/work/linux/metrics/)
+    - 安全管理
+        - 用户管理
+            - [用户管理](/work/service/security/user/)
+        - OpenSSH
+            - [OpenSSH](/work/service/security/openssh/)
+            - [升级OpenSSH](/work/service/openssh/v9.9/)
+        - TLS证书
+            - [cfssl创建证书](/work/service/security/tls/tls-cfssl/v1.6.5/)
+            - [openssl创建证书](/work/service/security/tls/tls-openssl/)
     - 存储服务
         - 网络文件共享 NFS
             - [安装使用文档](/work/service/nfs/)
@@ -98,9 +106,6 @@
         - Haproxy
             - [安装文档](/work/service/haproxy/)
             - [使用文档](/work/service/haproxy/OPS.md)
-        - TLS证书
-            - [cfssl创建证书](/work/service/tls/tls-cfssl/v1.6.5/)
-            - [openssl创建证书](/work/service/tls/tls-openssl/)
     - DevOps
         - [Jenkins](/work/service/jenkins/)
         - [Argo CD](/work/service/argo-cd/)
