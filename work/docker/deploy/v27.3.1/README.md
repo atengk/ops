@@ -193,3 +193,172 @@ $ docker-compose version
 Docker Compose version v2.31.0
 ```
 
+
+
+## 客户端远程访问
+
+### 使用SSH
+
+前提：配置免秘钥
+
+**使用默认参数**
+
+```
+docker -H ssh://root@10.244.172.126 ps
+```
+
+**指定其他参数**
+
+编辑或创建你的 `~/.ssh/config` 文件，添加如下内容：
+
+```
+Host mydockerhost
+    HostName 10.244.172.126
+    Port 22
+    User root
+    IdentityFile /opt/id_rsa
+```
+
+然后使用如下命令：
+
+```
+docker -H ssh://mydockerhost ps
+```
+
+
+
+### 使用API
+
+将下面的 `配置远程API`
+
+
+
+## 配置远程API
+
+- [API文档](https://docs.docker.com/engine/api/latest/)
+
+### 启用 Docker 远程 API
+
+Docker 默认只监听本地 Unix socket（`/var/run/docker.sock`），为了使用远程 API，你需要让它监听 TCP 端口。
+
+**修改 Docker 配置**
+
+编辑 `/etc/docker/daemon.json`，添加以下内容：
+
+> ⚠️ 注意：使用 `tcp://0.0.0.0:2375` 是 **不安全的**（没有 TLS 加密），建议仅用于测试或在内网中使用。生产环境应配置 TLS。
+
+```
+{
+  "hosts": ["unix:///var/run/docker.sock", "tcp://0.0.0.0:2375"]
+}
+```
+
+然后重启 Docker：
+
+```
+sudo systemctl restart docker
+```
+
+验证
+
+```
+curl http://localhost:2375/version
+```
+
+
+
+### 使用远程的Docker
+
+**使用参数**
+
+```
+docker -H tcp://<远程主机IP>:2375 ps
+```
+
+**使用环境变量**
+
+```
+export DOCKER_HOST=tcp://192.168.1.100:2375
+docker ps
+```
+
+
+
+### 配置TLS
+
+参考 [openssl创建证书](/work/service/tls/tls-openssl/) 文件生成证书和秘钥
+
+- CA 根证书：ateng-ca.crt
+- 服务端证书：ateng-server.crt
+-  服务端私钥：ateng-server.key
+
+```
+mkdir -p /etc/docker/certs
+cp ateng-ca.crt ateng-server.crt ateng-server.key /etc/docker/certs
+```
+
+**修改Docker配置文件**
+
+在 Docker 服务器端，编辑 /etc/docker/daemon.json 来启用 TLS 和监听 HTTPS（而非 HTTP）。例如：
+
+```
+{
+  "hosts": [
+    "unix:///var/run/docker.sock",
+    "tcp://0.0.0.0:2376"
+  ],
+  "tlsverify": true,
+  "tlscacert": "/etc/docker/certs/ateng-ca.crt",
+  "tlscert": "/etc/docker/certs/ateng-server.crt",
+  "tlskey": "/etc/docker/certs/ateng-server.key"
+}
+```
+
+其中：
+
+- `tlsverify`: 启用 TLS 验证
+- `tlscacert`: CA证书路径
+- `tlscert`: 服务器证书路径
+- `tlskey`: 服务器密钥路径
+
+**重启 Docker 服务**
+
+```
+sudo systemctl restart docker
+```
+
+**客户端使用远程的TLS的Docker**
+
+拷贝证书到客户端并重命名
+
+- `ca.pem` (CA证书)
+- `cert.pem` (客户端证书)
+- `key.pem` (客户端私钥)
+
+```
+mkdir -p /etc/ssl/docker/ca
+cp ateng-ca.crt /etc/ssl/docker/ca/ca.pem
+cp ateng-server.crt /etc/ssl/docker/ca/cert.pem
+cp ateng-server.key /etc/ssl/docker/ca/key.pem
+```
+
+使用环境变量指定远程Docker
+
+```
+export DOCKER_TLS_VERIFY="1"
+export DOCKER_CERT_PATH="/etc/ssl/docker/ca"
+export DOCKER_HOST="tcp://10.244.172.126:2376"
+docker images
+```
+
+使用命令参数定远程Docker
+
+```
+docker --tlsverify \
+  --tlscacert=/etc/ssl/docker/ca/ca.pem \
+  --tlscert=/etc/ssl/docker/ca/cert.pem \
+  --tlskey=/etc/ssl/docker/ca/key.pem \
+  -H=tcp://10.244.172.126:2376 \
+  images
+```
+

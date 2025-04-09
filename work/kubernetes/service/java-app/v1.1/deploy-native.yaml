@@ -40,6 +40,7 @@ spec:
           command:
             - java
           args:
+            - -server
             - -Xms512m
             - -Xmx2048m
             - -jar

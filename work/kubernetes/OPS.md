@@ -2,6 +2,29 @@
 
 
 
+## 重启应用
+
+**删除 Pod**
+
+```
+kubectl delete pod -l app=myapp
+```
+
+**滚动重启**
+
+```
+kubectl rollout restart <deployment|statefulset|daemonset> <name>
+```
+
+**修改 annotation**
+
+```
+kubectl patch deployment <deployment-name> \
+  -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"kubectl.kubernetes.io/restartedAt\":\"$(date +%Y-%m-%dT%H:%M:%S)\"}}}}}"
+```
+
+
+
 ## 用户和kubeconfig
 
 

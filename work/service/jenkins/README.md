@@ -24,6 +24,7 @@ Jenkins 是一个开源的自动化服务器，广泛用于实现持续集成（
 - [Maven安装文档](/work/service/maven/v3.9.9/)
 - [Git安装文档](/work/service/git/v2.49.0/)
 - [NVM 和 Node.js 安装文档](/work/service/nvm/v0.40.2/)
+- [Docker安装文档](/work/docker/deploy/v27.3.1/)
 
 ### 配置Jenkins
 
@@ -162,7 +163,7 @@ sed -i "s#www.google.com#www.baidu.com#g" /data/service/jenkins/updates/default.
 
 - SSH 插件
 
-SSH Pipeline Steps、Publish Over SSH
+SSH Pipeline Steps、Publish Over SSH、SSH Agent
 
 - 流水线 插件
 
@@ -318,6 +319,69 @@ tar -xJf node-v22.14.0-linux-x64.tar.xz
 设置安装目录，指定实际路径
 
 ![image-20250403103143591](./assets/image-20250403103143591.png)
+
+
+
+#### Docker
+
+需要安装 `Docker、Docker Pipeline` 插件
+
+- [安装文档](/work/docker/deploy/v27.3.1/)
+
+**下载软件包**
+
+- [下载地址](https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz)
+
+**解压软件包**
+
+将下载的软件包上传到 `JENKINS_HOME/tools` 目录下并解压，可以选择自定义最后的目录名称
+
+需要将软件包放在bin目录下
+
+```
+tar -zxff docker-27.3.1.tgz
+mkdir -p docker/bin
+mv docker/* docker/bin
+```
+
+**Jenkins中配置**
+
+设置别名，用于后续Jenkinsfile中的tools的名称
+
+设置安装目录，指定实际路径
+
+![image-20250408134720722](./assets/image-20250408134720722.png)
+
+**使用工具**
+
+有两种方式使用Docker命令
+
+- 使用本机或者宿主机的Socket：`/var/run/docker.sock`，有了Socket后可以直接使用Docker命令
+- 远程Docker服务器开放API，使用环境变量 `DOCKER_HOST` 指定远程服务器，配置了远程服务器后也可以直接使用Docker命令
+
+```groovy
+pipeline {
+    agent any
+    environment {
+        DOCKER_HOST = 'tcp://10.244.172.126:2375'  // 配置 Docker 远程服务器的 API
+    }
+    tools {
+        dockerTool 'Docker-27.3.1'
+    }
+    stages {
+        stage('env') {
+            steps {
+                sh 'env'
+            }
+        }
+        stage('docker') {
+            steps {
+                sh 'docker version'
+            }
+        }
+    }
+}
+```
 
 
 
@@ -1194,6 +1258,121 @@ Finished: SUCCESS
 
 需要安装插件，见 `基础配置的安装插件` 章节的 `流水线 插件` 和 `Docker 插件`
 
+如果Jenkins是容器部署的，那么访问docker的使用有以下两种方式：
+
+- 重启Jenkins容器，并将宿主机的 `/var/run/docker.sock` 挂载到容器内部
+- 开启 Docker 远程 API，然后使用 `export DOCKER_HOST=tcp://10.244.172.126:2375` 环境变量的方式使用docker客户端命令访问
+
+
+
+### Jenkins添加Docker
+
+#### 创建Docker Cloud-Socket
+
+在 `Clouds` 配置里面选择 创建 Docker 云，这里名称为local_docker
+
+![image-20250408221609600](./assets/image-20250408221609600.png)
+
+配置以下参数
+
+- Name：local_docker
+
+- Docker Host URI: unix:///var/run/docker.sock
+- Enabled: 勾选
+- Expose DOCKER_HOST: 勾选
+
+![image-20250408221730167](./assets/image-20250408221730167.png)
+
+#### 创建Docker Cloud-API
+
+在 `Clouds` 配置里面选择 创建 Docker 云，这里名称为remote_docker
+
+![image-20250408221959427](./assets/image-20250408221959427.png)
+
+配置以下参数
+
+- Name：remote_docker
+
+- Docker Host URI: tcp://10.244.172.126:2375
+- Enabled: 勾选
+- Expose DOCKER_HOST: 勾选
+
+![image-20250408222226343](./assets/image-20250408222226343.png)
+
+
+
+### 添加Docker Agent templates
+
+注意添加Docker Agent templates是需要保证容器内部有java命令并且能正常执行。
+
+一般不建议使用这种方式，局限性太多了。
+
+#### Maven
+
+**Labels和镜像配置**
+
+Labels: remote-docker-agent-maven, 后续在流水线脚本中使用agent.label匹配这个agent
+
+Name：Agent templates名称，没啥用，保持和Labels一致即可
+
+Docker Image：需要使用的容器镜像名称，这里是maven:3.9.9-eclipse-temurin-21
+
+![image-20250409084046275](./assets/image-20250409084046275.png)
+
+**Container settings配置**
+
+设置挂载卷
+
+```
+type=bind,source=/var/jenkins,target=/workspace
+type=bind,source=/var/jenkins/downloads/maven,target=/data/download/maven
+type=bind,source=/var/jenkins/downloads/maven/settings.xml,target=/usr/share/maven/conf/settings.xml,readonly
+type=bind,source=/etc/localtime,target=/etc/localtime,readonly
+```
+
+挂载卷使用docker bind，相关文件或目录必须存在
+
+![image-20250409085056818](./assets/image-20250409085056818.png)
+
+在对应的远程docker节点创建相关目录和文件
+
+```
+sudo mkdir -p /var/jenkins /var/jenkins/downloads/maven
+sudo tee /var/jenkins/downloads/maven/settings.xml <<EOF
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <localRepository>/data/download/maven/repository</localRepository>
+  <mirrors>
+    <mirror>
+      <id>alimaven</id>
+      <name>aliyun maven</name>
+      <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+      <mirrorOf>central</mirrorOf>
+    </mirror>
+  </mirrors>
+</settings>
+EOF
+```
+
+设置环境变量
+
+```
+TZ=Asia/Shanghai
+Author=Ateng
+```
+
+![image-20250409085131738](./assets/image-20250409085131738.png)
+
+**设置用法**
+
+选择：Only build jobs with label expressions matching this node（仅使用与此节点匹配的标签表达式构建作业）
+
+![image-20250409084233657](./assets/image-20250409084233657.png)
+
+
+
 ### 创建任务
 
 **新建任务**
@@ -1353,7 +1532,7 @@ pipeline {
 
 ### 添加Pod templates
 
-添加命名为 `jenkins-agent-maven-yaml` 的 Pod templates
+添加命名为 `jenkins-agent-all` 的 Pod templates
 
 填写以下参数：
 
@@ -1379,6 +1558,8 @@ Raw YAML for the Pod，相当于这是个初始的yaml模版，其他的设置�
 - Docker容器：将Docker的socket `/var/run/docker.sock` 挂载到容器内部，使内部可以使用docker命令build和push等。如果是其他容器运行时可以挂载相应的socket和相关命令。
 
 在实际情况下，最好每一个容器设置一个pod templates，最小化管理。我这里全部弄在一起时方便演示
+
+注意使用Bitnami镜像需要注意使用root用户运行容器，不然导致没有权限Jenkins Agent无法工作。
 
 ```yaml
 apiVersion: "v1"
@@ -1509,6 +1690,23 @@ spec:
         runAsGroup: 0
         privileged: false
 
+    - name: "helm"
+      image: "alpine/helm:3.17.2"
+      imagePullPolicy: "IfNotPresent"
+      command:
+        - "sleep"
+      args:
+        - "infinity"
+      tty: true
+      volumeMounts:
+        - mountPath: "/etc/localtime"
+          name: "volume-1"
+          readOnly: true
+      env:
+        - name: "TZ"
+          value: "Asia/Shanghai"
+      resources: {}
+
     - name: "jnlp"
       image: "jenkins/inbound-agent:3301.v4363ddcca_4e7-3-jdk21"
       imagePullPolicy: "IfNotPresent"
@@ -1546,6 +1744,10 @@ spec:
 
 
 ### JNLP代理配置
+
+**🔧 什么是 JNLP（在 Jenkins 中）？**
+
+在 Jenkins 的上下文中，**JNLP 主要用于启动和连接“agent”（从节点）到 Jenkins master（主节点）**。JNLP 是一种 Java 网络启动协议，原始设计是为了通过网络启动 Java 应用。但在 Jenkins 中，它被用于一种特定方式：通过 JNLP 启动 agent 的 Java 程序，以便与 Jenkins master 通信。
 
 开启 `TCP port for inbound agents` 
 
@@ -1677,6 +1879,16 @@ pipeline {
                 }
             }
         }
+        stage('helm') {
+            steps {
+                container('helm') {
+                    withCredentials([file(credentialsId: 'kubeconfig_local_k8s_ns_kongyu', variable: 'KUBECONFIG')]) {
+                        sh 'helm version'
+                        sh 'helm ls'
+                    }
+                }
+            }
+        }
     }
 }
 ```
@@ -1691,7 +1903,7 @@ Node：依赖下载需要指定到 `/root/.npm` 目录下，并且区分项目�
 
 Docker：push镜像需要设置仓库的凭证，凭证设置为`Username with password`的格式
 
-Kuberctl：使用kubectl需要设置`KUBECONFIG`环境变量指定配置文件，在凭证中创建 `Secret file` ，将kubeconfig文件上传
+Kuberctl/Helm：使用kubectl/helm需要设置`KUBECONFIG`环境变量指定配置文件，在凭证中创建 `Secret file` ，将kubeconfig文件上传
 
 关于当前路径问题：jenkins在执行sh时，会将当起项目的命令设置为PWD，也就是 `$WORKSPACE` 会被设置为当起目录的路径，所有操作产生的文件都在这个路径下
 
@@ -2007,6 +2219,8 @@ git push -u origin master
 - 流水线-工具类
 - Git
 
+实现逻辑：在Jenkins的主机上，使用git拉取代码，然后再设置相关工具，最后使用通过SSH远程到服务器上镜像更新部署
+
 ### Git代码准备
 
 这一步骤是用演示的数据，在实际情况下可以跳过该步骤
@@ -2046,6 +2260,8 @@ git push -u origin master
 ### Jenkins任务配置
 
 #### 创建Git仓库凭证
+
+Git的认证方式有两种：HTTP和SSH，根据需要创建对应的凭证
 
 ![image-20250407151625942](./assets/image-20250407151625942.png)
 
@@ -2091,13 +2307,12 @@ pipeline {
 
     environment {
         GIT_CREDENTIALS_ID = "gitlab_ssh"  // Jenkins 中配置的 GitLab 凭据 ID
-        GIT_REPO_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
+        GIT_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
         GIT_BRANCH = "master"  // 要拉取的分支
         SSH_SERVER_NAME = "server_192.168.1.10_15620"  // SSH Servers 配置中添加的服务器
     }
 
     tools {
-        jdk "JDK-21"
         maven "Maven-3.9.9"
     }
 
@@ -2115,7 +2330,7 @@ pipeline {
                     checkout([$class: "GitSCM",
                         branches: [[name: "*/${GIT_BRANCH}"]],
                         userRemoteConfigs: [[
-                            url: "${GIT_REPO_URL}",
+                            url: "${GIT_URL}",
                             credentialsId: "${GIT_CREDENTIALS_ID}"
                         ]]
                     ])
@@ -2209,7 +2424,7 @@ pipeline {
     // 环境变量
     environment {
         GIT_CREDENTIALS_ID = "gitlab_ssh"  // Jenkins 中配置的 GitLab 凭据 ID
-        GIT_REPO_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
+        GIT_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
         GIT_BRANCH = "master"  // 要拉取的分支
         SSH_SERVER_NAME = "server_192.168.1.10_15620"  // SSH Servers 配置中添加的服务器
     }
@@ -2237,7 +2452,7 @@ pipeline {
                     checkout([$class: "GitSCM",
                         branches: [[name: "*/${GIT_BRANCH}"]],
                         userRemoteConfigs: [[
-                            url: "${GIT_REPO_URL}",
+                            url: "${GIT_URL}",
                             credentialsId: "${GIT_CREDENTIALS_ID}"
                         ]]
                     ])
@@ -2607,6 +2822,8 @@ JENKINS_URL/multibranch-webhook-trigger/invoke?token=ateng_ssh_springboot_multib
 - 流水线-Docker
 - Git
 
+实现逻辑：在Jenkins的主机上，使用git拉取代码，然后再设置相关工具（和Linux部署一致），最后使用docker部署到本地或者远程
+
 ### Git代码准备
 
 这一步骤是用演示的数据，在实际情况下可以跳过该步骤
@@ -2647,34 +2864,23 @@ git push -u origin master
 
 更多的Dockerfile用法参考：[JDK和应用](/work/docker/dockerfile/java/)
 
-#### docker-entrypoint.sh
-
-```
-cat > docker-entrypoint.sh <<"EOF"
-#!/bin/bash
-
-# 设置 JVM 参数
-JAVA_OPTS=${JAVA_OPTS:-}
-# 设置 Spring Boot 运行参数
-SPRING_OPTS=${SPRING_OPTS:-}
-
-# 执行 Java 进程
-RUN_CMD="java ${JAVA_OPTS} ${SPRING_OPTS}"
-echo "运行程序: ${RUN_CMD}"
-exec ${RUN_CMD}
-EOF
-chmod +x docker-entrypoint.sh
-```
-
-#### Dockerfile
+**编辑 Dockerfile 文件**
 
 ```
 cat > Dockerfile <<"EOF"
 FROM registry.lingo.local/service/java:debian12_temurin_openjdk-jdk-21-jre
-COPY --chown=1001:1001 docker-entrypoint.sh docker-entrypoint.sh
 COPY --chown=1001:1001 target/*.jar app.jar
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["java"]
+CMD ["-server", "-Xms128m", "-Xmx1024m", "-jar", "app.jar", "--server.port=8080"]
 EOF
+```
+
+**推送到Git仓库**
+
+```
+git add Dockerfile
+git commit -m "Add Dockerfile"
+git push -u origin master
 ```
 
 
@@ -2682,6 +2888,8 @@ EOF
 ### Jenkins任务配置
 
 #### 创建Git仓库凭证
+
+Git的认证方式有两种：HTTP和SSH，根据需要创建对应的凭证
 
 ![image-20250407151625942](./assets/image-20250407151625942.png)
 
@@ -2721,8 +2929,99 @@ Text: $ref
 
 #### 最小化配置
 
-```groovy
+如果想要把Docker相关的命令运行在远程服务器上，可以在环境变量中添加 `DOCKER_HOST`。例如：DOCKER_HOST = "tcp://10.244.172.126:2375"
 
+```groovy
+pipeline {
+    agent any
+
+    // 环境变量
+    environment {
+        // Git仓库
+        GIT_CREDENTIALS_ID = "gitlab_ssh"  // Jenkins 中配置的 GitLab 凭据 ID
+        GIT_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
+        GIT_BRANCH = "master"  // 要拉取的分支
+        
+        // Docker镜像和仓库
+        DOCKER_IMAGE = "springboot3"  // 构建的镜像名称，标签自动生成
+        DOCKER_REGISTRY = "registry.lingo.local/ateng"  // 镜像仓库地址
+        DOCKER_CREDENTIALS_ID = "harbor_admin"  // 镜像仓库凭证
+        DOCKER_HOST = "tcp://10.244.172.126:2375"  // Docker 主机的远程主机
+    }
+
+    // 工具类
+    tools {
+        jdk "JDK-21"
+        maven "Maven-3.9.9"
+    }
+
+    stages {
+
+        stage("设置并查看环境变量") {
+            steps {
+                script {
+                    // 镜像标签生成规则
+                    env.DOCKER_TAG = "$GIT_BRANCH-build-$BUILD_NUMBER"
+                }
+                sh "env"
+            }
+        }
+
+        stage('拉取代码') {
+            steps {
+                script {
+                    checkout([$class: "GitSCM",
+                        branches: [[name: "*/${GIT_BRANCH}"]],
+                        userRemoteConfigs: [[
+                            url: "${GIT_URL}",
+                            credentialsId: "${GIT_CREDENTIALS_ID}"
+                        ]]
+                    ])
+                }
+            }
+        }
+
+        stage('项目打包') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('构建容器镜像') {
+            steps {
+                sh 'docker build -f Dockerfile -t $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG .'
+            }
+        }
+
+        stage('推送镜像到仓库') {
+            steps {
+                withDockerRegistry([credentialsId: "$DOCKER_CREDENTIALS_ID", url: "http://$DOCKER_REGISTRY"]) {
+                    sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG'
+                }
+            }
+        }
+
+        stage("重启服务") {
+            steps {
+                sh "docker stop ateng-springboot3-demo &> /dev/null || true"
+                sh "docker rm ateng-springboot3-demo &> /dev/null || true"
+                sh """
+                docker run -d --restart=always \
+                    --name ateng-springboot3-demo \
+                    -p 18080:8080 \
+                    $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG \
+                    -server \
+                    -Xms128m -Xmx1024m \
+                    -jar app.jar \
+                    --server.port=8080 \
+                    --spring.profiles.active=prod
+                """
+            }
+        }
+
+    }
+    
+}
 ```
 
 #### 更多配置
@@ -2743,16 +3042,22 @@ pipeline {
         string(name: 'TAG_NUMBER', defaultValue: '', description: '请输入版本号，使用v开头，例如v1.0.0')
         booleanParam(name: 'IS_ARTIFACT', defaultValue: false, description: '是否保存制品')
     }
-
+    
     // 环境变量
     environment {
+        // Git仓库
         GIT_CREDENTIALS_ID = "gitlab_ssh"  // Jenkins 中配置的 GitLab 凭据 ID
-        GIT_REPO_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
+        GIT_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
         GIT_BRANCH = "master"  // 要拉取的分支
-        SSH_SERVER_NAME = "server_192.168.1.10_15620"  // SSH Servers 配置中添加的服务器
+        
+        // Docker镜像和仓库
+        DOCKER_IMAGE = "springboot3"  // 构建的镜像名称，标签自动生成
+        DOCKER_REGISTRY = "registry.lingo.local/ateng"  // 镜像仓库地址
+        DOCKER_CREDENTIALS_ID = "harbor_admin"  // 镜像仓库凭证
+        DOCKER_HOST = "tcp://10.244.172.126:2375"  // Docker 远程主机
     }
 
-    // 工具指定
+    // 工具类
     tools {
         jdk "JDK-21"
         maven "Maven-3.9.9"
@@ -2763,19 +3068,21 @@ pipeline {
         stage("设置并查看环境变量") {
             steps {
                 script {
-                    env.TODAY = new Date().format("yyyy-MM-dd")
+                    env.TODAY = new Date().format("yyyyMMdd")
+                    // 镜像标签生成规则
+                    env.DOCKER_TAG = "$GIT_BRANCH-$TODAY-build-$BUILD_NUMBER"
                 }
                 sh "env"
             }
         }
 
-        stage("拉取代码") {
+        stage('拉取代码') {
             steps {
                 script {
                     checkout([$class: "GitSCM",
                         branches: [[name: "*/${GIT_BRANCH}"]],
                         userRemoteConfigs: [[
-                            url: "${GIT_REPO_URL}",
+                            url: "${GIT_URL}",
                             credentialsId: "${GIT_CREDENTIALS_ID}"
                         ]]
                     ])
@@ -2783,65 +3090,46 @@ pipeline {
             }
         }
 
-        stage("项目打包") {
+        stage('项目打包') {
             steps {
-                sh "mvn clean package -DskipTests"
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage("上传Jar文件并更新") {
+        stage('构建容器镜像') {
             steps {
-                sshPublisher(
-                    publishers: [
-                        sshPublisherDesc(
-                            configName: "$SSH_SERVER_NAME", // 配置的 SSH 服务器名称
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: "target/*.jar", // 需要上传的文件
-                                    removePrefix: "target/", // 去掉本地的 ${removePrefix} 目录
-                                    remoteDirectory: "$JOB_NAME/$TODAY/$BUILD_NUMBER", // 远程目录：该目录是基于SSH Server的Remote Directory的路径
-                                    // 上传完成后执行命令，更新软件包
-                                    execCommand: """
-                                    cd /data/service/work/jenkins/
-                                    cp $JOB_NAME/$TODAY/$BUILD_NUMBER/*.jar /data/service/application/
-                                    """
-                                )
-                            ],
-                            verbose: true // 启用详细日志
-                        )
-                    ]
-                )
+                sh 'docker build -f Dockerfile -t $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG .'
+            }
+        }
+
+        stage('推送镜像到仓库') {
+            steps {
+                sh 'docker tag $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG $DOCKER_REGISTRY/$DOCKER_IMAGE:latest'
+                withDockerRegistry([credentialsId: "$DOCKER_CREDENTIALS_ID", url: "http://$DOCKER_REGISTRY"]) {
+                    sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG'
+                    sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:latest'
+                }
             }
         }
 
         stage("重启服务") {
             steps {
-                sshPublisher(
-                    publishers: [
-                        sshPublisherDesc(
-                            configName: "$SSH_SERVER_NAME", // 配置的 SSH 服务器名称
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: "",
-                                    removePrefix: "",
-                                    remoteDirectory: "",
-                                    // 执行远程脚本或命令重启服务
-                                    execCommand: """
-                                    ## 使用脚本
-                                    #source ~/.bash_profile
-                                    #/data/service/application/spring-app.sh restart
-                                    ## 使用Systemd
-                                    sudo systemctl restart spring-app.service
-                                    """
-                                )
-                            ],
-                            verbose: true // 启用详细日志
-                        )
-                    ]
-                )
+                sh "docker stop ateng-springboot3-demo &> /dev/null || true"
+                sh "docker rm ateng-springboot3-demo &> /dev/null || true"
+                sh """
+                docker run -d --restart=always \
+                    --name ateng-springboot3-demo \
+                    -p 18080:8080 \
+                    $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG \
+                    -server \
+                    -Xms128m -Xmx1024m \
+                    -jar app.jar \
+                    --server.port=8080 \
+                    --spring.profiles.active=prod
+                """
             }
         }
-        
+       
         stage("保存制品文件") {
             when {
                 expression {
@@ -2863,6 +3151,8 @@ pipeline {
             }
             steps {
                 sh """
+                    git config user.email "2385569970@qq.com"
+                    git config user.name "Ateng_Jenkins"
                     export GIT_SSH_COMMAND="ssh -i $JENKINS_HOME/.ssh/id_rsa -o StrictHostKeyChecking=no"
                     git tag -a $TAG_NUMBER-BUILD_$BUILD_NUMBER -m "$TODAY: version $TAG_NUMBER-BUILD_$BUILD_NUMBER"
                     git push origin $TAG_NUMBER-BUILD_$BUILD_NUMBER
@@ -2914,7 +3204,7 @@ pipeline {
         }
 
     }
-    
+
 }
 ```
 
@@ -2937,7 +3227,7 @@ git commit -m "修改 README.md"
 git push -u origin master
 ```
 
-![image-20250408082258510](./assets/image-20250408082258510.png)
+![image-20250409102829633](./assets/image-20250409102829633.png)
 
 
 
@@ -2945,7 +3235,7 @@ git push -u origin master
 
 手动构建输入版本号和勾选保存制品
 
-![image-20250408081308671](./assets/image-20250408081308671.png)
+![image-20250408144247729](./assets/image-20250408144247729.png)
 
 制品
 
@@ -2967,10 +3257,16 @@ git push -u origin master
 pipeline {
     agent any
 
+    // 环境变量
     environment {
-        SSH_SERVER_NAME = "server_192.168.1.10_15620"  // SSH Servers 配置中添加的服务器
+        // Docker镜像和仓库
+        DOCKER_IMAGE = "springboot3"  // 构建的镜像名称，标签自动生成
+        DOCKER_REGISTRY = "registry.lingo.local/ateng"  // 镜像仓库地址
+        DOCKER_CREDENTIALS_ID = "harbor_admin"  // 镜像仓库凭证
+        DOCKER_HOST = "tcp://10.244.172.126:2375"  // Docker 主机的远程主机
     }
 
+    // 工具类
     tools {
         jdk "JDK-21"
         maven "Maven-3.9.9"
@@ -2978,73 +3274,56 @@ pipeline {
 
     stages {
 
-        stage("查看环境变量") {
+        stage("设置并查看环境变量") {
             steps {
+                script {
+                    // 镜像标签生成规则
+                    env.DOCKER_TAG = "$GIT_BRANCH-build-$BUILD_NUMBER"
+                }
                 sh "env"
             }
         }
 
-        stage("项目打包") {
+        stage('项目打包') {
             steps {
-                sh "mvn clean package -DskipTests"
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage("上传Jar文件并更新") {
+        stage('构建容器镜像') {
             steps {
-                sshPublisher(
-                    publishers: [
-                        sshPublisherDesc(
-                            configName: "$SSH_SERVER_NAME", // 配置的 SSH 服务器名称
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: "target/*.jar", // 需要上传的文件
-                                    removePrefix: "target/", // 去掉本地的 ${removePrefix} 目录
-                                    remoteDirectory: "$JOB_NAME/$BUILD_NUMBER", // 远程目录：该目录是基于SSH Server的Remote Directory的路径
-                                    // 上传完成后执行命令，更新软件包
-                                    execCommand: """
-                                    cd /data/service/work/jenkins/
-                                    cp $JOB_NAME/$BUILD_NUMBER/*.jar /data/service/application/
-                                    """
-                                )
-                            ],
-                            verbose: true // 启用详细日志
-                        )
-                    ]
-                )
+                sh 'docker build -f Dockerfile -t $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG .'
+            }
+        }
+
+        stage('推送镜像到仓库') {
+            steps {
+                withDockerRegistry([credentialsId: "$DOCKER_CREDENTIALS_ID", url: "http://$DOCKER_REGISTRY"]) {
+                    sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG'
+                }
             }
         }
 
         stage("重启服务") {
             steps {
-                sshPublisher(
-                    publishers: [
-                        sshPublisherDesc(
-                            configName: "$SSH_SERVER_NAME", // 配置的 SSH 服务器名称
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: "",
-                                    removePrefix: "",
-                                    remoteDirectory: "",
-                                    // 执行远程脚本或命令重启服务
-                                    execCommand: """
-                                    ## 使用脚本
-                                    #source ~/.bash_profile
-                                    #/data/service/application/spring-app.sh restart
-                                    ## 使用Systemd
-                                    sudo systemctl restart spring-app.service
-                                    """
-                                )
-                            ],
-                            verbose: true // 启用详细日志
-                        )
-                    ]
-                )
+                sh "docker stop ateng-springboot3-demo &> /dev/null || true"
+                sh "docker rm ateng-springboot3-demo &> /dev/null || true"
+                sh """
+                docker run -d --restart=always \
+                    --name ateng-springboot3-demo \
+                    -p 18080:8080 \
+                    $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG \
+                    -server \
+                    -Xms128m -Xmx1024m \
+                    -jar app.jar \
+                    --server.port=8080 \
+                    --spring.profiles.active=prod
+                """
             }
         }
 
     }
-
+    
 }
 ```
 
@@ -3081,7 +3360,7 @@ git branch -r
 
 **创建多分支流水线**
 
-![image-20250408094824283](./assets/image-20250408094824283.png)
+![image-20250409103555264](./assets/image-20250409103555264.png)
 
 **配置Git仓库**
 
@@ -3127,16 +3406,1016 @@ git branch -r
 
 安装插件：[Multibranch Scan Webhook Trigger](JENKINS_URL/multibranch-webhook-trigger/invoke?token=TOKENHERE)
 
-在设置的触发器里面配置Webhook，Token自定义设置，我这里是配置的项目名称ateng_ssh_springboot_multibranch
+在设置的触发器里面配置Webhook，Token自定义设置，我这里是配置的项目名称ateng_docker_springboot_multibranch
 
 ![image-20250408104822269](./assets/image-20250408104822269.png)
 
 在Git仓库的Webhook配置URL：
 
-JENKINS_URL/multibranch-webhook-trigger/invoke?token=ateng_ssh_springboot_multibranch
-
-
+JENKINS_URL/multibranch-webhook-trigger/invoke?token=ateng_docker_springboot_multibranch
 
 
 
 ## 项目实战：Kubernetes部署Springboot项目
+
+请先参考或熟悉以下章节完成相关配置
+
+- 基础配置
+- 流水线-Kubernetes
+- Git
+
+实现逻辑：在Jenkins的主机上，使用配置的Pod Template，再远程创建这些Pod，在指定的节点进行容器构建。
+
+### Git代码准备
+
+这一步骤是用演示的数据，在实际情况下可以跳过该步骤
+
+#### 下载代码
+
+访问 https://start.spring.io/ 网站填写相关参数下载Springboot源码。也可以通过这里设置好的参数直接下载：[链接](https://start.spring.io/starter.zip?type=maven-project&language=java&bootVersion=3.4.4&baseDir=springboot-demo&groupId=local.ateng.demo&artifactId=springboot-demo&name=springboot-demo&description=Demo%20project%20for%20Spring%20Boot&packageName=local.ateng.demo.springboot-demo&packaging=jar&javaVersion=21&dependencies=web)
+
+#### 提交Git仓库
+
+**解压文件**
+
+```
+unzip springboot-demo.zip
+cd springboot-demo/
+```
+
+**Git 全局设置**
+
+```
+git config --global user.name "阿腾"
+git config --global user.email "2385569970@qq.com"
+```
+
+**推送现有文件夹**
+
+```
+git init --initial-branch=master
+git remote add origin http://gitlab.lingo.local/kongyu/springboot-demo.git
+git add .
+git commit -m "Initial commit"
+git push -u origin master
+```
+
+
+
+### 部署文件准备
+
+#### Docker
+
+更多的Dockerfile用法参考：[JDK和应用](/work/docker/dockerfile/java/)
+
+**编辑 Dockerfile 文件**
+
+```
+cat > Dockerfile <<"EOF"
+FROM registry.lingo.local/service/java:debian12_temurin_openjdk-jdk-21-jre
+COPY --chown=1001:1001 target/*.jar app.jar
+ENTRYPOINT ["java"]
+CMD ["-server", "-Xms128m", "-Xmx1024m", "-jar", "app.jar", "--server.port=8080"]
+EOF
+```
+
+**推送到Git仓库**
+
+```
+git add Dockerfile
+git commit -m "Add Dockerfile"
+git push -u origin master
+```
+
+#### Kubernetes
+
+**编辑 deploy.yaml 文件**
+
+注意镜像是变量，后续通过流水线脚本获取到具体的值
+
+```
+cat > deploy.yaml <<"EOF"
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ateng-springboot3-demo
+  labels:
+    app: ateng-springboot3-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ateng-springboot3-demo
+  template:
+    metadata:
+      labels:
+        app: ateng-springboot3-demo
+    spec:
+      containers:
+        - name: app
+          image: $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG
+          command:
+            - java
+          args:
+            - -server
+            - -Xms512m
+            - -Xmx2048m
+            - -jar
+            - /opt/app/app.jar
+            - --server.port=8080
+            - --spring.profiles.active=prod
+          ports:
+            - name: web
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: '2'
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+          #livenessProbe:
+          #  httpGet:
+          #    path: /actuator/health
+          #    port: 8080
+          #    scheme: HTTP
+          #  initialDelaySeconds: 30
+          #  timeoutSeconds: 1
+          #  periodSeconds: 10
+          #  successThreshold: 1
+          #  failureThreshold: 3
+          #readinessProbe:
+          #  httpGet:
+          #    path: /actuator/health
+          #    port: 8080
+          #    scheme: HTTP
+          #  initialDelaySeconds: 10
+          #  timeoutSeconds: 1
+          #  periodSeconds: 10
+          #  successThreshold: 1
+          #  failureThreshold: 3
+          imagePullPolicy: IfNotPresent
+      terminationGracePeriodSeconds: 60
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: ateng-springboot3-demo
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/ateng-springboot3-demo
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ateng-springboot3-demo-service
+  labels:
+    app: ateng-springboot3-demo
+spec:
+  type: NodePort
+  selector:
+    app: ateng-springboot3-demo
+  ports:
+  - name: web
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+    nodePort: 30808
+EOF
+```
+
+**推送到Git仓库**
+
+```
+git add deploy.yaml
+git commit -m "Add deploy.yaml"
+git push -u origin master
+```
+
+
+
+### Kubernetes环境准备
+
+#### 创建kubeconfig
+
+- K8S_UserName: 设置账户名称
+- K8S_ClusterName: 设置集群名称，用于区分多个集群的名称
+- K8S_API：设置集群地址
+- K8S_NameSpace：应用的命名空间
+
+```shell
+export K8S_UserName=ateng-kongyu
+export K8S_ClusterName=kubernetes.lingo.local
+export K8S_API=https://192.168.1.18:6443
+export K8S_NameSpace=ateng-kongyu
+
+kubectl create ns ${K8S_NameSpace}
+kubectl create ns ${K8S_NameSpace_DevOps}
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ${K8S_UserName}
+  namespace: ${K8S_NameSpace}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ${K8S_UserName}
+  namespace: ${K8S_NameSpace}
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ${K8S_UserName}-binding
+  namespace: ${K8S_NameSpace}
+subjects:
+- kind: ServiceAccount
+  name: ${K8S_UserName}
+  namespace: ${K8S_NameSpace}
+roleRef:
+  kind: Role
+  name: ${K8S_UserName}
+  apiGroup: rbac.authorization.k8s.io
+EOF
+k8s_secret=$(kubectl get serviceaccount ${K8S_UserName} -n ${K8S_NameSpace} -o jsonpath='{.secrets[0].name}')
+k8s_token=$(kubectl get -n ${K8S_NameSpace} secret ${k8s_secret} -n ${K8S_NameSpace} -o jsonpath='{.data.token}' | base64 -d)
+k8s_ca=$(kubectl get secrets -n ${K8S_NameSpace} ${k8s_secret} -o "jsonpath={.data['ca\.crt']}")
+cat > kubeconfig-${K8S_UserName}.yaml <<EOF
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    certificate-authority-data: ${k8s_ca}
+    server: ${K8S_API}
+  name: ${K8S_ClusterName}
+contexts:
+- context:
+    cluster: ${K8S_ClusterName}
+    user: ${K8S_UserName}
+    namespace: ${K8S_NameSpace}
+  name: ${K8S_UserName}@${K8S_ClusterName}
+current-context: ${K8S_UserName}@${K8S_ClusterName}
+preferences: {}
+users:
+- name: ${K8S_UserName}
+  user:
+    token: ${k8s_token}
+EOF
+```
+
+#### 添加Kubernetes Cloud
+
+添加凭证，将 `kubeconfig `以 `Secret file` 的方式添加到凭证中，ID为：kubeconfig_local_k8s_ateng_kongyu
+
+![image-20250409113117838](./assets/image-20250409113117838.png)
+
+添加Kubernetes Cloud，名称为： `local_kubernetes_ateng_kongyu` 
+
+![image-20250409112807891](./assets/image-20250409112807891.png)
+
+指定凭证，选择创建的kubeconfig凭证，然后点击连接测试
+
+![image-20250409113411456](./assets/image-20250409113411456.png)
+
+
+
+### 添加Pod Templates
+
+**创建Pod templates**
+
+添加命名为 `jenkins-agent-ateng-k8s-springboot3` 的 Pod templates
+
+填写以下参数：
+
+- 名称：Pod templates的名称
+- 命名空间：agent容器运行在k8s中的命名空间。为了降低耦合性，不配置命名空间，使用kubeconfig默认的
+- 标签列表：用于后续流水线脚本（Jenkinsfile）的agent.kubernetes的label配置，匹配Pod templates
+- Raw YAML for the Pod：填写初始的yaml
+- 工作空间卷：选择 `Host Path Workspace Volume` ，或者 `Generic Ephemeral Volume` 、`NFS Workspace Volume`。
+
+基础配置
+
+![image-20250409144807785](./assets/image-20250409144807785.png)
+
+
+
+Raw YAML for the Pod，相当于这是个初始的yaml模版，其他的设置会覆盖这个yaml。
+
+亲和性，使其尽量调度在集群节点有标签 `node-role.kubernetes.io/worker=ci` 上。
+
+挂载hostPath（相关依赖建议挂载到NFS中，可以共享依赖，不然Agent调度到其他节点就会重新下载）
+
+- Maven容器：设置路径挂载到容器中，持久化依赖的下载。启动工具类容器的挂载类似。
+- Docker容器：将Docker的socket `/var/run/docker.sock` 挂载到容器内部，使内部可以使用docker命令build和push等。如果是其他容器运行时可以挂载相应的socket和相关命令。
+- Bitnami容器：如bitnami/kubectl，这一类容器的默认用户是1001，需要使用root用户运行Jenkins Agent才能正常工作
+
+```yaml
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  name: "auto-generate"
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+              - key: "node-role.kubernetes.io/worker"
+                operator: "In"
+                values:
+                  - "ci"
+          weight: 1
+  containers:
+    - name: "maven"
+      image: "maven:3.9.9-eclipse-temurin-21"
+      imagePullPolicy: "IfNotPresent"
+      command:
+        - "sleep"
+      args:
+        - "infinity"
+      volumeMounts:
+        - mountPath: "/data/download/maven"
+          name: "maven"
+        - mountPath: "/etc/localtime"
+          name: "volume-1"
+          readOnly: true
+        - name: "maven-config-volume"
+          mountPath: "/usr/share/maven/conf/settings.xml"
+          subPath: "settings.xml"
+          readOnly: true
+      env:
+        - name: "TZ"
+          value: "Asia/Shanghai"
+      resources: {}
+
+    - name: "docker"
+      image: "docker:27.3.1"
+      imagePullPolicy: "IfNotPresent"
+      command:
+        - "sleep"
+      args:
+        - "infinity"
+      volumeMounts:
+        - mountPath: "/var/run/docker.sock"
+          name: "volume-0"
+          readOnly: true
+        - mountPath: "/etc/localtime"
+          name: "volume-1"
+          readOnly: true
+      env:
+        - name: "TZ"
+          value: "Asia/Shanghai"
+      resources: {}
+
+    - name: "kubectl"
+      image: "bitnami/kubectl:1.32.3"
+      imagePullPolicy: "IfNotPresent"
+      command:
+        - "sleep"
+      args:
+        - "infinity"
+      tty: true
+      volumeMounts:
+        - mountPath: "/etc/localtime"
+          name: "volume-1"
+          readOnly: true
+      env:
+        - name: "TZ"
+          value: "Asia/Shanghai"
+      resources: {}
+      # bitnami 容器默认是1001用户，需要使用root用户运行Jenkins Agent才能正常工作
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        privileged: false
+
+    - name: "jnlp"
+      image: "jenkins/inbound-agent:3301.v4363ddcca_4e7-3-jdk21"
+      imagePullPolicy: "IfNotPresent"
+      volumeMounts:
+        - mountPath: "/etc/localtime"
+          name: "volume-1"
+          readOnly: true
+      env:
+        - name: "TZ"
+          value: "Asia/Shanghai"
+      resources: {}
+
+  volumes:
+    - hostPath:
+        path: "/var/run/docker.sock"
+      name: "volume-0"
+    - hostPath:
+        path: "/etc/localtime"
+      name: "volume-1"
+    - hostPath:
+        path: "/var/jenkins/downloads/maven"
+      name: "maven"
+    - name: "maven-config-volume"
+      configMap:
+        name: "maven-config"
+```
+
+工作空间卷，需要保证这个路径是权限是RWX=777。
+
+![image-20250406154027341](./assets/image-20250406154027341.png)
+
+**创建Maven的配置**
+
+在Kubernetes集群创建configmap，作为Maven容器的配置文件
+
+```shell
+kubectl -n ateng-kongyu apply -f - <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: maven-config
+data:
+  settings.xml: |
+    <?xml version="1.0" encoding="UTF-8"?>
+    <settings>
+        <localRepository>/data/download/maven/repository</localRepository>
+        <mirrors>
+            <mirror>
+                <id>aliyun</id>
+                <mirrorOf>central</mirrorOf>
+                <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
+            </mirror>
+        </mirrors>
+    </settings>
+EOF
+```
+
+
+
+### Jenkins任务配置
+
+#### 创建Git仓库凭证
+
+Git的认证方式有两种：HTTP和SSH，根据需要创建对应的凭证
+
+![image-20250407151625942](./assets/image-20250407151625942.png)
+
+#### 创建流水线任务
+
+![image-20250409104659676](./assets/image-20250409104659676.png)
+
+#### 配置Webhook
+
+在流水线的配置 `Triggers`（触发器）中 勾选 `Generic Webhook Trigger` 其中 Webhook URL 是 `http://JENKINS_URL/generic-webhook-trigger/invoke`，关键地方在于 `Token` 的配置，设置token用于区分Jenkins项目Webhook，后续推送在Git仓库配置 `http://JENKINS_URL/generic-webhook-trigger/invoke?token=xxxx` 
+
+关键参数配置：
+
+Post content parameters：获取ref参数，用于后续匹配分支
+
+```
+Variable: ref
+Expression: $.ref
+```
+
+Token：自定义设置（这里设置的是任务名称），用于后续Git仓库设置Webhook的URL
+
+Optional filter：匹配特定分支才能触发Webhook，这里是master和production
+
+```
+Expression: ^refs/heads/(master|production)$
+Text: $ref
+```
+
+![image-20250407175315146](./assets/image-20250407175315146.png)
+
+![image-20250409104743804](./assets/image-20250409104743804.png)
+
+![image-20250407175406702](./assets/image-20250407175406702.png)
+
+### 编辑流水线脚本
+
+#### 最小化配置
+
+```groovy
+pipeline {
+    agent {
+        kubernetes {
+            label 'jenkins-agent-ateng-k8s-springboot3'  // Pod templates中设置的标签
+        }
+    }
+
+    // 环境变量
+    environment {
+        // Git仓库
+        GIT_CREDENTIALS_ID = "gitlab_ssh"  // Jenkins 中配置的 GitLab 凭据 ID
+        GIT_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
+        GIT_BRANCH = "master"  // 要拉取的分支
+        
+        // Docker镜像和仓库
+        DOCKER_IMAGE = "springboot3"  // 构建的镜像名称，标签自动生成
+        DOCKER_REGISTRY = "registry.lingo.local/ateng"  // 镜像仓库地址
+        DOCKER_CREDENTIALS_ID = "harbor_admin"  // 镜像仓库凭证
+        DOCKER_HOST = "tcp://10.244.172.126:2375"  // Docker 主机的远程主机
+        
+        // Kubernetes的kubeconfig凭证
+        KUBECONFIG_CREDENTIAL_ID = "kubeconfig_local_k8s_ateng_kongyu"
+    }
+
+    stages {
+
+        stage('设置并查看环境变量') {
+            steps {
+                container('maven') {
+                    script {
+                        // 镜像标签生成规则
+                        env.DOCKER_TAG = "$GIT_BRANCH-build-$BUILD_NUMBER"
+                        sh "env"
+                    }
+                }
+            }
+        }
+
+       stage('拉取代码') {
+            steps {
+                // maven、node、golang 这些基础容器中包含有git命令
+                container('maven') {
+                    script {
+                        checkout([$class: "GitSCM",
+                            branches: [[name: "*/${GIT_BRANCH}"]],
+                            userRemoteConfigs: [[
+                                url: "${GIT_URL}",
+                                credentialsId: "${GIT_CREDENTIALS_ID}"
+                            ]]
+                        ])
+                    }
+                }
+            }
+        }
+
+        stage('项目打包') {
+            steps {
+                container('maven') {
+                    script {
+                        sh 'mvn clean package -DskipTests'
+                    }
+                }
+            }
+        }
+
+        stage('构建容器镜像') {
+            steps {
+                container('docker') {
+                    script {
+                        sh 'docker build -f Dockerfile -t $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG .'
+                    }
+                }
+            }
+        }
+
+        stage('推送镜像到仓库') {
+            steps {
+                container('docker') {
+                    withDockerRegistry([credentialsId: "$DOCKER_CREDENTIALS_ID", url: "http://$DOCKER_REGISTRY"]) {
+                        sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG'
+                    }
+                }
+            }
+        }
+
+        stage('重启服务') {
+            steps {
+                container('kubectl') {
+                    withCredentials([file(credentialsId: "$KUBECONFIG_CREDENTIAL_ID", variable: "KUBECONFIG")]) {
+                        sh 'envsubst < deploy.yaml | kubectl apply -f -'
+                    }
+                }
+            }
+        }
+
+    }
+    
+}
+```
+
+#### 更多配置
+
+在更多配置中比最小化配置多了以下功能：
+
+- 手动构建
+    - 输入版本号，git仓库提交tag
+    - 是否保存制品
+- 执行完毕发送邮件
+
+```groovy
+pipeline {
+    agent {
+        kubernetes {
+            label 'jenkins-agent-ateng-k8s-springboot3'  // Pod templates中设置的标签
+        }
+    }
+
+    // 手动运行发布版本时使用
+    parameters {
+        string(name: 'TAG_NUMBER', defaultValue: '', description: '请输入版本号，使用v开头，例如v1.0.0')
+        booleanParam(name: 'IS_ARTIFACT', defaultValue: false, description: '是否保存制品')
+    }
+    
+    // 环境变量
+    environment {
+        // Git仓库
+        GIT_CREDENTIALS_ID = "gitlab_ssh"  // Jenkins 中配置的 GitLab 凭据 ID
+        GIT_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
+        GIT_BRANCH = "master"  // 要拉取的分支
+        
+        // Docker镜像和仓库
+        DOCKER_IMAGE = "springboot3"  // 构建的镜像名称，标签自动生成
+        DOCKER_REGISTRY = "registry.lingo.local/ateng"  // 镜像仓库地址
+        DOCKER_CREDENTIALS_ID = "harbor_admin"  // 镜像仓库凭证
+        DOCKER_HOST = "tcp://10.244.172.126:2375"  // Docker 主机的远程主机
+        
+        // Kubernetes的kubeconfig凭证
+        KUBECONFIG_CREDENTIAL_ID = "kubeconfig_local_k8s_ateng_kongyu"
+    }
+
+    stages {
+
+        stage("设置并查看环境变量") {
+            steps {
+                script {
+                    env.TODAY = new Date().format("yyyyMMdd")
+                    // 镜像标签生成规则
+                    env.DOCKER_TAG = "$GIT_BRANCH-$TODAY-build-$BUILD_NUMBER"
+                }
+                sh "env"
+            }
+        }
+
+       stage('拉取代码') {
+            steps {
+                // maven、node、golang 这些基础容器中包含有git命令
+                container('maven') {
+                    script {
+                        checkout([$class: "GitSCM",
+                            branches: [[name: "*/${GIT_BRANCH}"]],
+                            userRemoteConfigs: [[
+                                url: "${GIT_URL}",
+                                credentialsId: "${GIT_CREDENTIALS_ID}"
+                            ]]
+                        ])
+                    }
+                }
+            }
+        }
+
+        stage('项目打包') {
+            steps {
+                container('maven') {
+                    script {
+                        sh 'mvn clean package -DskipTests'
+                    }
+                }
+            }
+        }
+
+        stage('构建容器镜像') {
+            steps {
+                container('docker') {
+                    script {
+                        sh 'docker build -f Dockerfile -t $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG .'
+                    }
+                }
+            }
+        }
+
+        stage('推送镜像到仓库') {
+            steps {
+                container('docker') {
+                    sh 'docker tag $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG $DOCKER_REGISTRY/$DOCKER_IMAGE:latest'
+                    withDockerRegistry([credentialsId: "$DOCKER_CREDENTIALS_ID", url: "http://$DOCKER_REGISTRY"]) {
+                        sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG'
+                        sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:latest'
+                    }
+                }
+            }
+        }
+
+        stage('重启服务') {
+            steps {
+                container('kubectl') {
+                    withCredentials([file(credentialsId: "$KUBECONFIG_CREDENTIAL_ID", variable: "KUBECONFIG")]) {
+                        sh 'envsubst < deploy.yaml | kubectl apply -f -'
+                    }
+                }
+            }
+        }
+       
+        stage("保存制品文件") {
+            when {
+                expression {
+                    return params.IS_ARTIFACT
+                }
+            }
+            steps {
+                container('maven') {
+                    script {
+                        archiveArtifacts(artifacts: 'target/*.jar', followSymlinks: false)
+                    }
+                }
+            }
+        }
+        
+        stage("保存Tag") {
+            when {
+                expression {
+                    return params.TAG_NUMBER =~ /v.*/
+                }
+            }
+            steps {
+                container('maven') {
+                    sshagent (credentials: ["$GIT_CREDENTIALS_ID"]) {
+                        sh """
+                            git config --global --add safe.directory $WORKSPACE
+                            git config user.email "2385569970@qq.com"
+                            git config user.name "Ateng_Jenkins"
+                            export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+                            git tag -a $TAG_NUMBER-BUILD_$BUILD_NUMBER -m "$TODAY: version $TAG_NUMBER-BUILD_$BUILD_NUMBER"
+                            git push origin $TAG_NUMBER-BUILD_$BUILD_NUMBER
+                            git ls-remote --tags
+                        """
+                    }
+                }
+            }
+        }
+
+    }
+    
+    post {
+        // 无论构建结果如何都会执行（失败、成功、中断等）
+        always {
+            emailext(
+                to: '2385569970@qq.com',
+                subject: "[Jenkins构建通知] ${JOB_NAME} #${BUILD_NUMBER} - ${currentBuild.currentResult}",
+                body: """
+🔔 Jenkins 构建通知
+
+🧱 项目：${env.JOB_NAME}
+🏗️ 构建编号：#${env.BUILD_NUMBER}
+🌿 分支：${env.GIT_BRANCH}
+💬 状态：${currentBuild.currentResult}
+🕒 耗时：${currentBuild.durationString}
+🔗 链接：${env.BUILD_URL}
+""",
+                attachLog: true
+            )
+        }
+        // 仅当构建成功时执行
+        success {
+            echo 'This runs if build succeeds'
+        }
+        // 构建失败时执行
+        failure {
+            echo 'This runs if build fails'
+        }
+        // 构建结果为不稳定（如测试失败）时执行
+        unstable {
+            echo 'This runs if build is unstable'
+        }
+        // 构建被手动中止或由于某些原因中止时执行
+        aborted {
+            echo 'This runs if build was aborted'
+        }
+        // 构建结果与上次不同（成功变失败，或失败变成功）时执行
+        changed {
+            echo 'This runs if build status changed from last time'
+        }
+
+    }
+
+}
+```
+
+制品管理，在配置管理中，找到 `Discard old builds` 设置构建和制品管理
+
+![image-20250408081919336](./assets/image-20250408081919336.png)
+
+
+
+### 自动化部署
+
+**推送代码触发自动构建**
+
+配置好Jenkins和Gitlab的Webhook后，就可以修改代码然后推送到Gitlab仓库就会触发自动构建
+
+```
+echo "version $(date '+%Y-%m-%d %H:%M:%S')" > README.md
+git add .
+git commit -m "修改 README.md"
+git push -u origin master
+```
+
+![image-20250409151536800](./assets/image-20250409151536800.png)
+
+
+
+**手动构建**
+
+手动构建输入版本号和勾选保存制品
+
+![image-20250409151200266](./assets/image-20250409151200266.png)
+
+制品
+
+![image-20250409151421214](./assets/image-20250409151421214.png)
+
+标签
+
+![image-20250408082641517](./assets/image-20250408082641517.png)
+
+
+
+### 多分支流水线
+
+多分支流水线作用就是获取到项目中不同分支`Jenkinsfile`文件执行对应的构建
+
+#### 创建Jenkinsfile
+
+```groovy
+pipeline {
+    agent {
+        kubernetes {
+            label 'jenkins-agent-ateng-k8s-springboot3'  // Pod templates中设置的标签
+        }
+    }
+
+    // 环境变量
+    environment {
+        // Docker镜像和仓库
+        DOCKER_IMAGE = "springboot3"  // 构建的镜像名称，标签自动生成
+        DOCKER_REGISTRY = "registry.lingo.local/ateng"  // 镜像仓库地址
+        DOCKER_CREDENTIALS_ID = "harbor_admin"  // 镜像仓库凭证
+        DOCKER_HOST = "tcp://10.244.172.126:2375"  // Docker 主机的远程主机
+        
+        // Kubernetes的kubeconfig凭证
+        KUBECONFIG_CREDENTIAL_ID = "kubeconfig_local_k8s_ateng_kongyu"
+    }
+
+    stages {
+
+        stage('设置并查看环境变量') {
+            steps {
+                container('maven') {
+                    script {
+                        // 镜像标签生成规则
+                        env.DOCKER_TAG = "$GIT_BRANCH-build-$BUILD_NUMBER"
+                        sh "env"
+                    }
+                }
+            }
+        }
+
+        stage('项目打包') {
+            steps {
+                container('maven') {
+                    script {
+                        sh 'mvn clean package -DskipTests'
+                    }
+                }
+            }
+        }
+
+        stage('构建容器镜像') {
+            steps {
+                container('docker') {
+                    script {
+                        sh 'docker build -f Dockerfile -t $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG .'
+                    }
+                }
+            }
+        }
+
+        stage('推送镜像到仓库') {
+            steps {
+                container('docker') {
+                    withDockerRegistry([credentialsId: "$DOCKER_CREDENTIALS_ID", url: "http://$DOCKER_REGISTRY"]) {
+                        sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG'
+                    }
+                }
+            }
+        }
+
+        stage('重启服务') {
+            steps {
+                container('kubectl') {
+                    withCredentials([file(credentialsId: "$KUBECONFIG_CREDENTIAL_ID", variable: "KUBECONFIG")]) {
+                        sh 'envsubst < deploy.yaml | kubectl apply -f -'
+                    }
+                }
+            }
+        }
+
+    }
+    
+}
+```
+
+#### Git创建分支
+
+根据实际环境修改对应分支的`Jenkinsfile`
+
+```
+# 创建并切换到新分支
+git checkout -b develop
+
+# 例如修改文件
+echo "分支：develop" >> README.md
+
+# 添加更改到暂存区
+git add README.md
+
+# 提交更改
+git commit -m "修改了 README.md，添加新内容"
+
+# 推送到远程仓库
+git push -u origin develop
+
+# 查看本地分支
+git branch
+
+# 查看远程分支
+git branch -r
+```
+
+
+
+#### 创建和配置
+
+**创建多分支流水线**
+
+![image-20250409151946587](./assets/image-20250409151946587.png)
+
+**配置Git仓库**
+
+![image-20250409152148427](./assets/image-20250409152148427.png)
+
+
+
+**配置过滤分支**
+
+设置 `Filter by name (with regular expression)` 规则，添加需要自动部署的分支
+
+- `\b(master|develop)\b`：只构建 `master`、`develop`
+
+![image-20250408103036034](./assets/image-20250408103036034.png)
+
+
+
+**保存设置**
+
+保存设置后会自动进行一次扫描，然后再自动构建
+
+![image-20250408103637714](./assets/image-20250408103637714.png)
+
+![image-20250408103650268](./assets/image-20250408103650268.png)
+
+
+
+#### 触发构建
+
+**手动扫描**
+
+点击 `立刻 Scan 多分支流水线`，将构建有更新的分支
+
+![image-20250408103937818](./assets/image-20250408103937818.png)
+
+**自动扫描**
+
+在设置的触发器里面配置1分钟自动扫描
+
+![image-20250408104146772](./assets/image-20250408104146772.png)
+
+**Webhook**
+
+安装插件：[Multibranch Scan Webhook Trigger](JENKINS_URL/multibranch-webhook-trigger/invoke?token=TOKENHERE)
+
+在设置的触发器里面配置Webhook，Token自定义设置，我这里是配置的项目名称ateng_kubernetes_springboot_multibranch
+
+![image-20250408104822269](./assets/image-20250408104822269.png)
+
+在Git仓库的Webhook配置URL：
+
+JENKINS_URL/multibranch-webhook-trigger/invoke?token=ateng_kubernetes_springboot_multibranch
+
+
+

@@ -58,6 +58,7 @@
             - [openssl创建证书](/work/service/tls/tls-openssl/)
     - DevOps
         - [Jenkins](/work/service/jenkins/)
+        - [Argo CD](/work/service/argo-cd/)
     - 可观测
         - OTLP
             - [OpenTelemetry](/work/service/opentelemetry/)
@@ -250,6 +251,12 @@
                 - [ingress模式](/work/kubernetes/service/harbor/v2.12.0/ingress-http/)
                 - [https模式](/work/kubernetes/service/harbor/v2.12.0/https/)
                 - [https模式(自定义证书)](/work/kubernetes/service/harbor/v2.12.0/https-custom/)
+        - DevOps
+            - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
+            - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
+            - [Jenkins](/work/kubernetes/service/jenkins/v2.492.3/baseic/)
+            - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
+            - [Argo CD](/work/kubernetes/service/argo-cd/v2.14.8/)
         - 可观测
             - [Prometheus](/work/kubernetes/service/prometheus/v2.55.1/)
             - [Grafana](/work/kubernetes/service/grafana/v11.5.3/)
@@ -259,11 +266,11 @@
             - [Fluentd](/work/kubernetes/service/fluentd/v.18.0/)
             - [Fluent Bit](/work/kubernetes/service/fluent-bit/v3.2.10/)
             - [Logstash](/work/kubernetes/service/logstash/v8.16.1/)
+            - [SkyWalking](/work/kubernetes/service/skywalking/v10.1.0/)
+            - [Zipkin](/work/kubernetes/service/zipkin/v3.5.0/)
+            - [Jaeger](/work/kubernetes/service/jaeger/v2.4.0/)
         - 开发服务
             - [Java应用](/work/kubernetes/service/java-app/v1.1/)
-            - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
-            - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
-            - [Jenkins](/work/kubernetes/service/jenkins/v2.492.3/baseic/)
             - [Snail-Job](/work/kubernetes/service/snail-job/v1.3.0/)
             - [PowerJob](/work/kubernetes/service/powerjob/v5.1.1/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
@@ -271,10 +278,6 @@
             - [Seata](/work/kubernetes/service/seata/)
             - [Sentinel](/work/kubernetes/service/sentinel/)
             - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
-            - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
-            - [SkyWalking](/work/kubernetes/service/skywalking/v10.1.0/)
-            - [Zipkin](/work/kubernetes/service/zipkin/v3.5.0/)
-            - [Jaeger](/work/kubernetes/service/jaeger/v2.4.0/)
             - [chat2db数据库管理工具](/work/kubernetes/service/chat2db/v0.3.7/)
             - [drawDB数据库编辑器](/work/kubernetes/service/drawdb/)
         - 大数据

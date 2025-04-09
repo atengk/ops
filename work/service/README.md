@@ -60,6 +60,7 @@
         - [openssl创建证书](/work/service/tls/tls-openssl/)
 - DevOps
     - [Jenkins](/work/service/jenkins/)
+    - [Argo CD](/work/service/argo-cd/)
     
 - 可观测
     - OTLP

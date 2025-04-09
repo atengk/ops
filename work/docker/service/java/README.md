@@ -89,9 +89,12 @@ sudo chown -R 1001:1001 /data/container/java/springboot3-demo
 docker run -d --restart=always \
     --name ateng-springboot3-demo \
     -p 18080:8080 \
-    -e JAVA_OPTS="-server -Xms128m -Xmx1024m -jar /opt/app/app.jar" \
-    -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
-    registry.lingo.local/service/java-app-integrated-cmd:debian12_temurin_openjdk-jdk-21-jre
+    registry.lingo.local/service/java-app-integrated-cmd:debian12_temurin_openjdk-jdk-21-jre \
+    -server \
+    -Xms128m -Xmx1024m \
+    -jar app.jar \
+    --server.port=8080 \
+    --spring.profiles.active=prod
 ```
 
 **查看日志**
