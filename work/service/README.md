@@ -58,9 +58,13 @@
     - TLS证书
         - [cfssl创建证书](/work/service/tls/tls-cfssl/v1.6.5/)
         - [openssl创建证书](/work/service/tls/tls-openssl/)
-- DevOps
-    - [Jenkins](/work/service/jenkins/)
-    - [Argo CD](/work/service/argo-cd/)
+- CI/CD
+    - DevOps - Jenkins
+        - [安装文档](/work/service/jenkins/)
+        - [使用文档](/work/service/jenkins/OPS.md)
+    - GitOps - Argo CD
+        - [安装文档](/work/service/argo-cd/)
+        - [使用文档](/work/service/argo-cd/OPS.md)
     
 - 可观测
     - OTLP

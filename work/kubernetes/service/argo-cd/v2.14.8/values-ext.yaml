@@ -320,12 +320,49 @@ config:
   secret:
     argocdServerAdminPassword: "Admin@123"
 redis:
-  enabled: false
-externalRedis:
+  image:
+    registry: registry.lingo.local
+    repository: bitnami/redis
+    tag: "7.4.2"
+    pullPolicy: IfNotPresent
   enabled: true
+  auth:
+    enabled: true
+    password: "Admin@123"
+  architecture: standalone
+  commonConfiguration: |-
+    databases 20
+    appendonly yes
+    appendfsync always
+    save ""
+    maxclients 1024
+    maxmemory 8GB
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    maxmemory-policy volatile-lru
+    io-threads 10
+    io-threads-do-reads yes
+  master:
+    extraEnvVars:
+      - name: TZ
+        value: Asia/Shanghai
+    resourcesPreset: "none"
+    resources: {}
+    affinity: {}
+    nodeSelector: {}
+    podAntiAffinityPreset: "soft"  ## 调度到不同节点
+    nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/argo-cd="true"
+      type: "soft"
+      key: "kubernetes.service/argo-cd"
+      values:
+        - "true"
+    persistence:
+      size: 10Gi
+externalRedis:
+  enabled: false
   host: "192.168.1.10"
   port: 42784
   password: "Admin@123"
 redisWait:
-  enabled: false
+  enabled: true
 

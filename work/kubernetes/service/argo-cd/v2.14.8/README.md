@@ -33,27 +33,34 @@ cat values.yaml
 **创建标签，运行在标签节点上**
 
 ```
+kubectl label nodes server02.lingo.local kubernetes.service/argo-cd="true"
 kubectl label nodes server03.lingo.local kubernetes.service/argo-cd="true"
 ```
 
 **创建服务**
 
 ```
-helm install argo-cd -n kongyu -f values.yaml argo-cd-7.3.1.tgz
+helm install argo-cd -n argocd -f values.yaml argo-cd-7.3.1.tgz
 ```
 
 **查看服务**
 
 ```
-kubectl get -n kongyu pod,svc,pvc -l app.kubernetes.io/instance=argo-cd
-kubectl logs -f -n kongyu deploy/argo-cd
+kubectl get -n argocd pod,svc,pvc -l app.kubernetes.io/instance=argo-cd
+kubectl logs -f -n argocd deploy/argo-cd-server
+```
+
+**查看API**
+
+```
+kubectl api-resources | grep argoproj.io
 ```
 
 **使用服务**
 
 访问Web地址
 
-> service/argo-cd 的 3000
+> service/argo-cd-server 的 80
 
 ```
 URL: http://192.168.1.10:18764
@@ -62,7 +69,7 @@ URL: http://192.168.1.10:18764
 **删除服务以及数据**
 
 ```
-helm uninstall -n kongyu argo-cd
-kubectl delete -n kongyu pvc -l app.kubernetes.io/instance=argo-cd
+helm uninstall -n argocd argo-cd
+kubectl delete -n argocd pvc -l app.kubernetes.io/instance=argo-cd
 ```
 

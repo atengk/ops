@@ -30,7 +30,7 @@
 
 - **DevOps**：⚙️
     - 使用Jenkins完成应用的CICD，包括Linux、Docker、Kubernetes多方面自动化部署。
-    - 参考：[使用文档](/work/service/jenkins/)
+    - 参考：[使用文档](/work/service/jenkins/OPS.md)
 
 - **可观测性**：🔍
     - 使用OpenTelemetry完成处理 跟踪（Tracing）、指标（Metrics）和日志（Logs） 数据。
@@ -52,8 +52,8 @@
         - 用户管理
             - [用户管理](/work/service/security/user/)
         - OpenSSH
-            - [OpenSSH](/work/service/security/openssh/)
-            - [升级OpenSSH](/work/service/openssh/v9.9/)
+            - [使用文档](/work/service/security/openssh/)
+            - [升级版本](/work/service/openssh/v9.9/)
         - TLS证书
             - [cfssl创建证书](/work/service/security/tls/tls-cfssl/v1.6.5/)
             - [openssl创建证书](/work/service/security/tls/tls-openssl/)
@@ -106,9 +106,13 @@
         - Haproxy
             - [安装文档](/work/service/haproxy/)
             - [使用文档](/work/service/haproxy/OPS.md)
-    - DevOps
-        - [Jenkins](/work/service/jenkins/)
-        - [Argo CD](/work/service/argo-cd/)
+    - CI/CD
+        - DevOps - Jenkins
+            - [安装文档](/work/service/jenkins/)
+            - [使用文档](/work/service/jenkins/OPS.md)
+        - GitOps - Argo CD
+            - [安装文档](/work/service/argo-cd/)
+            - [使用文档](/work/service/argo-cd/OPS.md)
     - 可观测
         - OTLP
             - [OpenTelemetry](/work/service/opentelemetry/)
@@ -301,12 +305,12 @@
                 - [ingress模式](/work/kubernetes/service/harbor/v2.12.0/ingress-http/)
                 - [https模式](/work/kubernetes/service/harbor/v2.12.0/https/)
                 - [https模式(自定义证书)](/work/kubernetes/service/harbor/v2.12.0/https-custom/)
-        - DevOps
+        - CI/CD
             - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
             - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
-            - [Jenkins](/work/kubernetes/service/jenkins/v2.492.3/baseic/)
-            - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
+            - [Jenkins](/work/kubernetes/service/jenkins/v2.492.3/)
             - [Argo CD](/work/kubernetes/service/argo-cd/v2.14.8/)
+            - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)
         - 可观测
             - [Prometheus](/work/kubernetes/service/prometheus/v2.55.1/)
             - [Grafana](/work/kubernetes/service/grafana/v11.5.3/)
