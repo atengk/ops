@@ -2,6 +2,101 @@
 
 
 
+## 客户端使用
+
+### 安装kubectl
+
+**下载最新版**
+
+```
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+```
+
+**下载指定版本**
+
+```
+curl -LO https://dl.k8s.io/release/v1.32.3/bin/linux/amd64/kubectl
+```
+
+**安装到用户目录**
+
+```
+mkdir -p ~/bin
+chmod +x kubectl
+mv kubectl ~/bin
+```
+
+**查看版本**
+
+```
+$ kubectl version
+Client Version: v1.31.2
+Kustomize Version: v5.4.2
+Server Version: v1.31.2
+```
+
+### 使用kubeconfig
+
+**使用环境变量**
+
+```
+export KUBECONFIG=kubeconfig.yaml
+kubectl config view
+kubectl auth can-i --list
+```
+
+**使用命令行参数**
+
+```
+kubectl --kubeconfig=kubeconfig.yaml config view
+kubectl --kubeconfig=kubeconfig.yaml auth can-i --list 
+```
+
+### 容器中使用
+
+创建容器并指定ServiceAccount（SA）
+
+```
+kubectl -n kubesphere-system apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubectl-test
+spec:
+  serviceAccountName: kubesphere
+  containers:
+    - name: kubectl
+      image: bitnami/kubectl:1.31.2
+      command: ["sleep", "3600"]
+EOF
+```
+
+进入容器
+
+```
+kubectl -n kubesphere-system exec -it kubectl-test -- bash
+```
+
+查看认证信息，指定了serviceAccountName后容器会自动将SA的kubeconfig的信息挂载到这个目录，后续使用kubectl命令就无须指定kubeconfig文件
+
+```
+ls -l /var/run/secrets/kubernetes.io/serviceaccount/
+```
+
+使用kubectl
+
+```
+kubectl auth can-i --list
+```
+
+删除pod
+
+```
+kubectl -n kubesphere-system delete pod kubectl-test
+```
+
+
+
 ## 重启应用
 
 **删除 Pod**
@@ -21,6 +116,16 @@ kubectl rollout restart <deployment|statefulset|daemonset> <name>
 ```
 kubectl patch deployment <deployment-name> \
   -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"kubectl.kubernetes.io/restartedAt\":\"$(date +%Y-%m-%dT%H:%M:%S)\"}}}}}"
+```
+
+
+
+## Service
+
+**获取服务的nodePort**
+
+```
+kubectl -n argocd get svc argo-cd-server -o jsonpath='{.spec.ports[?(@.port==443)].nodePort}'
 ```
 
 
@@ -176,37 +281,6 @@ users:
 EOF
 ```
 
-#### 使用kubeconfig
-
-**使用环境变量**
-
-配置kubeconfig
-
-```
-export KUBECONFIG=kubeconfig-${K8S_UserName}.yaml
-kubectl config view
-```
-
-查看资源
-
-```
-kubectl get pod
-```
-
-**使用命令行参数**
-
-配置kubeconfig
-
-```
-kubectl --kubeconfig=kubeconfig-${K8S_UserName}.yaml config view
-```
-
-查看资源
-
-```
-kubectl --kubeconfig=kubeconfig-${K8S_UserName}.yaml get pod
-```
-
 
 
 ### 创建admin用户并导出kubeconfig
@@ -350,42 +424,11 @@ users:
 EOF
 ```
 
-#### 使用kubeconfig
-
-**使用环境变量**
-
-配置kubeconfig
-
-```
-export KUBECONFIG=kubeconfig-${K8S_UserName}.yaml
-kubectl config view
-```
-
-查看资源
-
-```
-kubectl get pod
-```
-
-**使用命令行参数**
-
-配置kubeconfig
-
-```
-kubectl --kubeconfig=kubeconfig-${K8S_UserName}.yaml config view
-```
-
-查看资源
-
-```
-kubectl --kubeconfig=kubeconfig-${K8S_UserName}.yaml get pod
-```
-
 
 
 ### 常用规则
 
-#### ✅ 获取所有权限（全资源通配符）：
+✅ 获取所有权限（全资源通配符）：
 
 ```yaml
 rules:
@@ -396,7 +439,7 @@ rules:
 
 ------
 
-#### ✅ 管理 Pod 的权限：
+✅ 管理 Pod 的权限：
 
 ```yaml
 rules:
@@ -407,7 +450,7 @@ rules:
 
 ------
 
-#### ✅ 管理 Deployment 的权限：
+✅ 管理 Deployment 的权限：
 
 ```yaml
 rules:
@@ -418,7 +461,7 @@ rules:
 
 ------
 
-#### ✅ 管理 ConfigMap 和 Secret：
+✅ 管理 ConfigMap 和 Secret：
 
 ```yaml
 rules:
@@ -429,7 +472,7 @@ rules:
 
 ------
 
-#### ✅ 管理 Service、Endpoints、Ingress：
+✅ 管理 Service、Endpoints、Ingress：
 
 ```yaml
 rules:
@@ -443,7 +486,7 @@ rules:
 
 ------
 
-#### ✅ 只读权限（适合查看资源）：
+✅ 只读权限（适合查看资源）：
 
 ```yaml
 rules:
@@ -454,7 +497,7 @@ rules:
 
 ------
 
-#### ✅ 日志访问权限（通过 pod/log）：
+✅ 日志访问权限（通过 pod/log）：
 
 ```yaml
 rules:
@@ -465,7 +508,7 @@ rules:
 
 ------
 
-#### ✅ 管理命名空间资源（谨慎使用）：
+✅ 管理命名空间资源（谨慎使用）：
 
 ```yaml
 rules:
@@ -473,6 +516,68 @@ rules:
   resources: ["namespaces"]
   verbs: ["get", "list", "create", "update", "delete"]
 ```
+
+
+
+### 使用kubeconfig
+
+#### 临时使用
+
+**使用环境变量**
+
+```
+export KUBECONFIG=kubeconfig.yaml
+kubectl config view
+kubectl auth can-i --list
+```
+
+**使用命令行参数**
+
+```
+kubectl --kubeconfig=kubeconfig.yaml config view
+kubectl --kubeconfig=kubeconfig.yaml auth can-i --list 
+```
+
+#### 合并使用
+
+**合并kubeconfig**
+
+如果你拿到了目标集群的 `kubeconfig` 文件，比如是 `kubeconfig-aliyun.yaml`，可以这样合并进你本地 kubeconfig：
+
+```
+KUBECONFIG=~/.kube/config:/data/kubernetes/config/kubeconfig-ateng-admin.yaml kubectl config view --flatten > /tmp/config-merged && mv /tmp/config-merged ~/.kube/config
+```
+
+**查看全部 context**
+
+```
+kubectl config get-contexts
+```
+
+输出示例：
+
+```
+CURRENT   NAME                CLUSTER             AUTHINFO             NAMESPACE
+*         dev-context         dev-cluster         dev-user             default
+          prod-context        prod-cluster        prod-user            default
+```
+
+- `CURRENT` 那列带 `*` 的是当前正在使用的 context。
+- `NAME` 是 context 的名字，你切换就是切这个。
+
+**切换 context**
+
+```
+kubectl config use-context <context-name>
+```
+
+例子：
+
+```
+kubectl config use-context prod-context
+```
+
+切过去之后你再运行 `kubectl get pods` 等命令，就是针对 `prod-context` 所对应的集群了。
 
 
 

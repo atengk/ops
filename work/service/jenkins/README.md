@@ -5,7 +5,7 @@ Jenkins 是一个开源的自动化服务器，广泛用于实现持续集成（
 - [官网链接](https://www.jenkins.io/)
 
 - [Docker安装Jenkins文档](/work/docker/service/jenkins/)
-- [Kubernetes安装Jenkins文档](/work/kubernetes/service/jenkins/v2.492.2/baseic/)
+- [Kubernetes安装Jenkins文档](/work/kubernetes/service/jenkins/v2.492.2/)
 
 
 

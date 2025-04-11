@@ -60,10 +60,12 @@ kubectl api-resources | grep argoproj.io
 
 访问Web地址
 
-> service/argo-cd-server 的 80
+> service/argo-cd-server 的 443
 
 ```
-URL: http://192.168.1.10:18764
+URL: https://192.168.1.10:30980
+Username: admin
+Password: $(kubectl -n argocd get secret argocd-secret -o jsonpath="{.data.clearPassword}" | base64 -d)
 ```
 
 **删除服务以及数据**

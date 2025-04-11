@@ -121,6 +121,83 @@ ssh root@10.244.172.8
 
 
 
+### 添加主机公钥
+
+`~/.ssh/known_hosts` 是 SSH 客户端用来存储**服务器主机公钥**的文件，它在保障 SSH 连接安全性中扮演非常重要的角色。它的配置是**自动完成的**，但你也可以手动管理或预先写入，提高自动化和安全性。
+
+#### 使用 ssh-keyscan 添加
+
+```
+ssh-keyscan -t ed25519 -p 22 k8s-master01 >> ~/.ssh/known_hosts
+```
+
+你可以指定多个主机、使用不同密钥类型：
+
+```
+ssh-keyscan -t rsa,ed25519 -p 22 k8s-master01 10.244.250.10 >> ~/.ssh/known_hosts
+```
+
+#### 删除失效或更换公钥的主机记录
+
+如果服务器更换了密钥，你可能会遇到：
+
+```bash
+WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!
+```
+
+此时你可以编辑 `~/.ssh/known_hosts` 或使用以下命令删除旧记录：
+
+```bash
+ssh-keygen -R <host>
+```
+
+例如：
+
+```bash
+ssh-keygen -R github.com
+```
+
+然后重新连接并接受新的主机公钥即可。
+
+#### 忽略主机公钥检查
+
+**命令行方式**
+
+🚫 临时跳过 known_hosts 检查
+
+```
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 22 user@host
+```
+
+含义解释：
+
+| 参数                              | 作用                                                         |
+| --------------------------------- | ------------------------------------------------------------ |
+| `-o StrictHostKeyChecking=no`     | 第一次连接时自动接受公钥，不提示警告。后续主机密钥变更仍会警告。 |
+| `-o UserKnownHostsFile=/dev/null` | 不使用 `~/.ssh/known_hosts`，也不保存任何主机密钥（不会污染用户文件） |
+
+**配置文件方式**
+
+编辑你的 `~/.ssh/config` 文件，添加如下配置（针对特定主机或全部主机）：
+
+```sshconfig
+Host example.com
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+```
+
+或者作用于全部主机：
+
+```sshconfig
+Host *
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+```
+
+> ✅ 建议只对非生产环境这么设置，防止安全风险。
+
+
+
 ## 配置文件~/.ssh/config
 
 ### 配置实例

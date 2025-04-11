@@ -66,3 +66,10 @@ sudo ln -s  /usr/local/software/git/bin/git /usr/bin/git
 git --version
 ```
 
+**设置 Git 用户信息**
+
+```
+git config --global user.name "阿腾"
+git config --global user.email "2385569970@qq.com"
+```
+

@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vm-openeuler03
+  namespace: kongyu-vm
+  labels:
+    kubevirt.io/vm: vm-openeuler03
+spec:
+  selector:
+    kubevirt.io/vm: vm-openeuler03
+  ports:
+  - protocol: TCP
+    port: 22
+    targetPort: 22
+    nodePort: 38103
+  type: NodePort
+---
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: vm-openeuler03
+  namespace: kongyu-vm
+  labels:
+    kubevirt.io/vm: vm-openeuler03
+spec:
+  running: true
+  template:
+    metadata:
+      labels:
+        kubevirt.io/vm: vm-openeuler03
+      annotations:
+        "cni.projectcalico.org/ipAddrs": "[\"10.244.250.30\"]"
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: server03.lingo.local
+      domain:
+        cpu:
+          cores: 4
+          model: host-passthrough
+        memory:
+          guest: 8Gi
+        resources:
+          overcommitGuestOverhead: true
+        devices:
+          disks:
+          - name: containerdisk
+            disk:
+              bus: virtio
+          - name: emptydisk
+            disk:
+              bus: virtio
+          - name: cloudinitdisk
+            disk:
+              bus: virtio
+          interfaces:
+          - name: default
+            bridge: {}
+      terminationGracePeriodSeconds: 30
+      networks:
+      - name: default
+        pod: {}
+      volumes:
+      - name: containerdisk
+        containerDisk:
+          image: swr.cn-north-1.myhuaweicloud.com/kongyu/kubevirt/linux:openeuler-24.03-lts-x86_64
+      - name: emptydisk
+        emptyDisk:
+          capacity: 100Gi
+      - name: cloudinitdisk
+        cloudInitNoCloud:
+          userData: |
+            #!/bin/sh
+            echo Admin@123 | passwd --stdin root 
+            sed -i "s#PasswordAuthentication.*#PasswordAuthentication yes#g" /etc/ssh/sshd_config.d/50-cloud-init.conf
+            systemctl restart sshd

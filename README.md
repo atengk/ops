@@ -28,9 +28,9 @@
     - 涵盖基础服务、数据存储、计算框架及调度平台等，助力大数据系统的部署与优化。
     - 参考：[使用文档](/work/bigdata/)
 
-- **DevOps**：⚙️
-    - 使用Jenkins完成应用的CICD，包括Linux、Docker、Kubernetes多方面自动化部署。
-    - 参考：[使用文档](/work/service/jenkins/OPS.md)
+- **CI/CD自动化部署**：⚙️
+    - 使用 Jenkins 搭建自动化构建与部署流程，结合 ArgoCD 实现基于 GitOps 的 Kubernetes 应用持续交付，支持多环境部署、镜像管理与回滚操作。
+    - 参考：[DevOps - Jenkins 使用文档](/work/service/jenkins/OPS.md)｜[GitOps - ArgoCD 使用文档](/work/service/argo-cd/OPS.md)
 
 - **可观测性**：🔍
     - 使用OpenTelemetry完成处理 跟踪（Tracing）、指标（Metrics）和日志（Logs） 数据。
@@ -110,6 +110,7 @@
         - DevOps - Jenkins
             - [安装文档](/work/service/jenkins/)
             - [使用文档](/work/service/jenkins/OPS.md)
+            - [Agent镜像构建](/work/service/jenkins/images/)
         - GitOps - Argo CD
             - [安装文档](/work/service/argo-cd/)
             - [使用文档](/work/service/argo-cd/OPS.md)
