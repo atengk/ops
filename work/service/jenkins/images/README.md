@@ -70,6 +70,14 @@ wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F
 wget https://get.helm.sh/helm-v3.16.2-linux-amd64.tar.gz
 ```
 
+**yq**
+
+YAML编辑工具
+
+```
+wget https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64
+```
+
 
 
 ## 创建Dockerfile
@@ -113,7 +121,8 @@ RUN tar -zxvf ${PKG_DIR}/docker*.tgz -C ${PKG_DIR} && \
     tar -zxvf ${PKG_DIR}/helm*.tar.gz -C ${PKG_DIR} && \
     cp ${PKG_DIR}/linux-amd64/helm bin/helm && \
     tar -zxvf ${PKG_DIR}/kustomize_v5.5.0_linux_amd64.tar.gz -C bin && \
-    cp ${PKG_DIR}/kubectl bin/kubectl
+    cp ${PKG_DIR}/kubectl bin/kubectl && \
+    cp ${PKG_DIR}/yq_linux_amd64 bin/yq
 RUN chmod +x bin/* && \
     rm -rf ${PKG_DIR}
 
@@ -170,15 +179,6 @@ RUN mkdir -p ${WORK_DIR} ${DATA_DIR} && \
     vim \
     tree \
     less \
-    unzip \
-    zip \
-    tar \
-    gzip \
-    bzip2 \
-    xz-utils \
-    procps \
-    jq \
-    yq \
     telnet \
     net-tools \
     less \
@@ -188,6 +188,12 @@ RUN mkdir -p ${WORK_DIR} ${DATA_DIR} && \
     tzdata \
 
     # === 压缩/解压支持 ===
+    unzip \
+    zip \
+    tar \
+    gzip \
+    bzip2 \
+    xz-utils \
     rar \
     unrar \
     p7zip-full \
@@ -384,7 +390,8 @@ RUN tar -zxvf ${PKG_DIR}/docker*.tgz -C ${PKG_DIR} && \
     tar -zxvf ${PKG_DIR}/helm*.tar.gz -C ${PKG_DIR} && \
     cp ${PKG_DIR}/linux-amd64/helm bin/helm && \
     tar -zxvf ${PKG_DIR}/kustomize_v5.5.0_linux_amd64.tar.gz -C bin && \
-    cp ${PKG_DIR}/kubectl bin/kubectl
+    cp ${PKG_DIR}/kubectl bin/kubectl && \
+    cp ${PKG_DIR}/yq_linux_amd64 bin/yq
 RUN chmod +x bin/* && \
     rm -rf ${PKG_DIR}
 
@@ -593,7 +600,8 @@ RUN tar -zxvf ${PKG_DIR}/docker*.tgz -C ${PKG_DIR} && \
     tar -zxvf ${PKG_DIR}/helm*.tar.gz -C ${PKG_DIR} && \
     cp ${PKG_DIR}/linux-amd64/helm bin/helm && \
     tar -zxvf ${PKG_DIR}/kustomize_v5.5.0_linux_amd64.tar.gz -C bin && \
-    cp ${PKG_DIR}/kubectl bin/kubectl
+    cp ${PKG_DIR}/kubectl bin/kubectl && \
+    cp ${PKG_DIR}/yq_linux_amd64 bin/yq
 RUN chmod +x bin/* && \
     rm -rf ${PKG_DIR}
 
@@ -794,7 +802,8 @@ RUN tar -zxvf ${PKG_DIR}/docker*.tgz -C ${PKG_DIR} && \
     tar -zxvf ${PKG_DIR}/helm*.tar.gz -C ${PKG_DIR} && \
     cp ${PKG_DIR}/linux-amd64/helm bin/helm && \
     tar -zxvf ${PKG_DIR}/kustomize_v5.5.0_linux_amd64.tar.gz -C bin && \
-    cp ${PKG_DIR}/kubectl bin/kubectl
+    cp ${PKG_DIR}/kubectl bin/kubectl && \
+    cp ${PKG_DIR}/yq_linux_amd64 bin/yq
 RUN chmod +x bin/* && \
     rm -rf ${PKG_DIR}
 
@@ -815,10 +824,10 @@ ARG WORK_DIR=/usr/local/software \
     DATA_DIR=/data
 
 # 定义容器的用户信息
-ARG user=admin
-ARG group=ateng
-ARG uid=1001
-ARG gid=1001
+ARG user=jenkins
+ARG group=jenkins
+ARG uid=1000
+ARG gid=1000
 
 # 设置工作目录
 WORKDIR ${WORK_DIR}
@@ -939,7 +948,7 @@ ENV WORK_DIR=${WORK_DIR} \
 USER ${uid}:${gid}
 
 # 设置工作目录
-WORKDIR ${DATA_DIR}/agent
+WORKDIR /home/"${user}"
 ```
 
 #### 配置镜像
@@ -997,7 +1006,8 @@ RUN tar -zxvf ${PKG_DIR}/docker*.tgz -C ${PKG_DIR} && \
     tar -zxvf ${PKG_DIR}/helm*.tar.gz -C ${PKG_DIR} && \
     cp ${PKG_DIR}/linux-amd64/helm bin/helm && \
     tar -zxvf ${PKG_DIR}/kustomize_v5.5.0_linux_amd64.tar.gz -C bin && \
-    cp ${PKG_DIR}/kubectl bin/kubectl
+    cp ${PKG_DIR}/kubectl bin/kubectl && \
+    cp ${PKG_DIR}/yq_linux_amd64 bin/yq
 RUN chmod +x bin/* && \
     rm -rf ${PKG_DIR}
 

@@ -15,7 +15,8 @@ RUN tar -zxvf ${PKG_DIR}/docker*.tgz -C ${PKG_DIR} && \
     tar -zxvf ${PKG_DIR}/helm*.tar.gz -C ${PKG_DIR} && \
     cp ${PKG_DIR}/linux-amd64/helm bin/helm && \
     tar -zxvf ${PKG_DIR}/kustomize_v5.5.0_linux_amd64.tar.gz -C bin && \
-    cp ${PKG_DIR}/kubectl bin/kubectl
+    cp ${PKG_DIR}/kubectl bin/kubectl && \
+    cp ${PKG_DIR}/yq_linux_amd64 bin/yq
 RUN chmod +x bin/* && \
     rm -rf ${PKG_DIR}
 
