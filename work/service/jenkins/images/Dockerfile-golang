@@ -1,0 +1,154 @@
+# 拷贝文件
+FROM busybox AS builder
+ARG PKG_DIR=packages
+WORKDIR /opt
+COPY ${PKG_DIR} ${PKG_DIR}
+RUN mkdir -p bin
+RUN tar -zxvf ${PKG_DIR}/OpenJDK*.tar.gz && \
+    mv jdk* jdk
+RUN tar -zxvf packages/go*.tar.gz
+RUN tar -zxvf ${PKG_DIR}/docker*.tgz -C ${PKG_DIR} && \
+    cp ${PKG_DIR}/docker/* bin/ && \
+    cp ${PKG_DIR}/buildx* bin/docker-buildx && \
+    cp ${PKG_DIR}/docker-compose* bin/docker-compose && \
+    tar -zxvf ${PKG_DIR}/helm*.tar.gz -C ${PKG_DIR} && \
+    cp ${PKG_DIR}/linux-amd64/helm bin/helm && \
+    tar -zxvf ${PKG_DIR}/kustomize_v5.5.0_linux_amd64.tar.gz -C bin && \
+    cp ${PKG_DIR}/kubectl bin/kubectl
+RUN chmod +x bin/* && \
+    rm -rf ${PKG_DIR}
+
+# 镜像基础
+FROM debian:12.10
+
+# 作者/元信息
+LABEL maintainer="阿腾 <2385569970@qq.com>" \
+      org.opencontainers.image.title="DevOps Maven工具集镜像" \
+      org.opencontainers.image.description="包含 Java、Maven、Docker、kubectl、kustomize、helm 等常用工具的开发运维环境" \
+      org.opencontainers.image.authors="阿腾" \
+      org.opencontainers.image.version="1.0.0" \
+      org.opencontainers.image.created="2025-04-12T12:00:00+08:00" \
+      org.opencontainers.image.licenses="MIT"
+
+# 定义构建时的参数，WORK_DIR软件包安装目录、DATA_DIR软件包的数据目录
+ARG WORK_DIR=/usr/local/software \
+    DATA_DIR=/data
+
+# 定义容器的用户信息，需要和inbound-agent镜像的用户信息保持一致
+ARG user=jenkins
+ARG group=jenkins
+ARG uid=1000
+ARG gid=1000
+
+# 设置工作目录
+WORKDIR ${WORK_DIR}
+
+# 复制软件包
+COPY --chown=${uid}:${gid} --from=builder /opt/ .
+
+# 创建必要目录
+RUN mkdir -p ${WORK_DIR} ${DATA_DIR} && \
+
+# 修改镜像源
+    sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
+
+# 安装常用工具
+    apt-get install --no-install-recommends -y \
+    git=1:2.39.* \
+    ca-certificates \
+    curl \
+    wget \
+    vim \
+    tree \
+    less \
+    unzip \
+    zip \
+    tar \
+    gzip \
+    bzip2 \
+    xz-utils \
+    net-tools \
+    less \
+    netbase \
+    openssh-client \
+    patch \
+    tzdata \
+    locales \
+    gettext \
+    fontconfig && \
+    apt-get clean && \
+
+# 添加用户信息并设置权限
+    groupadd -g "${gid}" "${group}" || echo "group ${group} already exists." && \
+    useradd -l -c "DevOps User" -d /home/"${user}" -u "${uid}" -g "${gid}" -m "${user}" || echo "user ${user} already exists." && \
+    chown -R ${uid}:${gid} ${WORK_DIR} ${DATA_DIR}
+
+# 设置用户
+USER ${uid}:${gid}
+
+# 设置 JDK 环境变量
+ENV JAVA_HOME=${WORK_DIR}/jdk
+ENV PATH=$PATH:${JAVA_HOME}/bin
+# 设置 Golang 环境变量
+ENV GOROOT=${WORK_DIR}/go \
+    GOPATH=${DATA_DIR}/golang \
+    GOPROXY=https://goproxy.cn,direct
+ENV PATH=$PATH:${GOROOT}/bin:${GOPATH}/bin
+# 设置 bin 环境变量
+ENV PATH=$PATH:${WORK_DIR}/bin
+
+# Git 配置 & 固定 SSH 密钥
+RUN mkdir -p ~/.ssh && \
+    # 写入私钥
+    echo "-----BEGIN OPENSSH PRIVATE KEY-----" > ~/.ssh/id_ed25519 && \
+    echo "b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW" >> ~/.ssh/id_ed25519 && \
+    echo "QyNTUxOQAAACCz/8+IsXTRvPTIFG/Aolc01zjlj5974+yQDryhR7NZEAAAALAOVh0TDlYd" >> ~/.ssh/id_ed25519 && \
+    echo "EwAAAAtzc2gtZWQyNTUxOQAAACCz/8+IsXTRvPTIFG/Aolc01zjlj5974+yQDryhR7NZEA" >> ~/.ssh/id_ed25519 && \
+    echo "AAAEDbLxmQQzqUOHi7Isbf01cbajIFhsuKcsHAqfzcrDfpw7P/z4ixdNG89MgUb8CiVzTX" >> ~/.ssh/id_ed25519 && \
+    echo "OOWPn3vj7JAOvKFHs1kQAAAAKTIzODU1Njk5NzBAcXEuY29tIC0gU2VydmVyIEtleSAtID" >> ~/.ssh/id_ed25519 && \
+    echo "IwMjUwNDExAQIDBA==" >> ~/.ssh/id_ed25519 && \
+    echo "-----END OPENSSH PRIVATE KEY-----" >> ~/.ssh/id_ed25519 && \
+    # 写入公钥
+    echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILP/z4ixdNG89MgUb8CiVzTXOOWPn3vj7JAOvKFHs1kQ 2385569970@qq.com - Server Key - 20250411' > ~/.ssh/id_ed25519.pub && \
+    # 设置权限
+    cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys && \
+    chmod 700 ~/.ssh && \
+    chmod 600 ~/.ssh/id_ed25519 ~/.ssh/authorized_keys && \
+    chmod 644 ~/.ssh/id_ed25519.pub && \
+    # SSH 主机验证自动确认
+    echo "Host *" >> ~/.ssh/config && \
+    echo "    StrictHostKeyChecking no" >> ~/.ssh/config && \
+    echo "    UserKnownHostsFile=/dev/null" >> ~/.ssh/config && \
+    chmod 600 ~/.ssh/config && \
+    # Git 配置
+    git config --global user.name "阿腾" && \
+    git config --global user.email "2385569970@qq.com"
+
+# 切回root安装全局软件
+USER 0:0
+
+# 配置 Docker
+RUN mkdir -p /etc/docker && \
+    echo '{' >> /etc/docker/daemon.json && \
+    echo '  "features": { "buildkit": true },' >> /etc/docker/daemon.json && \
+    echo '  "insecure-registries": ["0.0.0.0/0"]' >> /etc/docker/daemon.json && \
+    echo '}' >> /etc/docker/daemon.json && \
+    mkdir -p /usr/lib/docker/cli-plugins && \
+    cp ${WORK_DIR}/bin/docker-buildx /usr/lib/docker/cli-plugins/docker-buildx && \
+
+# 清理多余文件
+    rm -rf packages /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/*
+
+# 设置时区
+ENV TZ=Asia/Shanghai
+
+# 设置路径变量
+ENV WORK_DIR=${WORK_DIR} \
+    DATA_DIR=${DATA_DIR}
+
+# 设置用户
+USER ${uid}:${gid}
+
+# 设置工作目录
+WORKDIR /home/"${user}"

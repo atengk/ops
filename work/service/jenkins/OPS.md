@@ -4395,3 +4395,332 @@ JENKINS_URL/multibranch-webhook-trigger/invoke?token=ateng_kubernetes_springboot
 
 
 
+## 使用自定义镜像
+
+自定义构建容器镜像，用于Jenkins Agent的镜像，参考文档：[Agent镜像构建](/work/service/jenkins/images/)
+
+以下示例是直接用的all这个镜像，如果需要使用特定的镜像请自行设置
+
+### Docker Cloud
+
+#### 配置templates
+
+配置以下信息
+
+- Labels: 流水线脚本匹配该镜像的标签，这里是 jenkins-agent-tools-all
+- Enabled：勾选
+- Name：Agent的名称（没啥用），和Labels保持一致
+- Docker Image: 自定义构建的镜像名称，这里是 registry.lingo.local/service/jenkins-agent-tools-all:1.0.0
+- Container settings: 主要是配置挂载卷，用户保存工具下载的依赖/软件等Mounts
+    - Mounts:
+
+```
+type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,readonly
+type=bind,source=/var/jenkins/agent,target=/data/agent
+type=bind,source=/var/jenkins/maven,target=/data/maven
+type=bind,source=/var/jenkins/nodejs,target=/data/nodejs
+type=bind,source=/var/jenkins/python,target=/data/python
+type=bind,source=/var/jenkins/golang,target=/data/golang
+```
+
+使用docker命令有两种方式，一是挂载宿主机的socket，而是使用环境变量`DOCKER_HOST` 指定远程API地址
+
+注意需要在宿主机创建这些目录并设置正确的权限
+
+```
+mkdir -p /var/jenkins/{agent,maven,nodejs,python,golang}
+chown -R 1001:1001 /var/jenkins
+```
+
+- 用法：选择 Only build jobs with label expressions matching this node
+
+![image-20250412211205861](./assets/image-20250412211205861.png)
+
+#### 配置流水线脚本
+
+设置 `agent.label` 和 Template 的 `label` 匹配
+
+```groovy
+pipeline {
+    agent {
+        label "jenkins-agent-tools-all"
+    }
+
+    // 环境变量
+    environment {
+        // Git仓库
+        GIT_CREDENTIALS_ID = "gitlab_ssh"  // Jenkins 中配置的 GitLab 凭据 ID
+        GIT_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
+        GIT_BRANCH = "master"  // 要拉取的分支
+        
+        // Docker镜像和仓库
+        DOCKER_IMAGE = "springboot3"  // 构建的镜像名称，标签自动生成
+        DOCKER_REGISTRY = "registry.lingo.local/ateng"  // 镜像仓库地址
+        DOCKER_CREDENTIALS_ID = "harbor_admin"  // 镜像仓库凭证
+    }
+
+    stages {
+
+        stage("设置并查看环境变量") {
+            steps {
+                script {
+                    // 镜像标签生成规则
+                    env.DOCKER_TAG = "$GIT_BRANCH-build-$BUILD_NUMBER"
+                }
+                sh "env"
+            }
+        }
+
+        stage('拉取代码') {
+            steps {
+                script {
+                    checkout([$class: "GitSCM",
+                        branches: [[name: "*/${GIT_BRANCH}"]],
+                        userRemoteConfigs: [[
+                            url: "${GIT_URL}",
+                            credentialsId: "${GIT_CREDENTIALS_ID}"
+                        ]]
+                    ])
+                }
+            }
+        }
+
+        stage('项目打包') {
+            steps {
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('构建容器镜像') {
+            steps {
+                sh 'docker build -f Dockerfile -t $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG .'
+            }
+        }
+
+        stage('推送镜像到仓库') {
+            steps {
+                withDockerRegistry([credentialsId: "$DOCKER_CREDENTIALS_ID", url: "http://$DOCKER_REGISTRY"]) {
+                    sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG'
+                }
+            }
+        }
+
+        stage("重启服务") {
+            steps {
+                sh "docker stop ateng-springboot3-demo &> /dev/null || true"
+                sh "docker rm ateng-springboot3-demo &> /dev/null || true"
+                sh """
+                docker run -d --restart=always \
+                    --name ateng-springboot3-demo \
+                    -p 18080:8080 \
+                    $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG \
+                    -server \
+                    -Xms128m -Xmx1024m \
+                    -jar app.jar \
+                    --server.port=8080 \
+                    --spring.profiles.active=prod
+                """
+            }
+        }
+        
+    }
+    
+}
+```
+
+
+
+### Kubernetes Cloud
+
+#### 配置templates
+
+添加命名为 `jenkins-agent-tools-all` 的 Pod templates
+
+填写以下参数：
+
+- 名称：Pod templates的名称
+- 命名空间：agent容器运行在k8s中的命名空间。为了降低耦合性，不配置命名空间，使用kubeconfig默认的。如果kubeconfig是配置的集群管理员，那么可以指定以下命名空间。
+- 标签列表：用于后续流水线脚本（Jenkinsfile）的agent.kubernetes的label配置，匹配Pod templates
+- Raw YAML for the Pod：填写初始的yaml
+- 工作空间卷：选择 `Host Path Workspace Volume` ，或者 `Generic Ephemeral Volume` 、`NFS Workspace Volume`。
+
+基础配置
+
+![image-20250412222808653](./assets/image-20250412222808653.png)
+
+Raw YAML for the Pod，相当于这是个初始的yaml模版，其他的设置会覆盖这个yaml。
+
+```yaml
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  name: "auto-generate"
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - preference:
+            matchExpressions:
+              - key: "node-role.kubernetes.io/worker"
+                operator: "In"
+                values:
+                  - "ci"
+          weight: 1
+  containers:
+    - name: "jnlp"
+      image: "jenkins/inbound-agent:3301.v4363ddcca_4e7-3-jdk21"
+      imagePullPolicy: "IfNotPresent"
+      volumeMounts:
+        - mountPath: "/etc/localtime"
+          name: "localtime"
+          readOnly: true
+      env:
+        - name: "TZ"
+          value: "Asia/Shanghai"
+      resources: {}
+    - name: "agent-tools"
+      image: "registry.lingo.local/service/jenkins-agent-tools-all:1.0.0"
+      imagePullPolicy: "IfNotPresent"
+      command:
+        - "sleep"
+      args:
+        - "infinity"
+      volumeMounts:
+        - mountPath: "/data"
+          name: "data"
+      env:
+        - name: "TZ"
+          value: "Asia/Shanghai"
+      resources:
+        limits:
+          cpu: '2'
+          memory: 2Gi
+        requests:
+          cpu: 100m
+          memory: 256Mi
+  volumes:
+    - hostPath:
+        path: "/etc/localtime"
+      name: "localtime"
+    - hostPath:
+        path: "/var/jenkins/data"
+      name: "data"
+```
+
+工作空间卷，需要保证 `1000:1000` 用户有权限，我这里是使用的 `Host Path Workspace Volume`
+
+```
+mkdir -p /var/jenkins /var/jenkins/data
+chown -R 1000:1000 /var/jenkins
+```
+
+![image-20250414092409852](./assets/image-20250414092409852.png)
+
+
+
+#### 配置流水线脚本
+
+设置 `agent.kubernetes.label` 和 Template 的 `label` 匹配
+
+```groovy
+pipeline {
+    agent {
+        kubernetes {
+            label 'jenkins-agent-tools-all'  // Pod templates中设置的标签
+        }
+    }
+
+    // 环境变量
+    environment {
+        // Git仓库
+        GIT_CREDENTIALS_ID = "gitlab_ssh"  // Jenkins 中配置的 GitLab 凭据 ID
+        GIT_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
+        GIT_BRANCH = "master"  // 要拉取的分支
+        
+        // Docker镜像和仓库
+        DOCKER_IMAGE = "springboot3"  // 构建的镜像名称，标签自动生成
+        DOCKER_REGISTRY = "registry.lingo.local/ateng"  // 镜像仓库地址
+        DOCKER_CREDENTIALS_ID = "harbor_admin"  // 镜像仓库凭证
+        DOCKER_HOST = "tcp://192.168.1.19:2375"  // Docker 主机的远程主机
+        
+        // Kubernetes的kubeconfig凭证
+        KUBECONFIG_CREDENTIAL_ID = "kubeconfig_local_k8s_ateng_kongyu"
+    }
+
+    stages {
+
+        stage('设置并查看环境变量') {
+            steps {
+                container('agent-tools') {
+                    script {
+                        // 镜像标签生成规则
+                        env.DOCKER_TAG = "$GIT_BRANCH-build-$BUILD_NUMBER"
+                        sh "env"
+                    }
+                }
+            }
+        }
+
+       stage('拉取代码') {
+            steps {
+                container('agent-tools') {
+                    script {
+                        sh "ls -la && pwd && hostname"
+                        sh "cat /etc/passwd"
+                        checkout([$class: "GitSCM",
+                            branches: [[name: "*/${GIT_BRANCH}"]],
+                            userRemoteConfigs: [[
+                                url: "${GIT_URL}",
+                                credentialsId: "${GIT_CREDENTIALS_ID}"
+                            ]]
+                        ])
+                    }
+                }
+            }
+        }
+
+        stage('项目打包') {
+            steps {
+                container('agent-tools') {
+                    script {
+                        sh 'mvn clean package -DskipTests'
+                    }
+                }
+            }
+        }
+
+        stage('构建容器镜像') {
+            steps {
+                container('agent-tools') {
+                    script {
+                        sh 'docker build -f Dockerfile -t $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG .'
+                    }
+                }
+            }
+        }
+
+        stage('推送镜像到仓库') {
+            steps {
+                container('agent-tools') {
+                    withDockerRegistry([credentialsId: "$DOCKER_CREDENTIALS_ID", url: "http://$DOCKER_REGISTRY"]) {
+                        sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG'
+                    }
+                }
+            }
+        }
+
+        stage('重启服务') {
+            steps {
+                container('agent-tools') {
+                    withCredentials([file(credentialsId: "$KUBECONFIG_CREDENTIAL_ID", variable: "KUBECONFIG")]) {
+                        sh 'envsubst < deploy.yaml | kubectl apply -f -'
+                    }
+                }
+            }
+        }
+
+    }
+    
+}
+```
+
