@@ -1,0 +1,230 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "springboot-app"
+replicaCount: 1
+commonLabels:
+  team: devops
+  environment: production
+  owner: alice
+commonAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  example.com/owner: "alice"
+extraDeploy:
+  - |
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: my-custom-config
+    data:
+      MY_ENV: "production"
+  - |
+    apiVersion: batch/v1
+    kind: CronJob
+    metadata:
+      name: my-cron
+    spec:
+      schedule: "*/5 * * * *"
+      jobTemplate:
+        spec:
+          template:
+            spec:
+              containers:
+                - name: job
+                  image: busybox
+                  command: ["echo", "hello from cron"]
+              restartPolicy: OnFailure
+## 镜像设置
+image:
+  registry: swr.cn-north-1.myhuaweicloud.com
+  repository: kongyu/java-app-integrated-cmd
+  tag: debian12_temurin_openjdk-jdk-21-jre
+  pullPolicy: IfNotPresent
+command: []
+args: []
+extraEnvVars:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "prod"
+  - name: JAVA_OPTS
+    value: "-Xms512m -Xmx1024m"
+updateStrategy:
+ type: RollingUpdate
+ rollingUpdate:
+   maxSurge: 25%
+   maxUnavailable: 25%
+hostAliases:
+  - ip: "127.0.0.1"
+    hostnames:
+    - "foo.local"
+    - "bar.local"
+  - ip: "10.1.2.3"
+    hostnames:
+    - "foo.remote"
+    - "bar.remote"
+extraVolumes:
+  - name: extra-volume
+    emptyDir: {}
+extraVolumeMounts:
+  - name: extra-volume
+    mountPath: /extra
+    subPath: data-dir
+pdb:
+  create: true
+  minAvailable: "1"
+  maxUnavailable: ""
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 11
+  targetCPU: 50
+  targetMemory: 50
+lifecycleHooks:
+  postStart:
+    exec:
+      command:
+        - "/bin/sh"
+        - "-c"
+        - "echo Container started at $(date)"
+  preStop:
+    exec:
+      command:
+        - "/bin/sh"
+        - "-c"
+        - "echo Container stopping at $(date) && sleep 5"
+podLabels:
+  app.kubernetes.io/name: my-app
+  app.kubernetes.io/instance: my-app
+  app.kubernetes.io/component: backend
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  example.com/owner: "alice"
+podAffinityPreset: "soft"  ## 调度到同一节点
+podAntiAffinityPreset: "soft"  ## 调度到不同节点
+nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/springboot-app="true"
+  type: "soft"
+  key: "kubernetes.service/springboot-app"
+  values:
+    - "true"
+    - "yes"
+tolerations:
+  - key: "node.kubernetes.io/not-ready"
+    operator: "Exists"
+    effect: "NoExecute"
+    tolerationSeconds: 300
+  - key: "node-role.kubernetes.io/infra"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+resources:
+  requests:
+    cpu: 2
+    memory: 512Mi
+  limits:
+    cpu: 3
+    memory: 1024Mi
+containerPorts:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
+podSecurityContext:
+  enabled: true
+  fsGroupChangePolicy: Always
+  sysctls: []
+  supplementalGroups: []
+  fsGroup: 1001
+containerSecurityContext:
+  enabled: true
+  seLinuxOptions: {}
+  runAsUser: 1001
+  runAsGroup: 1001
+  runAsNonRoot: true
+  privileged: false
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: "RuntimeDefault"
+customStartupProbe:
+  httpGet:
+    path: /actuator/health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  failureThreshold: 30
+customLivenessProbe:
+  httpGet:
+    path: /actuator/health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+customReadinessProbe:
+  httpGet:
+    path: /actuator/health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 1
+  failureThreshold: 3
+service:
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+      nodePort: 38083
+networkPolicy:
+  enabled: true
+  allowExternal: true
+  allowExternalEgress: true
+  kubeAPIServerPorts: [443, 6443, 8443]
+  extraIngress: []
+  extraEgress: []
+  ingressNSMatchLabels: {}
+  ingressNSPodMatchLabels: {}
+  
+ingress:
+  enabled: true
+  pathType: ImplementationSpecific
+  apiVersion: ""
+  hostname: ateng.local
+  path: /
+  tls: false
+  selfSigned: false
+  extraHosts: []
+  extraPaths: []
+  extraTls: []
+  secrets: []
+  ingressClassName: ""
+  extraRules: []
+persistence:
+  enabled: true
+  path: /data
+  subPath: ""
+  subPathExpr: ""
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+  annotations: {}
+  labels: {}
+  selector: {}
+  existingClaim: ""
+rbac:
+  create: true
+  rules:
+    - apiGroups:
+        - "*"
+      resources:
+        - "*"
+      verbs:
+        - "*"
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+  automountServiceAccountToken: true

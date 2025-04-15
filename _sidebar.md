@@ -148,6 +148,7 @@
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
+        - [Helm使用文档](/work/kubernetes/deploy/helm/OPS.md)
     - 安装文档
         - [kubekey](/work/kubernetes/deploy/kubekey/v3.1.7/)
         - [kubesphere3](/work/kubernetes/deploy/kubesphere/v3.4.1/)

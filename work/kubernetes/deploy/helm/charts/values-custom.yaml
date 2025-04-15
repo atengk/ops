@@ -1,0 +1,52 @@
+global:
+  defaultStorageClass: ""
+fullnameOverride: "springboot-app"
+replicaCount: 1
+## 镜像设置
+image:
+  registry: swr.cn-north-1.myhuaweicloud.com
+  repository: kongyu/java-app-integrated-cmd
+  tag: debian12_temurin_openjdk-jdk-21-jre
+  pullPolicy: IfNotPresent
+command: []
+args: []
+extraEnvVars:
+  - name: SPRING_PROFILES_ACTIVE
+    value: "prod"
+  - name: JAVA_OPTS
+    value: "-Xms512m -Xmx1024m"
+resources:
+  requests:
+    cpu: 2
+    memory: 512Mi
+  limits:
+    cpu: 3
+    memory: 1024Mi
+containerPorts:
+  - name: http
+    containerPort: 8080
+    protocol: TCP
+customLivenessProbe:
+  httpGet:
+    path: /actuator/health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3
+customReadinessProbe:
+  httpGet:
+    path: /actuator/health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 1
+  failureThreshold: 3
+service:
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+      nodePort: 38083

@@ -165,6 +165,7 @@
         - [使用文档](/work/docker/OPS.md)
     - Dockerfile
         - [JDK和应用](/work/docker/dockerfile/java/)
+        - [kkFileView](/work/docker/dockerfile/kkfileview/v4.4.0/)
     - 服务安装文档
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)
@@ -188,9 +189,11 @@
         - [Java应用](/work/docker/service/java/)
         - [nacos](/work/docker/service/nacos/)
         - [rocketmq](/work/docker/service/rocketmq/)
+        - [kkfileview](/work/docker/service/kkfileview/v4.4.0/)
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
+        - [Helm使用文档](/work/kubernetes/deploy/helm/OPS.md)
     - 安装文档
         - [kubekey](/work/kubernetes/deploy/kubekey/v3.1.7/)
         - [kubesphere3](/work/kubernetes/deploy/kubesphere/v3.4.1/)
@@ -335,6 +338,7 @@
             - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
             - [chat2db数据库管理工具](/work/kubernetes/service/chat2db/v0.3.7/)
             - [drawDB数据库编辑器](/work/kubernetes/service/drawdb/)
+            - [kkFileView](/work/kubernetes/service/kkfileview/v4.4.0/)
         - 大数据
             - [Zookeeper](/work/kubernetes/service/zookeeper/v3.9.3/)
             - [Flink](/work/kubernetes/service/flink/v1.19.1/)
