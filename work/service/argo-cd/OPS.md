@@ -1346,3 +1346,228 @@ Dashboard查看
 kubectl get -n kongyu pod,svc -l app=ateng-springboot3-demo
 ```
 
+
+
+## 项目实战：Helm篇
+
+这里给出关键部分，其他和 **项目实战：Jenkins+GitOps实现CICD** 类似
+
+参考文档：
+
+- [Helm Chart制作](/work/kubernetes/deploy/helm/OPS?id=制作javaapp-chart)
+
+### 项目结构
+
+```
+.
+├── Dockerfile
+├── k8s
+│   ├── environments
+│   │   ├── dev
+│   │   │   └── values.yaml
+│   │   ├── production
+│   │   │   └── values.yaml
+│   │   └── staging
+│   │       └── values.yaml
+│   └── springboot-app
+│       ├── Chart.lock
+│       ├── charts
+│       │   └── common
+│       ├── Chart.yaml
+│       ├── templates
+│       │   ├── deployment.yaml
+│       │   ├── extra-list.yaml
+│       │   ├── hpa.yaml
+│       │   ├── ingress.yaml
+│       │   ├── networkpolicy.yaml
+│       │   ├── pdb.yaml
+│       │   ├── pvc.yaml
+│       │   ├── rolebinding.yaml
+│       │   ├── role.yaml
+│       │   ├── serviceaccount.yaml
+│       │   └── svc.yaml
+│       └── values.yaml
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
+├── README.md
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── local
+    │   └── resources
+    │       └── application.properties
+    └── test
+        └── java
+            └── local
+```
+
+### Jenkins 流水线脚本
+
+```groovy
+pipeline {
+    agent {
+        kubernetes {
+            label 'jenkins-agent-tools-all'  // Pod templates中设置的标签
+        }
+    }
+
+    // 环境变量
+    environment {
+        // Git仓库
+        GIT_CREDENTIALS_ID = "gitlab_ssh"  // Jenkins 中配置的 GitLab 凭据 ID
+        GIT_URL = "ssh://git@192.168.1.51:22/kongyu/springboot-demo.git"  // GitLab 仓库地址
+        GIT_BRANCH = "master"  // 要拉取的分支
+        
+        // Docker镜像和仓库
+        DOCKER_IMAGE = "springboot3"  // 构建的镜像名称，标签自动生成
+        DOCKER_REGISTRY = "registry.lingo.local/ateng"  // 镜像仓库地址
+        DOCKER_CREDENTIALS_ID = "harbor_admin"  // 镜像仓库凭证
+        DOCKER_HOST = "tcp://192.168.1.19:2375"  // Docker 主机的远程主机
+    }
+
+    stages {
+
+        stage('设置并查看环境变量') {
+            steps {
+                container('agent-tools') {
+                    script {
+                        // 镜像标签生成规则
+                        env.DOCKER_TAG = "$GIT_BRANCH-build-$BUILD_NUMBER"
+                        sh "env"
+                    }
+                }
+            }
+        }
+
+       stage('拉取代码') {
+            steps {
+                container('agent-tools') {
+                    script {
+                        checkout([$class: "GitSCM",
+                            branches: [[name: "*/${GIT_BRANCH}"]],
+                            userRemoteConfigs: [[
+                                url: "${GIT_URL}",
+                                credentialsId: "${GIT_CREDENTIALS_ID}"
+                            ]]
+                        ])
+                    }
+                }
+            }
+        }
+
+        stage('项目打包') {
+            steps {
+                container('agent-tools') {
+                    script {
+                        sh 'mvn clean package -DskipTests'
+                    }
+                }
+            }
+        }
+
+        stage('构建容器镜像') {
+            steps {
+                container('agent-tools') {
+                    script {
+                        sh 'docker build -f Dockerfile -t $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG .'
+                    }
+                }
+            }
+        }
+
+        stage('推送镜像到仓库') {
+            steps {
+                container('agent-tools') {
+                    withDockerRegistry([credentialsId: "$DOCKER_CREDENTIALS_ID", url: "http://$DOCKER_REGISTRY"]) {
+                        sh 'docker push $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG'
+                    }
+                }
+            }
+        }
+
+        stage('更新部署文件并推送到仓库') {
+            steps {
+                container('agent-tools') {
+                    sshagent (credentials: ["$GIT_CREDENTIALS_ID"]) {
+                        // 替换部署文件的配置
+                        sh """
+                            yq eval '.image.tag = "$DOCKER_TAG"' -i k8s/environments/production/values.yaml
+                            yq eval '.replicaCount = 3' -i k8s/environments/production/values.yaml
+                        """
+                        // 更新部署文件并推送到仓库
+                        sh """
+                            git config --global --add safe.directory $WORKSPACE
+                            git config user.name "Jenkins CI"
+                            git config user.email "jenkins@ci.local"
+                            export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+                            git fetch origin
+                            git checkout -B $GIT_BRANCH origin/$GIT_BRANCH
+                            git add -v .
+                            git commit -m "更新部署文件，镜像=$DOCKER_TAG [skip-ci]"
+                            git push origin $GIT_BRANCH
+                        """
+                    }
+                }
+            }
+        }
+
+
+    }
+    
+}
+```
+
+### Argo CD Application配置
+
+```yaml
+kubectl apply -f - <<EOF
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-springboot
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: ssh://git@192.168.1.51:22/kongyu/springboot-demo.git
+    targetRevision: master
+    path: k8s/springboot-app/
+    helm:
+      releaseName: my-app
+      valueFiles:
+        - ../environments/production/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kongyu
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        maxDuration: 2m0s
+        factor: 2
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+  info:
+    - name: description
+      value: "Springboot应用部署"
+    - name: owner
+      value: "2385569970@qq.com"
+  revisionHistoryLimit: 5
+EOF
+```
+
