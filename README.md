@@ -1,45 +1,84 @@
-# 阿腾运维知识库网站
+# 运维技术栈 · 阿腾
 
-- 网站管理员：[阿腾](http://wpa.qq.com/msgrd?v=3&uin=2385569970&Menu=yes)
+## 🚀 初衷与愿景
 
-## 概述
+历经打磨，运维知识库正式版温暖上线。这里记录的不只是技术，更是一次次深夜排障的背影、一条条命令背后的思考。
+无论你是新手起步，还是资深老兵，我希望这个网站，能让你在翻阅中找到方向，在困境中看到答案。
+时间在走，经验在累，知识也应被珍藏。愿你我携手，用知识点亮未来，用积淀成就自己。
 
-欢迎来到阿腾的运维知识库网站！
+------
 
-这里汇集了运维相关的技术文档，帮助开发者和运维人员解决在系统部署、管理、监控等方面的问题。
+## 🔥 精选专题 · 运维从这里起飞
 
-## 特别文档专栏
+实战驱动、经验沉淀，每一份文档都为高效运维而生，助你构建更稳定、更智能的系统基础设施。
 
-- **Java开发网站**：☕🔥
-    - 汇集了Java开发相关的技术文档和实践指南，帮助深入掌握Java技术栈。
-    - 查看：[Java开发网站](https://kongyu666.github.io/dev/)
-- **Linux部署服务**：🐧
-    - 提供Linux平台上的服务部署操作手册，助力在Linux环境中高效管理和运行服务。
-    - 参考：[部署文档](/work/service/README.md)
-- **Docker部署服务**：🐳
-    - 为Docker环境中的服务部署提供全面支持，提升容器化应用的管理与运维效率。
-    - 参考：[部署文档](/work/docker/service/catalog.md)
-- **Kubernetes部署服务**：☸️
-    - 详细介绍在Kubernetes环境下部署与管理服务的最佳实践，支持构建可扩展的分布式系统。
-    - 参考：[部署文档](/work/kubernetes/service/catalog.md)
-- **大数据部署与使用**：📊
-    - 涵盖基础服务、数据存储、计算框架及调度平台等，助力大数据系统的部署与优化。
-    - 参考：[使用文档](/work/bigdata/)
+------
 
-- **CI/CD自动化部署**：⚙️
-    - 使用 Jenkins 搭建自动化构建与部署流程，结合 ArgoCD 实现基于 GitOps 的 Kubernetes 应用持续交付，支持多环境部署、镜像管理与回滚操作。
-    - 参考：[DevOps - Jenkins 使用文档](/work/service/jenkins/OPS.md)｜[GitOps - ArgoCD 使用文档](/work/service/argo-cd/OPS.md)
+### ☕ Java 开发网站
 
-- **可观测**：🔍
-    - 使用OpenTelemetry完成处理 跟踪（Tracing）、指标（Metrics）和日志（Logs） 数据。
-    - 参考：[使用文档](/work/service/opentelemetry/)
+📚 系统级 Java 开发实践文档，涵盖微服务架构、大数据处理与异步任务调度等多个技术方向。
 
-- **Snail Job**：🚀
-    - 提供灵活、可靠且高效的分布式任务重试与调度平台。
-    - Kubernetes部署服务可参考：[部署文档](/work/kubernetes/service/snail-job/v1.3.0/)
-    - Java开发相关文档可参考：[开发文档](https://kongyu666.github.io/dev/#/work/Ateng-Java/task/snail-job/)
+ 🔗 [Java开发网站](https://kongyu666.github.io/dev/)
 
-## 文档目录
+------
+
+### 🐧 Linux 部署服务
+
+⚙️ 从零搭建 Linux 服务环境，详细涵盖网络、安全、存储、用户管理等核心模块，适配多种系统发行版。
+
+ 📖 [部署文档](/work/service/README.md)
+
+------
+
+### 🐳 Docker 部署服务
+
+🚀 基于容器的部署手册，支持主流服务一键构建和运行，加快开发交付与系统运维的效率。
+
+ 📖 [部署文档](/work/docker/service/catalog.md)
+
+------
+
+### ☸️ Kubernetes 部署服务
+
+🌐 全栈 K8s 实战指南，提供微服务、数据库、中间件、CI/CD、监控等模块的自动化部署方案。
+
+ 📖 [部署文档](/work/kubernetes/service/catalog.md)
+
+------
+
+### 📊 大数据部署与使用
+
+📈 集成 Zookeeper、Kafka、Spark、Flink 等组件，提供从部署到优化的全链路文档支持。
+
+ 📖 [使用文档](/work/bigdata/)
+
+------
+
+### ⚙️ CI/CD 自动化部署
+
+🔄 Jenkins + ArgoCD 打造持续集成 / 持续交付流水线，实现容器镜像构建、回滚与环境隔离。
+
+ 📖 [Jenkins 文档](/work/service/jenkins/OPS.md)｜[ArgoCD 文档](/work/service/argo-cd/OPS.md)
+
+------
+
+### 🔍 可观测体系建设
+
+📡 OpenTelemetry 构建统一的监控、日志与追踪体系，实现系统运行状态的全面可视化。
+
+ 📖 [使用文档](/work/service/opentelemetry/)
+
+------
+
+### 🚀 Snail Job 分布式调度平台
+
+🧠 支持任务重试、分布式运行与自定义执行策略，适用于复杂业务流程的自动化调度。
+
+ 📖 [Kubernetes部署](/work/kubernetes/service/snail-job/v1.3.0/)｜[Java开发文档](https://kongyu666.github.io/dev/#/work/Ateng-Java/task/snail-job/)
+
+---
+
+## 📚 全站索引
 
 - Linux Service
     - 服务器管理
