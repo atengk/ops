@@ -15,10 +15,6 @@
 </head>
 <body>
   <div id="app">加载中...</div>
-  <!-- 支持docsify侧边栏目录展开和折叠 -->
-  <script src="js/docsify-sidebar-collapse.min.js"></script>
-  <!-- 在每个页面上生成一个编辑github按钮。点击按钮，打开相应的github上的md编辑页面 -->
-  <script src="js/docsify-edit-on-github.js"></script>
   <script>
     window.$docsify = {
         // 项目名称
@@ -74,12 +70,6 @@
             crossChapter: true,
             crossChapterText: true,
         },
-        // 在 docsify 中呈现阅读进度的插件
-        progress: {
-            position: "top",
-            color: "var(--theme-color,#42b983)",
-            height: "3px",
-        },
         // 为每个 docsify markdown 添加更新时间
         timeUpdater: {
             text: "<div align='right' width='100px' style='color:gray;font-size:16px'>更新时间 @ {docsify-updated}</div>",
@@ -119,8 +109,6 @@
   <script src="js/prism-java.js"></script>
   <!-- docsify的分页导航插件 -->
   <script src="js/docsify-pagination.min.js"></script>
-  <!-- 在 docsify 中呈现阅读进度的插件 -->
-  <script src="js/progress.min.js"></script>
   <!-- 为每个 docsify markdown 添加更新时间 -->
   <script src="js/time-updater.min.js"></script>
   <!-- 一个 docsify 插件，用于启用busuanzi，显示您的网站访问数据 -->
@@ -134,5 +122,7 @@
   <script src="js/pdfobject.min.js"></script> 
   <!-- This is the source code of the pdf embed plugin -->
   <script src="js/docsify-pdf-embed.js"></script>
+  <!-- 在每个页面上生成一个编辑github按钮。点击按钮，打开相应的github上的md编辑页面 -->
+  <script src="js/docsify-edit-on-github.js"></script>
 </body>
 </html>
