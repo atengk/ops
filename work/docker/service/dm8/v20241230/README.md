@@ -102,7 +102,7 @@ sudo rm -rf /data/container/dm8
 
 因为官网提供的镜像有些参数涉及不全面，所以这里使用官网提供的安装包自定义制作镜像
 
-### 提取dmdbms文件
+### 下载原生镜像
 
 **下载镜像**
 
@@ -119,46 +119,20 @@ wget https://download.dameng.com/eco/dm8/dm8_20241230_x86_rh6_64_rq_single.tar
 Loaded image: dm8:dm8_20241230_rev255012_x86_rh6_64
 ```
 
-**运行临时的容器**
-
-```
-docker run -d --name=ateng-dm8-temp dm8:dm8_20241230_rev255012_x86_rh6_64
-```
-
-**拷贝dmdbms文件并删除多余的文件**
-
-```
-docker cp ateng-dm8-temp:/opt/dmdbms ./dmdbms
-rm -rf dmdbms/{bin2,data,log}
-```
-
-**删除临时容器**
-
-```
-docker rm -f ateng-dm8-temp
-```
-
-**打包镜像**
-
-```
-chown 1001:1001 -R dmdbms/
-tar --remove-files -czvf dmdbms_20241230.tar.gz dmdbms/
-```
-
-**查看文件**
-
-```
-ll -h dmdbms_20241230.tar.gz
-```
-
 ### 构建镜像
 
 **创建Dockerfile**
 
 ```
 cat > Dockerfile <<"EOF"
+# 原始镜像
+FROM dm8:dm8_20241230_rev255012_x86_rh6_64 AS builder
+
 # 环境
 FROM ubuntu:24.04
+
+# 拷贝原始镜像的文件
+COPY --from=builder --chown=1001:1001 /opt/dmdbms /opt/dmdbms
 
 # 作者信息
 LABEL maintainer="KongYu <2385569970@qq.com>"
@@ -168,9 +142,8 @@ LABEL description="操作系统版本是：ubuntu:24.04，达梦数据库版本�
 LABEL version="1.0"
 LABEL release-date="2025-02-13"
 
-# 拷贝数据
-ADD dmdbms_20241230.tar.gz /opt/
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+# 拷贝文件
+COPY --chown=1001:1001 docker-entrypoint.sh /docker-entrypoint.sh
 
 # 定位到指定目录
 WORKDIR /opt/dmdbms
@@ -200,7 +173,7 @@ RUN sed -i "s#http://.*ubuntu.com/ubuntu/#http://mirrors.aliyun.com/ubuntu/#g" /
 USER 1001:1001
 
 # 设置容器的启动命令
-CMD ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
 EOF
 ```
 

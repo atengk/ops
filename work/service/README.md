@@ -66,7 +66,6 @@
     - GitOps - Argo CD
         - [安装文档](/work/service/argo-cd/)
         - [使用文档](/work/service/argo-cd/OPS.md)
-    
 - 可观测
     - OTLP
         - [OpenTelemetry](/work/service/opentelemetry/)
@@ -77,10 +76,6 @@
         - [Prometheus](/work/service/prometheus/v3.2.1/)
         - [Grafana](/work/service/grafana/v11.5.3/)
         - [Alertmanager](/work/service/alertmanager/v0.28.1/)
-
-- 其他服务
-    - [内网穿透FRP](/work/service/frp/)
-    - [CoreDNS](/work/service/coredns/)
 - 开发服务
     - OpenJDK
         - [OpenJDK8](/work/service/openjdk/openjdk8/)
@@ -100,9 +95,23 @@
     - Node.js 和 NVM
         - [安装文档](/work/service/nvm/v0.40.2/)
         - [使用文档](/work/service/nvm/OPS.md)
+    - Python
+        - [安装文档](/work/service/python/v3.13.3/)
+        - [使用文档](/work/service/python/OPS.md)
     - SpringCloud Alibaba
         - [Nacos](/work/service/springcloudalibaba/nacos)
         - [Sentinel](/work/service/springcloudalibaba/sentinel/)
         - [Seata](/work/service/springcloudalibaba/seata/)
         - [RocketMQ](/work/service/springcloudalibaba/rocketmq/standalone/)
+- 流媒体服务
+    - [FFmpeg](/work/service/ffmpeg/)
+    - ZLMediaKit
+        - [安装文档](/work/service/zlmediakit/)
+        - [使用文档](/work/service/zlmediakit/OPS.md)
+    - SRS
+        - [安装文档](/work/service/srs/)
+        - [使用文档](/work/service/srs/OPS.md)
+- 其他服务
+    - [内网穿透FRP](/work/service/frp/)
+    - [CoreDNS](/work/service/coredns/)
 
