@@ -32,7 +32,7 @@ ln -s /usr/local/software/rocketmq-all-5.3.1-bin-release /usr/local/software/roc
 **创建环境变量**
 
 ```
-cat > /usr/local/software/rocketmq/conf/rocketmq.env <<EOF
+cat > /usr/local/software/rocketmq/conf/rocketmq.env <<"EOF"
 JAVA_HOME=/usr/local/software/jdk8
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:$JAVA_HOME/bin
 EOF
@@ -163,8 +163,8 @@ sudo systemctl start rocketmq-namesrv.service
 **查看状态**
 
 ```
-systemctl status rocketmq-namesrv.service
-journalctl -f -u rocketmq-namesrv.service
+sudo systemctl status rocketmq-namesrv.service
+sudo journalctl -f -u rocketmq-namesrv.service
 ```
 
 ### Broker 服务
@@ -211,8 +211,8 @@ sudo systemctl start rocketmq-broker.service
 **查看状态**
 
 ```
-systemctl status rocketmq-broker.service
-journalctl -f -u rocketmq-broker.service
+sudo systemctl status rocketmq-broker.service
+sudo journalctl -f -u rocketmq-broker.service
 ```
 
 
@@ -321,8 +321,8 @@ sudo systemctl start rocketmq-dashboard.service
 **查看状态**
 
 ```
-systemctl status rocketmq-dashboard.service
-journalctl -f -u rocketmq-dashboard.service
+sudo systemctl status rocketmq-dashboard.service
+sudo journalctl -f -u rocketmq-dashboard.service
 ```
 
 

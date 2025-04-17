@@ -61,6 +61,6 @@ postgresql:
 externalDatabase:
   host: "postgresql-0.postgresql-hl.kongyu"
   port: 5432
-  user: gitea
+  user: postgres
   database: ateng_gitea
   password: "Admin@123"

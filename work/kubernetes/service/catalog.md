@@ -84,7 +84,7 @@
         - [https模式(自定义证书)](/work/kubernetes/service/harbor/v2.12.0/https-custom/)
 - CI/CD
     - [Gitlab](/work/kubernetes/service/gitlab/v17.6.1/)
-    - [Gitea](/work/kubernetes/service/gitea/v1.22.3/)
+    - [Gitea](/work/kubernetes/service/gitea/v1.23.7/)
     - [Jenkins](/work/kubernetes/service/jenkins/v2.492.3/)
     - [Argo CD](/work/kubernetes/service/argo-cd/v2.14.8/)
     - [Sonarqube](/work/kubernetes/service/sonarqube/v10.7.0/)

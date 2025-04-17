@@ -39,3 +39,25 @@ helm completion bash > /etc/bash_completion.d/helm
 source <(helm completion bash)
 ```
 
+**关于下载Chart**
+
+如果在某些网络环境下，无法下载Chart，可以直接使用官网链接下载
+
+例如这样，无法下载
+
+```
+helm pull bitnami/gitea --version 3.2.3
+```
+
+输出
+
+```
+Error: failed to do request: Head "https://registry-1.docker.io/v2/bitnamicharts/gitea/manifests/3.2.3": dial tcp 107.181.166.244:443: i/o timeout
+```
+
+直接使用官网链接下载
+
+```
+wget https://charts.bitnami.com/bitnami/gitea-3.2.3.tgz
+```
+
