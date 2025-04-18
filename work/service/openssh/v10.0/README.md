@@ -57,9 +57,330 @@ sudo su -
 sudo systemctl disable --now telnet.socket
 ```
 
+## 方案一：覆盖原有OpenSSL和OpenSSH
+
+### OpenSSL
+
+如果操作系统的openssl>=1.1.就不要再安装了，因为OpenSSH需要OpenSSL>=1.1.1，再者升级OpenSSL是有风险的，会影响操作系统的库依赖，谨慎操作！
+
+查看版本
+
+```
+openssl version
+```
+
+#### 编译准备
+
+**安装依赖包**
+
+安装了必要的依赖包
+
+```bash
+yum install -y gcc make libtool zlib-devel wget
+```
+
+特定系统安装
+
+- CentOS7
+
+```bash
+yum install -y perl-IPC-Cmd
+```
+
+**下载并解压源码**
+
+从 OpenSSL 官方 GitHub 仓库下载所需版本的源码，并解压缩：
+
+```bash
+wget https://github.com/openssl/openssl/releases/download/openssl-3.5.0/openssl-3.5.0.tar.gz
+tar -zxvf openssl-3.5.0.tar.gz
+cd openssl-3.5.0
+```
+
+**创建构建目录**
+
+为编译创建单独的构建目录：
+
+```bash
+mkdir build
+cd build
+```
+
+#### 编译和安装
+
+**配置编译选项**
+
+配置 OpenSSL 的编译选项并指定安装路径：
+
+```bash
+../config \
+    --prefix=/usr/local/software/openssl-3.5.0 \
+    shared zlib
+```
+
+- `--prefix=xxx`: 指定安装路径。
+- `shared`: 生成共享库。
+- `zlib`: 对 zlib 压缩库的支持。
+
+**编译**
+
+使用多线程进行编译：
+
+```bash
+make -j$(nproc)
+```
+
+**安装**
+
+编译完成后，安装 OpenSSL：
+
+```bash
+make install
+ln -s /usr/local/software/openssl-3.5.0 /usr/local/software/openssl
+```
+
+#### 服务配置
+
+**配置动态链接库路径**
+
+将 OpenSSL 的库文件路径添加到系统的动态链接库配置文件中，并重新加载配置：
+
+```bash
+echo "/usr/local/software/openssl/lib64" | tee -a /etc/ld.so.conf.d/openssl.conf
+ldconfig
+```
+
+**替换OpenSSL**
+
+```bash
+mv /usr/bin/openssl{,_$(date +%Y%m%d)}
+ln -s /usr/local/software/openssl/bin/openssl /usr/bin/openssl
+```
+
+#### 查看服务
+
+**验证安装**
+
+验证 OpenSSL 是否成功安装：
+
+```bash
+openssl version
+```
+
+输出以下内容：
+
+```
+OpenSSL 3.5.0 8 Apr 2025 (Library: OpenSSL 3.5.0 8 Apr 2025)
+```
 
 
-## 方案一：替换原有OpenSSL和OpenSSH
+
+### OpenSSH
+
+#### 卸载OpenSSH
+
+卸载系统自带的OpenSSH，卸载先备份配置文件和秘钥
+
+备份配置文件和秘钥
+
+```bash
+mv /etc/ssh{,_$(date +%Y%m%d)}
+```
+
+备份PAM文件
+
+```
+mv /etc/pam.d/sshd /etc/ssh_$(date +%Y%m%d)
+```
+
+卸载服务
+
+```bash
+yum -y remove openssh-server openssh openssh-client
+```
+
+#### 编译准备
+
+**安装依赖包**
+
+首先，安装编译 OpenSSH 所需的依赖包。执行以下命令：
+
+```bash
+yum install -y gcc make zlib-devel openssl-devel pam-devel libselinux-devel krb5-devel wget
+```
+
+**下载并解压源码**
+
+下载完成后，解压源码包：
+
+```bash
+wget https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-10.0p1.tar.gz
+tar -zxvf openssh-10.0p1.tar.gz
+cd openssh-10.0p1/
+```
+
+**创建并进入编译目录**
+
+在源码目录中创建一个名为 `build` 的目录，并进入该目录：
+
+```bash
+mkdir build
+cd build
+```
+
+#### 编译和安装
+
+**配置编译选项**
+
+使用以下命令配置编译选项：
+
+```bash
+../configure \
+    --prefix=/usr \
+    --sysconfdir=/etc/ssh \
+    --libexecdir=/usr/libexec/openssh \
+    --with-pam \
+    --with-selinux \
+    --with-zlib \
+    --with-ssl-engine \
+    --with-kerberos5
+```
+
+如果单独配置了openssl，需要指定路径
+
+```bash
+../configure \
+    --with-ssl-dir=/usr/local/software/openssl \
+    --prefix=/usr \
+    --sysconfdir=/etc/ssh \
+    --libexecdir=/usr/libexec/openssh \
+    --with-pam \
+    --with-selinux \
+    --with-zlib \
+    --with-ssl-engine \
+    --with-kerberos5
+```
+
+- `--with-ssl-dir=/usr/local/software/openssl`: 指定 OpenSSL 安装路径，用于链接自定义版本的 libssl 和 libcrypto。
+- `--prefix=/usr`: 指定 OpenSSH 的安装目录为 `/usr`，与系统默认路径一致。
+- `--sysconfdir=/etc/ssh`: 指定配置文件目录为 `/etc/ssh`，如 `sshd_config`、`ssh_config` 会放在这里。
+- `--libexecdir=/usr/libexec/openssh`: 指定安装辅助程序的路径，如 `ssh-keysign`、`ssh-pkcs11-helper` 等，保持与系统一致。
+- `--with-pam`: 启用 PAM 支持，实现灵活的身份认证机制（如限制登录、密码策略等）。
+- `--with-selinux`：启用 SELinux（Security-Enhanced Linux）支持，增强系统安全性。
+- `--with-zlib`: 启用 zlib 支持，用于 SSH 数据压缩传输。
+- `--with-ssl-engine`: 启用 OpenSSL 加密引擎支持，提升加密运算性能。
+- `--with-kerberos5`: 启用 Kerberos 5 支持，用于集中式身份认证集成。
+
+**编译**
+
+配置完成后，使用 `make` 命令编译 OpenSSH：
+
+```bash
+make -j$(nproc)
+```
+
+**安装**
+
+编译完成后，使用以下命令安装 OpenSSH：
+
+```bash
+make install
+```
+
+#### 恢复文件
+
+**恢复配置文件和秘钥**
+
+将原有备份的配置文件和秘钥拷贝到现在的目录
+
+```
+rm -f /etc/ssh/ssh*
+cp -a /etc/ssh_$(date +%Y%m%d)/ssh* /etc/ssh
+```
+
+设置权限
+
+```
+chmod 600 /etc/ssh/ssh_host_*
+chmod 644 /etc/ssh/ssh_host_*.pub
+```
+
+**恢复PAM文件**
+
+```
+mv /etc/ssh_$(date +%Y%m%d)/sshd /etc/pam.d/sshd
+```
+
+**检查sshd_config配置文件**
+
+常用设置
+
+- 设置端口：Port 22
+- 开启密码认证：PasswordAuthentication yes
+- 运行root用户登录：PermitRootLogin yes
+
+```
+vi /etc/ssh/sshd_config
+```
+
+查看配置文件
+
+```
+grep -E -v "^$|^#" /etc/ssh/sshd_config
+```
+
+**检查配置文件**
+
+检查配置文件是否正确
+
+```
+sshd -t -f /etc/ssh/sshd_config
+```
+
+#### 启动服务
+
+**编辑配置文件**
+
+```
+tee /etc/systemd/system/sshd.service <<"EOF"
+[Unit]
+Description=OpenSSH Server
+Documentation=https://www.openssh.com/
+After=network.target
+[Service]
+Type=simple
+ExecStartPre=/sbin/sshd -t -f /etc/ssh/sshd_config
+ExecStart=/sbin/sshd -D -f /etc/ssh/sshd_config
+ExecStop=/bin/kill -SIGTERM $MAINPID
+Restart=on-failure
+RestartSec=10
+KillMode=control-group
+KillSignal=SIGTERM
+User=root
+Group=root
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+**启动服务**
+
+```bash
+systemctl daemon-reload
+systemctl enable sshd.service
+systemctl start sshd.service
+systemctl status sshd.service
+```
+
+#### 连接SSH
+
+再次连接SSH测试是否正常
+
+```bash
+ssh root@192.168.116.128 -p 22
+```
+
+## 方案二：替换原有OpenSSL和OpenSSH
 
 ### OpenSSL
 
@@ -219,9 +540,9 @@ cd build
     --prefix=/usr/local/software/openssh-10.0p1 \
     --with-pam \
     --with-selinux \
-    --with-kerberos5 \
     --with-zlib \
-    --with-md5-passwords
+    --with-ssl-engine \
+    --with-kerberos5
 ```
 
 如果单独配置了openssl，需要指定路径
@@ -232,17 +553,17 @@ cd build
     --with-ssl-dir=/usr/local/software/openssl \
     --with-pam \
     --with-selinux \
-    --with-kerberos5 \
     --with-zlib \
-    --with-md5-passwords
+    --with-ssl-engine \
+    --with-kerberos5
 ```
 
 - `--prefix=xxx`：指定 OpenSSH 的安装目录。
-- `--with-pam`：启用 PAM（Pluggable Authentication Modules）支持，用于身份验证。
+- `--with-pam`: 启用 PAM 支持，实现灵活的身份认证机制（如限制登录、密码策略等）。
 - `--with-selinux`：启用 SELinux（Security-Enhanced Linux）支持，增强系统安全性。
-- `--with-kerberos5`：启用 Kerberos 5 支持，用于网络身份验证。
-- `--with-zlib`：启用 zlib 库支持，用于压缩传输数据。
-- `--with-md5-passwords`：允许 OpenSSH 支持 MD5 加密格式的密码（$1$ 开头的 hash）
+- `--with-zlib`: 启用 zlib 支持，用于 SSH 数据压缩传输。
+- `--with-ssl-engine`: 启用 OpenSSL 加密引擎支持，提升加密运算性能。
+- `--with-kerberos5`: 启用 Kerberos 5 支持，用于集中式身份认证集成。
 
 **编译**
 
@@ -403,7 +724,7 @@ ssh root@192.168.116.128 -p 2222
 
 
 
-## 方案二：额外安装OpenSSL和OpenSSH
+## 方案三：额外安装OpenSSL和OpenSSH
 
 保留操作系统自带的OpenSSL和OpenSSH，新安装的OpenSSH和原有的互不影响
 
@@ -551,9 +872,9 @@ cd build
     --prefix=/usr/local/software/openssh-10.0p1 \
     --with-pam \
     --with-selinux \
-    --with-kerberos5 \
     --with-zlib \
-    --with-md5-passwords
+    --with-ssl-engine \
+    --with-kerberos5
 ```
 
 如果单独配置了openssl，需要指定路径
@@ -565,17 +886,17 @@ export LD_LIBRARY_PATH=/usr/local/software/openssl/lib64
     --with-ssl-dir=/usr/local/software/openssl \
     --with-pam \
     --with-selinux \
-    --with-kerberos5 \
     --with-zlib \
-    --with-md5-passwords
+    --with-ssl-engine \
+    --with-kerberos5
 ```
 
 - `--prefix=xxx`：指定 OpenSSH 的安装目录。
-- `--with-pam`：启用 PAM（Pluggable Authentication Modules）支持，用于身份验证。
+- `--with-pam`: 启用 PAM 支持，实现灵活的身份认证机制（如限制登录、密码策略等）。
 - `--with-selinux`：启用 SELinux（Security-Enhanced Linux）支持，增强系统安全性。
-- `--with-kerberos5`：启用 Kerberos 5 支持，用于网络身份验证。
-- `--with-zlib`：启用 zlib 库支持，用于压缩传输数据。
-- `--with-md5-passwords`：允许 OpenSSH 支持 MD5 加密格式的密码（$1$ 开头的 hash）
+- `--with-zlib`: 启用 zlib 支持，用于 SSH 数据压缩传输。
+- `--with-ssl-engine`: 启用 OpenSSL 加密引擎支持，提升加密运算性能。
+- `--with-kerberos5`: 启用 Kerberos 5 支持，用于集中式身份认证集成。
 
 **编译**
 
