@@ -85,6 +85,7 @@
         - [基础配置](/work/service/00-basic/)
         - [网络配置](/work/service/network/)
         - [系统性能监控](/work/linux/metrics/)
+        - [时间同步服务](/work/service/chrony/)
     - 安全管理
         - 用户管理
             - [用户管理](/work/service/security/user/)
@@ -238,6 +239,7 @@
         - [nacos](/work/docker/service/nacos/)
         - [rocketmq](/work/docker/service/rocketmq/)
         - [kkfileview](/work/docker/service/kkfileview/v4.4.0/)
+        - [禅道](/work/docker/service/zentao/v21.6/)
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
@@ -383,7 +385,7 @@
             - [Nacos](/work/kubernetes/service/nacos/v2.4.3/)
             - [Seata](/work/kubernetes/service/seata/)
             - [Sentinel](/work/kubernetes/service/sentinel/)
-            - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
+            - [禅道](/work/kubernetes/service/zentao/v21.6/)
             - [chat2db数据库管理工具](/work/kubernetes/service/chat2db/v0.3.7/)
             - [drawDB数据库编辑器](/work/kubernetes/service/drawdb/)
             - [kkFileView](/work/kubernetes/service/kkfileview/v4.4.0/)

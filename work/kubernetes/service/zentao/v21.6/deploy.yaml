@@ -1,0 +1,113 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: zentao
+  labels:
+    app: zentao
+spec:
+  replicas: 1
+  serviceName: zentao-headless
+  selector:
+    matchLabels:
+      app: zentao
+  template:
+    metadata:
+      labels:
+        app: zentao
+    spec:
+      terminationGracePeriodSeconds: 30
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: zentao
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/zentao
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+      containers:
+        - name: zentao
+          image: 'registry.lingo.local/service/zentao:21.6'
+          ports:
+            - name: http-80
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+            - name: ZT_MYSQL_HOST
+              value: 192.168.1.13
+            - name: ZT_MYSQL_PORT
+              value: "20001"
+            - name: ZT_MYSQL_USER
+              value: root
+            - name: ZT_MYSQL_PASSWORD
+              value: Admin@123
+            - name: ZT_MYSQL_DB
+              value: ateng_zentao
+          resources: {}
+          volumeMounts:
+            - name: host-time
+              mountPath: /etc/localtime
+            - name: data
+              mountPath: /data
+          imagePullPolicy: IfNotPresent
+      volumes:
+        - name: host-time
+          hostPath:
+            path: /etc/localtime
+            type: ''
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        #storageClassName: openebs-hostpath
+        volumeMode: Filesystem
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: zentao-headless
+  labels:
+    app: zentao-headless
+spec:
+  ports:
+    - name: http-80
+      protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: zentao
+  clusterIP: None
+  type: ClusterIP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: zentao
+  labels:
+    app: zentao
+spec:
+  ports:
+    - name: http-80
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 31018
+  selector:
+    app: zentao
+  type: NodePort

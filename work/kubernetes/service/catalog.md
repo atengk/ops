@@ -108,7 +108,7 @@
     - [Nacos](/work/kubernetes/service/nacos/v2.4.3/)
     - [Seata](/work/kubernetes/service/seata/)
     - [Sentinel](/work/kubernetes/service/sentinel/)
-    - [禅道](/work/kubernetes/service/zentao/v20.7.1/)
+    - [禅道](/work/kubernetes/service/zentao/v21.6/)
     - [chat2db数据库管理工具](/work/kubernetes/service/chat2db/v0.3.7/)
     - [drawDB数据库编辑器](/work/kubernetes/service/drawdb/)
     - [kkFileView](/work/kubernetes/service/kkfileview/v4.4.0/)

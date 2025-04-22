@@ -17,14 +17,14 @@ docker pull bitnami/gitea:1.23.7
 **推送到仓库**
 
 ```
-docker tag bitnami/gitea:1.23.7registry.lingo.local/bitnami/gitea:1.23.7
+docker tag bitnami/gitea:1.23.7 registry.lingo.local/bitnami/gitea:1.23.7
 docker push registry.lingo.local/bitnami/gitea:1.23.7
 ```
 
 **保存镜像**
 
 ```
-docker save registry.lingo.local/bitnami/gitea:1.23.7| gzip -c > image-gitea_1.23.7.tar.gz
+docker save registry.lingo.local/bitnami/gitea:1.23.7 | gzip -c > image-gitea_1.23.7.tar.gz
 ```
 
 **创建目录**

@@ -1,56 +1,72 @@
 # 基础配置
 
-再进行服务安装之前，请先参考该文档。其中 `用户创建` 这部分是必须要做的。
+该文档是服务器最开始需要初始化的步骤，按需进行各项配置
 
 ## 网络配置
 
-### 使用配置文件
+### 配置文件
 
-**使用配置文件**
+**配置静态IP**
 
 ```
 # vi /etc/sysconfig/network-scripts/ifcfg-ens32
-DEVICE="ens33"
-BOOTPROTO="static"
-ONBOOT="yes"
-IPADDR="192.168.1.131"
-PREFIX="24"
-GATEWAY="192.168.1.1"
-DNS1="114.114.114.114"
+TYPE=Ethernet
+BOOTPROTO=static
+NAME=ens33
+DEVICE=ens33
+ONBOOT=yes
+IPADDR=192.168.1.100
+PREFIX=24
+GATEWAY=192.168.1.1
+DNS1=8.8.8.8
 # systemctl restart network
 ```
 
-### 使用 nmcli 配置网络
+**配置DHCP**
 
-**使用nmcli命令**
+```
+# vi /etc/sysconfig/network-scripts/ifcfg-ens32
+TYPE=Ethernet
+BOOTPROTO=dhcp
+NAME=ens33
+DEVICE=ens33
+ONBOOT=yes
+# systemctl restart network
+```
 
-还未配置网络的情况，配置ens37网卡
+### NetworkManager
+
+**新增网卡**
 
 ```
 nmcli device
-nmcli connection show
-nmcli connection add \
-  type ethernet ipv4.method manual \
-  connection.autoconnect yes \
-  ifname ens37 con-name ens37 \
-  ipv4.addresses 10.14.0.100/24 \
-  ipv4.gateway 10.14.0.1 \
-  ipv4.dns "8.8.8.8 8.8.4.4"
-nmcli connection up ens37
-nmcli connection show
+nmcli con show
+nmcli con add \
+    type ethernet \
+    ipv4.method manual \
+    con.autoconnect yes \
+    ifname ens34 \
+    con-name ens34 \
+    ipv4.addresses 192.168.1.100/24 \
+    ipv4.gateway 192.168.1.1 \
+    ipv4.dns "8.8.8.8 8.8.4.4"
+nmcli con up ens34
+nmcli con show
 ip addr
 ```
 
-已经配置了网络，需要修改的情况
+**修改网卡**
 
 ```
-nmcli connection modify ens37 ipv4.method manual
-nmcli connection modify ens37 connection.autoconnect yes
-nmcli connection modify ens37 ipv4.addresses 10.14.0.101/24
-nmcli connection modify ens37 ipv4.gateway 10.14.0.254
-nmcli connection modify ens37 ipv4.dns "1.1.1.1 1.0.0.1"
-nmcli connection up ens37
-nmcli connection show
+nmcli con show
+nmcli con mod ens34 \
+    ipv4.method manual \
+    con.autoconnect yes \
+    ipv4.addresses 192.168.1.100/24 \
+    ipv4.gateway 192.168.1.1 \
+    ipv4.dns "8.8.8.8 8.8.4.4"
+nmcli con up ens34
+nmcli con show
 ip addr
 ```
 
@@ -96,37 +112,51 @@ setenforce 0
 sed -i "s/SELINUX=.*/SELINUX=disabled/g" /etc/selinux/config
 ```
 
-### 配置 SSH 服务优化
 
-#### 禁用不必要的 SSH 功能
 
-**不解析IP地址**
+## 用户与权限管理
 
-```
-sed -i -e 's/#UseDNS yes/UseDNS no/g' \
-    -e 's/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' \
-    /etc/ssh/sshd_config
-```
-
-**取消主机公钥确认**
+### 创建服务用户与组
 
 ```
-sed -i 's/#   StrictHostKeyChecking ask/   StrictHostKeyChecking no/g' /etc/ssh/ssh_config
+groupadd -g 1001 ateng
+useradd -u 1001 -g ateng -m -s /bin/bash -c "Server Administrator" admin
+echo Admin@123 | passwd --stdin admin
 ```
 
-**重启服务**
+### 配置目录权限
 
 ```
-systemctl restart sshd
+mkdir -p /usr/local/software /data/service
+chown admin:ateng /usr/local/software /data
 ```
 
-#### 配置免密登录
+### 配置 sudo 权限
+
+用户 "admin" 可以以任何用户身份，在任何主机上执行任何命令，并且在执行 sudo 命令时无需输入密码
+
+```
+echo "admin ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/ateng-admin
+chmod 440 /etc/sudoers.d/ateng-admin
+```
+
+
+
+## SSH设置
+
+### 配置 SSH 秘钥
 
 生成秘钥
 
 ```
-ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa -C "2385569970@qq.com"
-cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys
+ssh-keygen -t ed25519 -P "" -f ~/.ssh/id_ed25519 -C "2385569970@qq.com - Server Key - $(date +%Y%m%d)"
+```
+
+配置公钥信任列表
+
+```
+cat ~/.ssh/id_*.pub >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
 ```
 
 将秘钥分发到其他节点
@@ -139,23 +169,61 @@ scp -r ~/.ssh service03:~
 
 
 
+### 配置 SSH 服务优化
+
+**编辑配置文件**
+
+编辑 `/etc/ssh/sshd_config` 配置文件，优化以下配置
+
+- 设置监听端口：`Port 9022`
+- 禁用 DNS 反解析：`UseDNS no`
+- 禁止 root 用户登录：`PermitRootLogin no`
+- 关闭密码认证：`PasswordAuthentication no`
+- 启用公钥认证：`PubkeyAuthentication yes`
+
+**重启服务**
+
+```
+systemctl restart sshd
+```
+
+
+
 ## 时间与时区配置
+
+### 同步时间
+
+使用chrony服务同步时间，编辑配置文件
+
+```
+tee /etc/chrony.conf <<"EOF"
+server ntp.aliyun.com iburst
+server cn.ntp.org.cn iburst
+driftfile /var/lib/chrony/drift
+rtcsync
+makestep 1.0 -1
+local stratum 10
+allow 192.168.1.0/24
+logdir /var/log/chrony
+EOF
+```
+
+重启服务
+
+```
+systemctl restart chronyd
+```
+
+查看同步状态
+
+```
+chronyc sources
+```
 
 ### 设置时区
 
 ```
 timedatectl set-timezone Asia/Shanghai
-clock -w
-timedatectl set-local-rtc 1
-```
-
-### 同步时间
-
-```
-sed -i "/^server/d" /etc/chrony.conf
-sed -i "3i server ntp.aliyun.com iburst" /etc/chrony.conf
-systemctl restart chronyd
-chronyc sources
 ```
 
 
@@ -292,35 +360,6 @@ systemctl restart systemd-journald
 - **SystemMaxFileSize=500M**: 单个日志文件的最大大小为 500 MB。
 - **MaxRetentionSec=100d**: 日志的保留时间为 100 天。
 - **ForwardToSyslog=no**: 不将日志转发到 syslog。
-
-
-
-## 用户与权限管理
-
-### 创建服务用户与组
-
-```
-groupadd -g 1001 ateng
-useradd -u 1001 -g ateng -m -s /bin/bash admin
-echo Admin@123 | passwd --stdin admin
-```
-
-### 配置目录权限
-
-```
-mkdir -p /usr/local/software /data/service
-chown admin:ateng /usr/local/software /data/service
-chmod 755 /data
-```
-
-### 配置 sudo 权限
-
-用户 "admin" 可以以任何用户身份，在任何主机上执行任何命令，并且在执行 sudo 命令时无需输入密码
-
-```
-echo "admin ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/ateng-admin
-chmod 440 /etc/sudoers.d/ateng-admin
-```
 
 
 
