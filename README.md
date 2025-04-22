@@ -239,7 +239,8 @@
         - [nacos](/work/docker/service/nacos/)
         - [rocketmq](/work/docker/service/rocketmq/)
         - [kkfileview](/work/docker/service/kkfileview/v4.4.0/)
-        - [禅道](/work/docker/service/zentao/v21.6/)
+        - [禅道](/work/docker/service/zentao/)
+        - [Snail-Job](/work/docker/service/snail-job/)
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)
@@ -379,7 +380,7 @@
             - [Jaeger](/work/kubernetes/service/jaeger/v2.4.0/)
         - 开发服务
             - [Java应用](/work/kubernetes/service/java-app/v1.1/)
-            - [Snail-Job](/work/kubernetes/service/snail-job/v1.3.0/)
+            - [Snail-Job](/work/kubernetes/service/snail-job/v1.4.0/)
             - [PowerJob](/work/kubernetes/service/powerjob/v5.1.1/)
             - [Spring Boot Admin](/work/kubernetes/service/springboot-admin/v3.3.0/)
             - [Nacos](/work/kubernetes/service/nacos/v2.4.3/)

@@ -12,6 +12,9 @@
 export MYSQL_PWD=Admin@123
 mysql -h192.168.1.13 -P20001 -uroot
 CREATE DATABASE ateng_zentao;
+CREATE USER 'zentao'@'%' IDENTIFIED BY 'Admin@123';
+GRANT ALL PRIVILEGES ON ateng_zentao.* TO 'zentao'@'%';
+FLUSH PRIVILEGES;
 ```
 
 **配置修改**

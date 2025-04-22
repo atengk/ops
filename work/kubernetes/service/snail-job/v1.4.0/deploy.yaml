@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snail-job-config
+  labels:
+    app: snail-job
+data:
+  application-extra.yml: |
+    server:
+      port: 8080
+    spring:
+      datasource:
+        ## postgres
+        driver-class-name: org.postgresql.Driver
+        url: jdbc:postgresql://192.168.1.10:32297/ateng_snail_job?useUnicode=true&characterEncoding=utf8&useSSL=true&autoReconnect=true&reWriteBatchedInserts=true
+        ## mysql
+        #driver-class-name: com.mysql.cj.jdbc.Driver
+        #url: jdbc:mysql://192.168.1.10:32297/ateng_snail_job?useSSL=false&characterEncoding=utf8&useUnicode=true
+        username: postgres
+        password: Lingo@local_postgresql_5432
+        type: com.zaxxer.hikari.HikariDataSource
+        hikari:
+          connection-timeout: 30000
+          minimum-idle: 5
+          maximum-pool-size: 20
+          auto-commit: true
+          idle-timeout: 30000
+          pool-name: snail_job
+          max-lifetime: 1800000
+    snail-job:
+      retry-pull-page-size: 1000
+      job-pull-page-size: 1000
+      server-port: 17888
+      log-storage: 7
+      rpc-type: grpc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snail-job
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: snail-job
+  template:
+    metadata:
+      labels:
+        app: snail-job
+    spec:
+      containers:
+      - name: snail-job
+        image: registry.lingo.local/service/snail-job:1.4.0
+        imagePullPolicy: IfNotPresent
+        workingDir: /snailjob/server
+        command:
+          - java
+        args:
+          - -server
+          - -Xms512m
+          - -Xmx2048m
+          - -jar
+          - app.jar
+          - --spring.config.additional-location=application-extra.yml
+        resources:
+          limits:
+            cpu: '2'
+            memory: 2Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: grpc
+          containerPort: 17888
+        env:
+        - name: TZ
+          value: "Asia/Shanghai"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /snailjob/server/application-extra.yml
+          subPath: application-extra.yml
+        livenessProbe:
+          httpGet:
+            path: /snail-job/system/version
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /snail-job/system/version
+            port: 8080
+            scheme: HTTP
+          timeoutSeconds: 1
+          periodSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: config-volume
+        configMap:
+          name: snail-job-config
+      terminationGracePeriodSeconds: 60
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: snail-job
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - preference:
+                matchExpressions:
+                  - key: kubernetes.service/snail-job
+                    operator: In
+                    values:
+                      - "true"
+              weight: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snail-job
+  labels:
+    app: snail-job
+spec:
+  selector:
+    app: snail-job
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 32681
+    - name: grpc
+      protocol: TCP
+      port: 17888
+      targetPort: 17888
+      nodePort: 32682
+  type: NodePort

@@ -22,4 +22,5 @@
 - [springboot应用](/work/docker/service/java/springboot2/)
 - [nacos](/work/docker/service/nacos/)
 - [rocketmq](/work/docker/service/rocketmq/)
-- [禅道](/work/docker/service/zentao/v21.6/)
+- [禅道](/work/docker/service/zentao/)
+- [Snail-Job](/work/docker/service/snail-job/)
