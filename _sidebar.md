@@ -136,6 +136,7 @@
     - 服务安装文档
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)
+        - [nginx](/work/docker/service/nginx/)
         - [doris](/work/docker/service/doris/)
         - [redis](/work/docker/service/redis/)
         - [kafka](/work/docker/service/kafka/)

@@ -347,7 +347,6 @@ docker run --rm --name springboot-demo \
 ```
 cat > Dockerfile-app <<"EOF"
 FROM registry.lingo.local/service/java:debian12_temurin_openjdk-jdk-21-jre
-COPY --chown=1001:1001 docker-entrypoint.sh docker-entrypoint.sh
 COPY --chown=1001:1001 springboot3-demo-v1.0.jar app.jar
 ENTRYPOINT ["java"]
 CMD ["-server", "-Xms128m", "-Xmx1024m", "-jar", "app.jar", "--server.port=8080"]

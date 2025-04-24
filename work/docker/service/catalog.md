@@ -2,6 +2,7 @@
 
 - [mysql](/work/docker/service/mysql/)
 - [postgresql](/work/docker/service/postgresql/)
+- [nginx](/work/docker/service/nginx/)
 - [doris](/work/docker/service/doris/)
 - [redis](/work/docker/service/redis/)
 - [kafka](/work/docker/service/kafka/)
@@ -19,8 +20,9 @@
 - [jenkins](/work/docker/service/jenkins/)
 - [jumpserver](/work/docker/service/jumpserver/)
 - [达梦数据库](/work/docker/service/dm8/v20241230/)
-- [springboot应用](/work/docker/service/java/springboot2/)
+- [Java应用](/work/docker/service/java/)
 - [nacos](/work/docker/service/nacos/)
 - [rocketmq](/work/docker/service/rocketmq/)
+- [kkfileview](/work/docker/service/kkfileview/v4.4.0/)
 - [禅道](/work/docker/service/zentao/)
 - [Snail-Job](/work/docker/service/snail-job/)
