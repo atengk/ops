@@ -35,8 +35,10 @@ spec:
         - name: app
           image: registry.lingo.local/service/java-app-separate:debian12_temurin_openjdk-jdk-21-jre
           env:
+            - name: JAR_CMD
+              value: "-jar /opt/app/app.jar"
             - name: JAVA_OPTS
-              value: "-server -Xms128m -Xmx1024m -jar /opt/app/target/app.jar"
+              value: "-server -Xms128m -Xmx1024m"
             - name: SPRING_OPTS
               value: "--server.port=8080 --spring.profiles.active=prod"
           ports:

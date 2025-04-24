@@ -43,6 +43,7 @@ sudo sysctl --system
 ```
 tar -zxvf docker-27.3.1.tgz
 sudo cp -v docker/* /usr/bin/
+rm -rf docker/
 ```
 
 **编辑配置文件**
@@ -66,7 +67,7 @@ sudo tee /etc/docker/daemon.json <<"EOF"
   },
   "exec-opts": ["native.cgroupdriver=systemd"],
   "insecure-registries": ["registry.lingo.local", "registry.ateng.local", "192.168.1.0/24"],
-  "registry-mirrors": ["https://docker.rainbond.cc"]
+  "registry-mirrors": ["https://docker.m.daocloud.io"]
 }
 EOF
 ```
@@ -80,11 +81,11 @@ sudo tee /etc/systemd/system/docker.service <<"EOF"
 [Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
-After=network-online.target docker.socket
+After=network-online.target
 Wants=network-online.target
 [Service]
 Type=notify
-ExecStart=/usr/bin/dockerd
+ExecStart=/usr/bin/dockerd --config-file=/etc/docker/daemon.json
 ExecReload=/bin/kill -s HUP $MAINPID
 TimeoutSec=0
 RestartSec=10
@@ -290,7 +291,7 @@ docker ps
 
 - CA 根证书：ateng-ca.crt
 - 服务端证书：ateng-server.crt
--  服务端私钥：ateng-server.key
+- 服务端私钥：ateng-server.key
 
 ```
 mkdir -p /etc/docker/certs

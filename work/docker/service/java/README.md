@@ -137,6 +137,11 @@ sudo rm -rf /data/container/java/springboot3-demo
 
 **创建目录**
 
+如果有额外的依赖包lib或者日志目录可以创建目录，没有的话可以不用创建
+
+- -v /data/container/java/springboot3-demo/lib:/opt/app/lib
+- -v /data/container/java/springboot3-demo/logs:/opt/app/logs
+
 ```
 sudo mkdir -p /data/container/java/springboot3-demo
 sudo chown -R 1001:1001 /data/container/java/springboot3-demo
@@ -144,12 +149,39 @@ sudo chown -R 1001:1001 /data/container/java/springboot3-demo
 
 **运行容器**
 
+自定义启动参数运行应用，分别指定相关参数
+
 ```shell
 docker run -d --restart=always \
     --name ateng-springboot3-demo \
     -p 18080:8080 \
-    -e JAVA_OPTS="-server -Xms128m -Xmx1024m -jar /opt/app/app.jar" \
+    -e JAR_CMD="-jar /opt/app/app.jar" \
+    -e JAVA_OPTS="-server -Xms128m -Xmx1024m" \
     -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
+    registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre
+```
+
+自定义启动参数运行应用，统一自定义设置
+
+```shell
+docker run -d --restart=always \
+    --name ateng-springboot3-demo \
+    -p 18080:8080 \
+    -e RUN_CMD="java -server -Xms128m -Xmx1024m -jar /opt/app/app.jar --server.port=8080 --spring.profiles.active=prod" \
+    registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre
+```
+
+自定义启动参数运行应用，保存日志和设置lib
+
+```shell
+docker run -d --restart=always \
+    --name ateng-springboot3-demo \
+    -p 18080:8080 \
+    -e JAR_CMD="-cp app.jar:lib/* local.ateng.java.demo.SpringBoot3Application" \
+    -e JAVA_OPTS="-server -Xms128m -Xmx1024m" \
+    -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
+    -v /data/container/java/springboot3-demo/lib:/opt/app/lib:ro \
+    -v /data/container/java/springboot3-demo/logs:/opt/app/logs \
     registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre
 ```
 
@@ -211,7 +243,8 @@ docker run -d --restart=always \
     --name ateng-springboot3-demo \
     -p 18080:8080 \
     -v /data/container/java/springboot3-demo/springboot3-demo-v1.0.jar:/opt/app/app.jar:ro \
-    -e JAVA_OPTS="-server -Xms128m -Xmx1024m -jar /opt/app/app.jar" \
+    -e JAR_CMD="-jar /opt/app/app.jar" \
+    -e JAVA_OPTS="-server -Xms128m -Xmx1024m" \
     -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
     registry.lingo.local/service/java-app-separate:debian12_temurin_openjdk-jdk-21-jre
 ```

@@ -400,15 +400,19 @@ docker save registry.lingo.local/service/java-app-integrated-cmd:debian12_temuri
 ```shell
 cat > docker-entrypoint.sh <<"EOF"
 #!/bin/bash
+set -euo pipefail
 
+# 设置 Jar 启动的命令
+JAR_CMD=${JAR_CMD:--jar /opt/app/app.jar}
 # 设置 JVM 参数
-JAVA_OPTS=${JAVA_OPTS:-}
-# 设置 Spring Boot 运行参数
-SPRING_OPTS=${SPRING_OPTS:-}
+JAVA_OPTS=${JAVA_OPTS:--Xms128m -Xmx1024m}
+# 设置 Spring Boot 参数
+SPRING_OPTS=${SPRING_OPTS:---spring.profiles.active=prod}
+# 设置应用启动命令
+RUN_CMD=${RUN_CMD:-java ${JAVA_OPTS} ${JAR_CMD} ${SPRING_OPTS}}
 
-# 执行 Java 进程
-RUN_CMD="java ${JAVA_OPTS} ${SPRING_OPTS}"
-echo "运行程序: ${RUN_CMD}"
+# 打印命令并启动
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting application: ${RUN_CMD}"
 exec ${RUN_CMD}
 EOF
 chmod +x docker-entrypoint.sh
@@ -434,13 +438,23 @@ docker build -f Dockerfile-app \
 
 **测试镜像**
 
-自定义启动参数运行应用
+自定义启动参数运行应用，分别指定相关参数
 
 ```
 docker run --rm --name springboot-demo \
     -p 18080:8080 \
-    -e JAVA_OPTS="-server -Xms128m -Xmx1024m -jar /opt/app/app.jar" \
+    -e JAR_CMD="-jar /opt/app/app.jar" \
+    -e JAVA_OPTS="-server -Xms128m -Xmx1024m" \
     -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
+    registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre
+```
+
+自定义启动参数运行应用，统一自定义设置
+
+```
+docker run --rm --name springboot-demo \
+    -p 18080:8080 \
+    -e RUN_CMD="java -server -Xms128m -Xmx1024m -jar /opt/app/app.jar --server.port=8080 --spring.profiles.active=prod" \
     registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre
 ```
 
@@ -468,15 +482,19 @@ docker save registry.lingo.local/service/java-app-integrated-shell:debian12_temu
 ```shell
 cat > docker-entrypoint.sh <<"EOF"
 #!/bin/bash
+set -euo pipefail
 
+# 设置 Jar 启动的命令
+JAR_CMD=${JAR_CMD:--jar /opt/app/app.jar}
 # 设置 JVM 参数
-JAVA_OPTS=${JAVA_OPTS:-}
-# 设置 Spring Boot 运行参数
-SPRING_OPTS=${SPRING_OPTS:-}
+JAVA_OPTS=${JAVA_OPTS:--Xms128m -Xmx1024m}
+# 设置 Spring Boot 参数
+SPRING_OPTS=${SPRING_OPTS:---spring.profiles.active=prod}
+# 设置应用启动命令
+RUN_CMD=${RUN_CMD:-java ${JAVA_OPTS} ${JAR_CMD} ${SPRING_OPTS}}
 
-# 执行 Java 进程
-RUN_CMD="java ${JAVA_OPTS} ${SPRING_OPTS}"
-echo "运行程序: ${RUN_CMD}"
+# 打印命令并启动
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting application: ${RUN_CMD}"
 exec ${RUN_CMD}
 EOF
 chmod +x docker-entrypoint.sh
@@ -507,7 +525,8 @@ docker build -f Dockerfile-app \
 docker run --rm --name springboot-demo \
     -p 18080:8080 \
     -v $(pwd)/springboot3-demo-v1.0.jar:/opt/app/app.jar:ro \
-    -e JAVA_OPTS="-server -Xms128m -Xmx1024m -jar /opt/app/app.jar" \
+    -e JAR_CMD="-jar /opt/app/app.jar" \
+    -e JAVA_OPTS="-server -Xms128m -Xmx1024m" \
     -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
     registry.lingo.local/service/java-app-separate:debian12_temurin_openjdk-jdk-21-jre
 ```
