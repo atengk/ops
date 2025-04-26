@@ -543,3 +543,94 @@ docker save registry.lingo.local/service/java-app-separate:debian12_temurin_open
   | gzip -c > image-java-app-separate_debian12_temurin_openjdk-jdk-21-jre.tar.gz
 ```
 
+
+
+## 最佳实践
+
+**镜像列表**
+
+- eclipse-temurin:21 eclipse-temurin:21-jre
+- eclipse-temurin:17 eclipse-temurin:17-jre
+- eclipse-temurin:11 eclipse-temurin:11-jre
+- eclipse-temurin:8 eclipse-temurin:8-jre
+
+**创建启动脚本**
+
+根据实际情况修改该脚本
+
+```shell
+cat > docker-entrypoint.sh <<"EOF"
+#!/bin/bash
+set -euo pipefail
+
+# 设置 Jar 启动的命令
+JAR_CMD=${JAR_CMD:--jar springboot3-demo-v1.0.jar}
+# 设置 JVM 参数
+JAVA_OPTS=${JAVA_OPTS:--Xms128m -Xmx1024m}
+# 设置 Spring Boot 参数
+SPRING_OPTS=${SPRING_OPTS:---spring.profiles.active=prod}
+# 设置应用启动命令
+RUN_CMD=${RUN_CMD:-java ${JAVA_OPTS} ${JAR_CMD} ${SPRING_OPTS}}
+
+# 打印命令并启动
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting application: ${RUN_CMD}"
+exec ${RUN_CMD}
+EOF
+chmod +x docker-entrypoint.sh
+```
+
+**创建Dockerfile**
+
+```
+cat > Dockerfile-java <<"EOF"
+FROM debian:12.10
+
+ARG UID=1001
+ARG GID=1001
+ARG USER_NAME=admin
+ARG GROUP_NAME=ateng
+ARG WORK_DIR=/opt/app
+
+WORKDIR ${WORK_DIR}
+
+COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --chown=${UID}:${GID} docker-entrypoint.sh .
+COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
+
+RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y locales tzdata curl fontconfig ca-certificates  && \
+    apt-get clean && \
+    echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen zh_CN.UTF-8 && \
+    update-locale LANG=zh_CN.UTF-8 && \
+    groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV JAVA_HOME=/opt/jdk
+ENV PATH=$PATH:$JAVA_HOME/bin
+ENV TZ=Asia/Shanghai
+ENV LANG=zh_CN.UTF-8
+ENV LANGUAGE=zh_CN:zh
+ENV LC_ALL=zh_CN.UTF-8
+
+USER 1001:1001
+ENTRYPOINT ["./docker-entrypoint.sh"]
+EOF
+```
+
+**构建镜像**
+
+```
+docker build -f Dockerfile-java \
+    -t registry.lingo.local/service/springboot3-demo:v1.0 .
+```
+
+**运行测试**
+
+```
+docker run --name springboot3-demo \
+    --rm registry.lingo.local/service/springboot3-demo:v1.0 
+```
+

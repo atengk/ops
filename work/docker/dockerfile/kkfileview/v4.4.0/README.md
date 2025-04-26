@@ -3,10 +3,6 @@
 kkFileView为文件文档在线预览解决方案，该项目使用流行的spring boot搭建，易上手和部署，基本支持主流办公文档的在线预览，如doc,docx,xls,xlsx,ppt,pptx,pdf,txt,zip,rar,图片,视频,音频等等
 
 - [官网链接](https://www.kkview.cn/zh-cn/index.html)
-- [Git安装文档](/work/service/git/v2.49.0/)
-- [JDK安装文档](/work/service/openjdk/openjdk21/)
-- [Maven安装文档](/work/service/maven/v3.9.9/)
-- [Docker安装文档](/work/docker/deploy/v27.3.1/)
 
 
 
@@ -16,26 +12,124 @@ kkFileView为文件文档在线预览解决方案，该项目使用流行的spri
 
 - https://gitee.com/kekingcn/file-online-preview/releases/tag/v4.4.0
 
-**进入源码**
+**解压源码**
 
 ```
-tar -zxvf file-online-preview-v4.4.0.tar.gz
-cd file-online-preview-v4.4.0
-KK_PWD=$(pwd)
+export KK_VERSION=4.4.0
+tar -zxvf file-online-preview-v${KK_VERSION}.tar.gz
 ```
 
-**构建基础镜像**
+**创建maven配置文件**
 
 ```
-cd docker/kkfileview-base/
-docker build --tag keking/kkfileview-base:4.4.0 .
+cat > settings.xml <<"EOF"
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <mirrors>
+    <mirror>
+      <mirrorOf>central</mirrorOf>
+      <id>alimaven</id>
+      <name>阿里云中央仓库</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+    </mirror>
+  </mirrors>
+</settings>
+EOF
 ```
 
 **编译打包**
 
+```shell
+docker run --rm \
+    --cpus="2" \
+    -m="2g" \
+    -v "/data/download/maven/repository":/root/.m2 \
+    -v "$PWD":/app \
+    -w /app \
+    maven:3.9-eclipse-temurin-8 \
+    mvn clean package -DskipTests \
+    -s settings.xml \
+    -f file-online-preview-v4.4.0/server/pom.xml
 ```
-cd ${KK_PWD}
-mvn clean package -DskipTests
+
+**整理文件**
+
+```
+mv file-online-preview-v${KK_VERSION}/server/target/kkFileView-${KK_VERSION}.tar.gz .
+rm -rf file-online-preview-v${KK_VERSION}/
+```
+
+**创建启动脚本**
+
+```shell
+cat > docker-entrypoint.sh <<"EOF"
+#!/bin/bash
+set -euo pipefail
+
+# 设置 Jar 启动的命令
+JAR_CMD=${JAR_CMD:--jar bin/kkFileView-4.4.0.jar}
+# 设置 JVM 参数
+JAVA_OPTS=${JAVA_OPTS:--Xms128m -Xmx1024m}
+# 设置 Spring Boot 参数
+SPRING_OPTS=${SPRING_OPTS:---spring.config.location=config/application.properties}
+# 设置应用启动命令
+RUN_CMD=${RUN_CMD:-java ${JAVA_OPTS} ${JAR_CMD} ${SPRING_OPTS}}
+
+# 打印命令并启动
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting application: ${RUN_CMD}"
+exec ${RUN_CMD}
+EOF
+chmod +x docker-entrypoint.sh
+```
+
+**创建 Dockerfile**
+
+```dockerfile
+cat > Dockerfile <<"EOF"
+FROM debian:12.10
+
+ARG UID=1001
+ARG GID=1001
+ARG USER_NAME=admin
+ARG GROUP_NAME=ateng
+ARG KK_VERSION=4.4.0
+ARG WORK_DIR=/opt/kkFileView-${KK_VERSION}
+
+WORKDIR ${WORK_DIR}
+
+COPY --from=eclipse-temurin:8 /opt/java/openjdk /opt/jdk
+ADD kkFileView-${KK_VERSION}.tar.gz /tmp
+COPY docker-entrypoint.sh .
+
+RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y locales tzdata curl fontconfig ca-certificates  \
+        xfonts-wqy fonts-noto-cjk  fonts-freefont-ttf \
+        libreoffice-nogui ttf-wqy-microhei ttf-wqy-zenhei && \
+    apt-get clean && \
+    echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen zh_CN.UTF-8 && \
+    update-locale LANG=zh_CN.UTF-8 && \
+    mv /tmp/kkFileView-${KK_VERSION}/* . && \
+    groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown ${UID}:${GID} -R ${WORK_DIR} && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV KKFILEVIEW_BIN_FOLDER=${WORK_DIR}/bin
+ENV JAVA_HOME=/opt/jdk
+ENV PATH=$PATH:$JAVA_HOME/bin
+ENV TZ=Asia/Shanghai
+ENV LANG=zh_CN.UTF-8
+ENV LANGUAGE=zh_CN:zh
+ENV LC_ALL=zh_CN.UTF-8
+
+USER ${UID}:${GID}
+EXPOSE 8012
+ENTRYPOINT ["./docker-entrypoint.sh"]
+EOF
 ```
 
 **构建镜像**
@@ -44,17 +138,28 @@ mvn clean package -DskipTests
 docker build -t registry.lingo.local/service/kkfileview:v4.4.0 .
 ```
 
+**运行测试**
+
+使用默认启动命令
+
+```
+docker run --rm --name kkfileview registry.lingo.local/service/kkfileview:v4.4.0
+```
+
+自定义启动命令
+
+```
+docker run --rm --name kkfileview \
+    -e JAR_CMD="-jar bin/kkFileView-4.4.0.jar" \
+    -e JAVA_OPTS="-Xms1024m -Xmx1024m" \
+    -e SPRING_OPTS="--spring.config.location=config/application.properties" \
+    registry.lingo.local/service/kkfileview:v4.4.0
+```
+
 **推送镜像到仓库**
 
 ```
 docker push registry.lingo.local/service/kkfileview:v4.4.0
-```
-
-**清理环境**
-
-```
-cd ..
-rm -rf ${KK_PWD}
 ```
 
 **保存镜像**

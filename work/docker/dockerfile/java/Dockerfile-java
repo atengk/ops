@@ -1,0 +1,34 @@
+FROM debian:12.10
+
+ARG UID=1001
+ARG GID=1001
+ARG USER_NAME=admin
+ARG GROUP_NAME=ateng
+ARG WORK_DIR=/opt/app
+
+WORKDIR ${WORK_DIR}
+
+COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --chown=${UID}:${GID} docker-entrypoint.sh .
+COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
+
+RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && apt-get upgrade -y && \
+    apt-get install --no-install-recommends -y locales tzdata curl fontconfig ca-certificates  && \
+    apt-get clean && \
+    echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen zh_CN.UTF-8 && \
+    update-locale LANG=zh_CN.UTF-8 && \
+    groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV JAVA_HOME=/opt/jdk
+ENV PATH=$PATH:$JAVA_HOME/bin
+ENV TZ=Asia/Shanghai
+ENV LANG=zh_CN.UTF-8
+ENV LANGUAGE=zh_CN:zh
+ENV LC_ALL=zh_CN.UTF-8
+
+USER 1001:1001
+ENTRYPOINT ["./docker-entrypoint.sh"]

@@ -2,11 +2,11 @@
 set -euo pipefail
 
 # 设置 Jar 启动的命令
-JAR_CMD=${JAR_CMD:--jar springboot3-demo-v1.0.jar}
+JAR_CMD=${JAR_CMD:--jar bin/kkFileView-4.4.0.jar}
 # 设置 JVM 参数
 JAVA_OPTS=${JAVA_OPTS:--Xms128m -Xmx1024m}
 # 设置 Spring Boot 参数
-SPRING_OPTS=${SPRING_OPTS:---spring.profiles.active=prod}
+SPRING_OPTS=${SPRING_OPTS:---spring.config.location=config/application.properties}
 # 设置应用启动命令
 RUN_CMD=${RUN_CMD:-java ${JAVA_OPTS} ${JAR_CMD} ${SPRING_OPTS}}
 
