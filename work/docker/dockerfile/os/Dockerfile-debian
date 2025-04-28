@@ -30,5 +30,6 @@ ENV LANG=zh_CN.UTF-8
 ENV LANGUAGE=zh_CN:zh
 ENV LC_ALL=zh_CN.UTF-8
 
-USER 1001:1001
+USER ${UID}:${GID}
+
 ENTRYPOINT ["./docker-entrypoint.sh"]

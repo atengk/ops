@@ -1,4 +1,4 @@
-FROM debian:12.10
+FROM ubuntu:22.04
 
 ARG UID=1001
 ARG GID=1001
@@ -13,11 +13,9 @@ COPY --from=eclipse-temurin:8 /opt/java/openjdk /opt/jdk
 ADD kkFileView-${KK_VERSION}.tar.gz /tmp
 COPY docker-entrypoint.sh .
 
-RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
+RUN sed -i "s#http://.*ubuntu.com/ubuntu/#http://mirrors.aliyun.com/ubuntu/#g" /etc/apt/sources.list && \
     apt-get update && apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y locales tzdata curl fontconfig ca-certificates  \
-        xfonts-wqy fonts-noto-cjk  fonts-freefont-ttf \
-        libreoffice-nogui ttf-wqy-microhei ttf-wqy-zenhei && \
+    apt-get install --no-install-recommends -y locales tzdata curl ca-certificates fontconfig fonts-noto-cjk libreoffice-nogui && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \

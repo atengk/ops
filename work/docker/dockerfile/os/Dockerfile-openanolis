@@ -1,4 +1,4 @@
-FROM debian:12.10
+FROM registry.openanolis.cn/openanolis/anolisos:23.2
 
 ARG UID=1001
 ARG GID=1001
@@ -12,16 +12,13 @@ COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y locales tzdata curl ca-certificates fontconfig fonts-noto-cjk && \
-    apt-get clean && \
-    echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
-    locale-gen zh_CN.UTF-8 && \
-    update-locale LANG=zh_CN.UTF-8 && \
+RUN dnf -y update && \
+    dnf -y install shadow-utils glibc-locale-source glibc-langpack-zh tzdata ca-certificates fontconfig google-noto-sans-cjk-ttc-fonts && \
+    dnf clean all && \
+    localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8 && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    rm -rf /var/cache/dnf /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
@@ -30,5 +27,6 @@ ENV LANG=zh_CN.UTF-8
 ENV LANGUAGE=zh_CN:zh
 ENV LC_ALL=zh_CN.UTF-8
 
-USER 1001:1001
+USER ${UID}:${GID}
+
 ENTRYPOINT ["./docker-entrypoint.sh"]

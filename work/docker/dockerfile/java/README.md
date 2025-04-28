@@ -20,7 +20,7 @@ wget https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u432-b0
 
 **创建Dockerfile**
 
-安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales curl fontconfig fonts-dejavu-core fonts-liberation
+安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig fonts-noto-cjk
 
 ```
 cat > Dockerfile-openjdk8 <<"EOF"
@@ -31,7 +31,7 @@ ADD OpenJDK8U-*.tar.gz /opt/
 
 RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
     apt-get update && apt-get upgrade -y && \
-    apt-get install -y locales curl unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-dejavu-core fonts-liberation && \
+    apt-get install -y locales tzdata curl ca-certificates unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-noto-cjk && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
@@ -97,7 +97,7 @@ wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.2
 
 **创建Dockerfile**
 
-安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales curl fontconfig fonts-dejavu-core fonts-liberation
+安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig fonts-noto-cjk
 
 ```
 cat > Dockerfile-openjdk11 <<"EOF"
@@ -108,7 +108,7 @@ ADD OpenJDK11U-*.tar.gz /opt/
 
 RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
     apt-get update && apt-get upgrade -y && \
-    apt-get install -y locales curl unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-dejavu-core fonts-liberation && \
+    apt-get install -y locales tzdata curl ca-certificates unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-noto-cjk && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
@@ -174,7 +174,7 @@ wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1
 
 **创建Dockerfile**
 
-安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales curl fontconfig fonts-dejavu-core fonts-liberation
+安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig fonts-noto-cjk
 
 ```
 cat > Dockerfile-openjdk17 <<"EOF"
@@ -185,7 +185,7 @@ ADD OpenJDK17U-*.tar.gz /opt/
 
 RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
     apt-get update && apt-get upgrade -y && \
-    apt-get install -y locales curl unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-dejavu-core fonts-liberation && \
+    apt-get install -y locales tzdata curl ca-certificates unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-noto-cjk && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
@@ -251,7 +251,7 @@ wget https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.5
 
 **创建Dockerfile**
 
-安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales curl fontconfig fonts-dejavu-core fonts-liberation
+安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig fonts-noto-cjk
 
 ```
 cat > Dockerfile-openjdk21 <<"EOF"
@@ -262,7 +262,7 @@ ADD OpenJDK21U-*.tar.gz /opt/
 
 RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
     apt-get update && apt-get upgrade -y && \
-    apt-get install -y locales curl unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-dejavu-core fonts-liberation && \
+    apt-get install -y locales tzdata curl ca-certificates unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-noto-cjk && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
@@ -547,12 +547,44 @@ docker save registry.lingo.local/service/java-app-separate:debian12_temurin_open
 
 ## 最佳实践
 
-**镜像列表**
+**编译和打包（可选）**
 
-- eclipse-temurin:21 eclipse-temurin:21-jre
-- eclipse-temurin:17 eclipse-temurin:17-jre
-- eclipse-temurin:11 eclipse-temurin:11-jre
-- eclipse-temurin:8 eclipse-temurin:8-jre
+如果需要将源码编译打包Jar文件，可以参考该步骤。一般情况下是直接提供了Jar文件的，所以该步骤可选
+
+创建maven配置文件
+
+```
+cat > settings.xml <<"EOF"
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <mirrors>
+    <mirror>
+      <mirrorOf>central</mirrorOf>
+      <id>alimaven</id>
+      <name>阿里云中央仓库</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+    </mirror>
+  </mirrors>
+</settings>
+EOF
+```
+
+编译打包
+
+```shell
+docker run --rm \
+    --cpus="2" \
+    -m="2g" \
+    -v "/data/download/maven/repository":/root/.m2 \
+    -v "$PWD":/app \
+    -w /app \
+    maven:3.9-eclipse-temurin-21 \
+    mvn clean package -DskipTests \
+    -s settings.xml \
+    -f pom.xml
+```
 
 **创建启动脚本**
 
@@ -581,6 +613,13 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
+其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+
+- eclipse-temurin:21 eclipse-temurin:21-jre
+- eclipse-temurin:17 eclipse-temurin:17-jre
+- eclipse-temurin:11 eclipse-temurin:11-jre
+- eclipse-temurin:8 eclipse-temurin:8-jre
+
 ```
 cat > Dockerfile-java <<"EOF"
 FROM debian:12.10
@@ -599,7 +638,7 @@ COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
 RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
     apt-get update && apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y locales tzdata curl fontconfig ca-certificates  && \
+    apt-get install --no-install-recommends -y locales tzdata curl ca-certificates fontconfig fonts-noto-cjk && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \

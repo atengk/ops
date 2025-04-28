@@ -133,6 +133,8 @@
     - Dockerfile
         - [JDK和应用](/work/docker/dockerfile/java/)
         - [kkFileView](/work/docker/dockerfile/kkfileview/v4.4.0/)
+        - [kkFileView-Alpine](/work/docker/dockerfile/kkfileview/v4.4.0/alpine/)
+        - [操作系统集合](/work/docker/dockerfile/os/)
     - 服务安装文档
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)

@@ -1,4 +1,4 @@
-FROM debian:12.10
+FROM ubuntu:25.04
 
 ARG UID=1001
 ARG GID=1001
@@ -12,7 +12,7 @@ COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
+RUN sed -i "s#http://.*ubuntu.com/ubuntu/#http://mirrors.aliyun.com/ubuntu/#g" /etc/apt/sources.list && \
     apt-get update && apt-get upgrade -y && \
     apt-get install --no-install-recommends -y locales tzdata curl ca-certificates fontconfig fonts-noto-cjk && \
     apt-get clean && \
@@ -30,5 +30,6 @@ ENV LANG=zh_CN.UTF-8
 ENV LANGUAGE=zh_CN:zh
 ENV LC_ALL=zh_CN.UTF-8
 
-USER 1001:1001
+USER ${UID}:${GID}
+
 ENTRYPOINT ["./docker-entrypoint.sh"]

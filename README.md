@@ -74,7 +74,7 @@
 
 🧠 支持任务重试、分布式运行与自定义执行策略，适用于复杂业务流程的自动化调度。
 
- 📖 [Kubernetes部署](/work/kubernetes/service/snail-job/v1.3.0/)｜[Java开发文档](https://kongyu666.github.io/dev/#/work/Ateng-Java/task/snail-job/)
+ 📖 [Kubernetes部署](/work/kubernetes/service/snail-job/v1.4.0/)｜[Java开发文档](https://kongyu666.github.io/dev/#/work/Ateng-Java/task/snail-job/)
 
 ---
 
@@ -215,6 +215,8 @@
     - Dockerfile
         - [JDK和应用](/work/docker/dockerfile/java/)
         - [kkFileView](/work/docker/dockerfile/kkfileview/v4.4.0/)
+        - [kkFileView-Alpine](/work/docker/dockerfile/kkfileview/v4.4.0/alpine/)
+        - [操作系统集合](/work/docker/dockerfile/os/)
     - 服务安装文档
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)

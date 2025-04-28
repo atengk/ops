@@ -12,8 +12,11 @@ kkFileView为文件文档在线预览解决方案，该项目使用流行的spri
 
 ```
 docker run -d --name ateng-kkfileview \
-  -p 20023:8012 --restart=always \
-  registry.lingo.local/service/kkfileview:v4.4.0
+    -p 20023:8012 --restart=always \
+    -e JAR_CMD="-jar bin/kkFileView-4.4.0.jar" \
+    -e JAVA_OPTS="-Xms1024m -Xmx1024m" \
+    -e SPRING_OPTS="--spring.config.location=config/application.properties" \
+    registry.lingo.local/service/kkfileview:v4.4.0
 ```
 
 **查看日志**
