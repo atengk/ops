@@ -8,35 +8,29 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21-jdk-alpine --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre-alpine --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN set -eux && \
-    sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+RUN sed -i 's|dl-cdn.alpinelinux.org|mirrors.aliyun.com|g' /etc/apk/repositories && \
     apk update && \
-    apk upgrade && \
     apk add --no-cache \
         tzdata \
         curl \
         ca-certificates \
+        fontconfig \
         font-noto-cjk \
-        su-exec \
         shadow \
-        bash \
-        icu-data-full && \
-    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone && \
+        bash && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 

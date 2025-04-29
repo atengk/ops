@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # 设置 Jar 启动的命令
-JAR_CMD=${JAR_CMD:--jar springboot3-demo-v1.0.jar}
+JAR_CMD=${JAR_CMD:--jar app.jar}
 # 设置 JVM 参数
 JAVA_OPTS=${JAVA_OPTS:--Xms128m -Xmx1024m}
 # 设置 Spring Boot 参数

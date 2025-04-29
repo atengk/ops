@@ -73,7 +73,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21 eclipse-temurin:21-jre
 - eclipse-temurin:17 eclipse-temurin:17-jre
@@ -92,27 +92,30 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y locales tzdata curl ca-certificates fontconfig fonts-noto-cjk && \
+RUN sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        locales \
+        tzdata \
+        curl \
+        ca-certificates \
+        fontconfig && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
-    update-locale LANG=zh_CN.UTF-8 && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 
@@ -216,7 +219,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21 eclipse-temurin:21-jre
 - eclipse-temurin:17 eclipse-temurin:17-jre
@@ -225,7 +228,7 @@ chmod +x docker-entrypoint.sh
 
 ```
 cat > Dockerfile-ubuntu <<"EOF"
-FROM ubuntu:25.04
+FROM ubuntu:24.04
 
 ARG UID=1001
 ARG GID=1001
@@ -235,27 +238,30 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN sed -i "s#http://.*ubuntu.com/ubuntu/#http://mirrors.aliyun.com/ubuntu/#g" /etc/apt/sources.list && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y locales tzdata curl ca-certificates fontconfig fonts-noto-cjk && \
+RUN sed -i 's|http://.*ubuntu.com|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/ubuntu.sources && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        locales \
+        tzdata \
+        curl \
+        ca-certificates \
+        fontconfig && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
-    update-locale LANG=zh_CN.UTF-8 && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 
@@ -359,7 +365,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21 eclipse-temurin:21-jre
 - eclipse-temurin:17 eclipse-temurin:17-jre
@@ -378,26 +384,25 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN dnf -y install epel-release && \
-    dnf -y update && \
-    dnf -y install glibc-langpack-zh tzdata ca-certificates fontconfig google-noto-sans-cjk-ttc-fonts && \
+RUN dnf -y install \
+        glibc-langpack-zh \
+        tzdata \
+        ca-certificates \
+        fontconfig && \
     dnf clean all && \
-    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/cache/dnf /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 
@@ -501,7 +506,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21 eclipse-temurin:21-jre
 - eclipse-temurin:17 eclipse-temurin:17-jre
@@ -520,24 +525,28 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN dnf -y update && \
-    dnf -y install shadow-utils glibc-locale-source glibc-langpack-zh tzdata ca-certificates fontconfig google-noto-sans-cjk-ttc-fonts && \
+RUN dnf -y install \
+        shadow-utils \
+        glibc-locale-source \
+        glibc-langpack-zh \
+        tzdata \
+        ca-certificates \
+        fontconfig && \
     dnf clean all && \
     localedef --no-archive -c -f UTF-8 -i zh_CN zh_CN.UTF-8 && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/cache/dnf /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 
@@ -641,7 +650,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21 eclipse-temurin:21-jre
 - eclipse-temurin:17 eclipse-temurin:17-jre
@@ -660,24 +669,25 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN dnf -y update && \
-    dnf -y install shadow-utils glibc-locale-source glibc-langpack-zh tzdata ca-certificates fontconfig google-noto-sans-cjk-ttc-fonts && \
+RUN dnf -y install \
+        glibc-langpack-zh \
+        tzdata \
+        ca-certificates \
+        fontconfig && \
     dnf clean all && \
-    localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8 && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/cache/dnf /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 
@@ -781,7 +791,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21 eclipse-temurin:21-jre
 - eclipse-temurin:17 eclipse-temurin:17-jre
@@ -800,33 +810,27 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
 RUN sed -i 's|^mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/*.repo && \
     sed -i 's|^# baseurl=http.*/almalinux/|baseurl=https://mirrors.aliyun.com/almalinux/|g' /etc/yum.repos.d/*.repo && \
-    dnf -y install epel-release && \
-    dnf -y update && \
     dnf -y install \
         glibc-langpack-zh \
         tzdata \
         ca-certificates \
-        fontconfig \
-        google-noto-sans-cjk-ttc-fonts && \
+        fontconfig && \
     dnf clean all && \
-    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/cache/dnf /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 
@@ -930,7 +934,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21 eclipse-temurin:21-jre
 - eclipse-temurin:17 eclipse-temurin:17-jre
@@ -949,27 +953,27 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN rm -f /etc/yum.repos.d/*.repo && \
-    curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-8.repo && \
-    dnf clean all && dnf makecache && \
-    dnf install -y epel-release && \
-    dnf -y install glibc-locale-source glibc-langpack-zh tzdata ca-certificates fontconfig google-noto-sans-cjk-ttc-fonts && \
+RUN sed -i 's|^mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/*.repo && \
+    sed -i 's|^#baseurl=http://mirror.centos.org|baseurl=http://mirrors.aliyun.com|g' /etc/yum.repos.d/*.repo && \
+    dnf -y install \
+        glibc-langpack-zh \
+        tzdata \
+        ca-certificates \
+        fontconfig && \
     dnf clean all && \
-    localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8  && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/cache/dnf /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 
@@ -1073,7 +1077,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre-alpine --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21-jdk-alpine eclipse-temurin:21-jre-alpine
 - eclipse-temurin:17-jdk-alpine eclipse-temurin:17-jre-alpine
@@ -1092,35 +1096,29 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21-jdk-alpine --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre-alpine --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN set -eux && \
-    sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+RUN sed -i 's|dl-cdn.alpinelinux.org|mirrors.aliyun.com|g' /etc/apk/repositories && \
     apk update && \
-    apk upgrade && \
     apk add --no-cache \
         tzdata \
         curl \
         ca-certificates \
+        fontconfig \
         font-noto-cjk \
-        su-exec \
         shadow \
-        bash \
-        icu-data-full && \
-    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone && \
+        bash && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 
@@ -1224,7 +1222,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21 eclipse-temurin:21-jre
 - eclipse-temurin:17 eclipse-temurin:17-jre
@@ -1243,32 +1241,27 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
 RUN sed -i 's|^metalink=|#metalink=|g' /etc/yum.repos.d/*.repo && \
     sed -i 's|^#baseurl=http.*/pub/fedora/linux/|baseurl=https://mirrors.aliyun.com/fedora/|g' /etc/yum.repos.d/*.repo && \
-    dnf -y update && \
     dnf -y install \
         glibc-langpack-zh \
         tzdata \
         ca-certificates \
-        fontconfig \
-        google-noto-sans-cjk-ttc-fonts && \
+        fontconfig && \
     dnf clean all && \
-    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/cache/dnf /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 

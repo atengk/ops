@@ -20,25 +20,33 @@ wget https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u432-b0
 
 **创建Dockerfile**
 
-安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig fonts-noto-cjk
+安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig
 
 ```
 cat > Dockerfile-openjdk8 <<"EOF"
 FROM debian:12.10
-WORKDIR /opt/app
+
+ARG UID=1001
+ARG GID=1001
+ARG USER_NAME=admin
+ARG GROUP_NAME=ateng
+ARG WORK_DIR=/opt/app
+
+WORKDIR ${WORK_DIR}
 
 ADD OpenJDK8U-*.tar.gz /opt/
 
-RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install -y locales tzdata curl ca-certificates unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-noto-cjk && \
+RUN sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    locales tzdata curl ca-certificates fontconfig fonts-noto-cjk unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
-    groupadd -g 1001 ateng && \
-    useradd -u 1001 -g ateng -m admin && \
-    chown 1001:1001 -R /opt && \
+    groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     mv /opt/jdk* /opt/jdk && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -46,10 +54,9 @@ ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
-USER 1001:1001
+USER ${UID}:${GID}
+
 ENTRYPOINT ["java"]
 EOF
 ```
@@ -97,25 +104,33 @@ wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.2
 
 **创建Dockerfile**
 
-安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig fonts-noto-cjk
+安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig
 
 ```
 cat > Dockerfile-openjdk11 <<"EOF"
 FROM debian:12.10
-WORKDIR /opt/app
+
+ARG UID=1001
+ARG GID=1001
+ARG USER_NAME=admin
+ARG GROUP_NAME=ateng
+ARG WORK_DIR=/opt/app
+
+WORKDIR ${WORK_DIR}
 
 ADD OpenJDK11U-*.tar.gz /opt/
 
-RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install -y locales tzdata curl ca-certificates unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-noto-cjk && \
+RUN sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    locales tzdata curl ca-certificates fontconfig fonts-noto-cjk unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
-    groupadd -g 1001 ateng && \
-    useradd -u 1001 -g ateng -m admin && \
-    chown 1001:1001 -R /opt && \
+    groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     mv /opt/jdk* /opt/jdk && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -123,10 +138,9 @@ ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
-USER 1001:1001
+USER ${UID}:${GID}
+
 ENTRYPOINT ["java"]
 EOF
 ```
@@ -174,25 +188,33 @@ wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1
 
 **创建Dockerfile**
 
-安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig fonts-noto-cjk
+安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig
 
 ```
 cat > Dockerfile-openjdk17 <<"EOF"
 FROM debian:12.10
-WORKDIR /opt/app
+
+ARG UID=1001
+ARG GID=1001
+ARG USER_NAME=admin
+ARG GROUP_NAME=ateng
+ARG WORK_DIR=/opt/app
+
+WORKDIR ${WORK_DIR}
 
 ADD OpenJDK17U-*.tar.gz /opt/
 
-RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install -y locales tzdata curl ca-certificates unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-noto-cjk && \
+RUN sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    locales tzdata curl ca-certificates fontconfig fonts-noto-cjk unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
-    groupadd -g 1001 ateng && \
-    useradd -u 1001 -g ateng -m admin && \
-    chown 1001:1001 -R /opt && \
+    groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     mv /opt/jdk* /opt/jdk && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -200,10 +222,9 @@ ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
-USER 1001:1001
+USER ${UID}:${GID}
+
 ENTRYPOINT ["java"]
 EOF
 ```
@@ -251,25 +272,33 @@ wget https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.5
 
 **创建Dockerfile**
 
-安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig fonts-noto-cjk
+安装软件包这条命令中，生产环境中建议最小化安装，软件列表：locales tzdata curl ca-certificates fontconfig
 
 ```
 cat > Dockerfile-openjdk21 <<"EOF"
 FROM debian:12.10
-WORKDIR /opt/app
+
+ARG UID=1001
+ARG GID=1001
+ARG USER_NAME=admin
+ARG GROUP_NAME=ateng
+ARG WORK_DIR=/opt/app
+
+WORKDIR ${WORK_DIR}
 
 ADD OpenJDK21U-*.tar.gz /opt/
 
-RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install -y locales tzdata curl ca-certificates unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-noto-cjk && \
+RUN sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+    locales tzdata curl ca-certificates fontconfig fonts-noto-cjk unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
     update-locale LANG=zh_CN.UTF-8 && \
-    groupadd -g 1001 ateng && \
-    useradd -u 1001 -g ateng -m admin && \
-    chown 1001:1001 -R /opt && \
+    groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     mv /opt/jdk* /opt/jdk && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -277,10 +306,9 @@ ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
-USER 1001:1001
+USER ${UID}:${GID}
+
 ENTRYPOINT ["java"]
 EOF
 ```
@@ -327,13 +355,14 @@ docker save \
 将宿主机的Jar文件映射到容器内部，然后自定义启动参数运行应用
 
 ```
+export JAR_FILE_NAME=springboot3-demo-v1.0.jar
 docker run --rm --name springboot-demo \
     -p 18080:8080 \
-    -v $(pwd)/springboot3-demo-v1.0.jar:/opt/app/app.jar:ro \
+    -v $(pwd)/${JAR_FILE_NAME}:/opt/app/${JAR_FILE_NAME}:ro \
     registry.lingo.local/service/java:debian12_temurin_openjdk-jdk-21-jre \
     -server \
     -Xms128m -Xmx1024m \
-    -jar app.jar \
+    -jar ${JAR_FILE_NAME} \
     --server.port=8080 \
     --spring.profiles.active=prod
 ```
@@ -347,9 +376,9 @@ docker run --rm --name springboot-demo \
 ```
 cat > Dockerfile-app <<"EOF"
 FROM registry.lingo.local/service/java:debian12_temurin_openjdk-jdk-21-jre
-COPY --chown=1001:1001 springboot3-demo-v1.0.jar app.jar
+COPY springboot3-demo-v1.0.jar .
 ENTRYPOINT ["java"]
-CMD ["-server", "-Xms128m", "-Xmx1024m", "-jar", "app.jar", "--server.port=8080"]
+CMD ["-server", "-Xms128m", "-Xmx1024m", "-jar", "springboot3-demo-v1.0.jar", "--server.port=8080"]
 EOF
 ```
 
@@ -370,7 +399,7 @@ docker run --rm --name springboot-demo \
     registry.lingo.local/service/java-app-integrated-cmd:debian12_temurin_openjdk-jdk-21-jre \
     -server \
     -Xms128m -Xmx1024m \
-    -jar app.jar \
+    -jar springboot3-demo-v1.0.jar \
     --server.port=8080 \
     --spring.profiles.active=prod
 ```
@@ -402,7 +431,7 @@ cat > docker-entrypoint.sh <<"EOF"
 set -euo pipefail
 
 # 设置 Jar 启动的命令
-JAR_CMD=${JAR_CMD:--jar /opt/app/app.jar}
+JAR_CMD=${JAR_CMD:--jar springboot3-demo-v1.0.jar}
 # 设置 JVM 参数
 JAVA_OPTS=${JAVA_OPTS:--Xms128m -Xmx1024m}
 # 设置 Spring Boot 参数
@@ -422,8 +451,8 @@ chmod +x docker-entrypoint.sh
 ```
 cat > Dockerfile-app <<"EOF"
 FROM registry.lingo.local/service/java:debian12_temurin_openjdk-jdk-21-jre
-COPY --chown=1001:1001 docker-entrypoint.sh docker-entrypoint.sh
-COPY --chown=1001:1001 springboot3-demo-v1.0.jar app.jar
+COPY docker-entrypoint.sh .
+COPY springboot3-demo-v1.0.jar .
 ENTRYPOINT ["./docker-entrypoint.sh"]
 EOF
 ```
@@ -442,7 +471,7 @@ docker build -f Dockerfile-app \
 ```
 docker run --rm --name springboot-demo \
     -p 18080:8080 \
-    -e JAR_CMD="-jar /opt/app/app.jar" \
+    -e JAR_CMD="-jar springboot3-demo-v1.0.jar" \
     -e JAVA_OPTS="-server -Xms128m -Xmx1024m" \
     -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
     registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre
@@ -453,7 +482,7 @@ docker run --rm --name springboot-demo \
 ```
 docker run --rm --name springboot-demo \
     -p 18080:8080 \
-    -e RUN_CMD="java -server -Xms128m -Xmx1024m -jar /opt/app/app.jar --server.port=8080 --spring.profiles.active=prod" \
+    -e RUN_CMD="java -server -Xms128m -Xmx1024m -jar springboot3-demo-v1.0.jar --server.port=8080 --spring.profiles.active=prod" \
     registry.lingo.local/service/java-app-integrated-shell:debian12_temurin_openjdk-jdk-21-jre
 ```
 
@@ -484,7 +513,7 @@ cat > docker-entrypoint.sh <<"EOF"
 set -euo pipefail
 
 # 设置 Jar 启动的命令
-JAR_CMD=${JAR_CMD:--jar /opt/app/app.jar}
+JAR_CMD=${JAR_CMD:--jar app.jar}
 # 设置 JVM 参数
 JAVA_OPTS=${JAVA_OPTS:--Xms128m -Xmx1024m}
 # 设置 Spring Boot 参数
@@ -504,7 +533,7 @@ chmod +x docker-entrypoint.sh
 ```
 cat > Dockerfile-app <<"EOF"
 FROM registry.lingo.local/service/java:debian12_temurin_openjdk-jdk-21-jre
-COPY --chown=1001:1001 docker-entrypoint.sh docker-entrypoint.sh
+COPY docker-entrypoint.sh .
 ENTRYPOINT ["./docker-entrypoint.sh"]
 EOF
 ```
@@ -521,10 +550,11 @@ docker build -f Dockerfile-app \
 将宿主机的Jar文件映射到容器内部，然后自定义启动参数运行应用
 
 ```
+export JAR_FILE_NAME=springboot3-demo-v1.0.jar
 docker run --rm --name springboot-demo \
     -p 18080:8080 \
-    -v $(pwd)/springboot3-demo-v1.0.jar:/opt/app/app.jar:ro \
-    -e JAR_CMD="-jar /opt/app/app.jar" \
+    -v $(pwd)/${JAR_FILE_NAME}:/opt/app/${JAR_FILE_NAME}:ro \
+    -e JAR_CMD="-jar /opt/app/${JAR_FILE_NAME}" \
     -e JAVA_OPTS="-server -Xms128m -Xmx1024m" \
     -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
     registry.lingo.local/service/java-app-separate:debian12_temurin_openjdk-jdk-21-jre
@@ -613,7 +643,7 @@ chmod +x docker-entrypoint.sh
 
 **创建Dockerfile**
 
-其中 `COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+其中 `COPY --from=eclipse-temurin:21-jre --chown=1001:1001 /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
 
 - eclipse-temurin:21 eclipse-temurin:21-jre
 - eclipse-temurin:17 eclipse-temurin:17-jre
@@ -632,29 +662,33 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y locales tzdata curl ca-certificates fontconfig fonts-noto-cjk && \
+RUN sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+        locales \
+        tzdata \
+        curl \
+        ca-certificates \
+        fontconfig && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
-    update-locale LANG=zh_CN.UTF-8 && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
-USER 1001:1001
+USER ${UID}:${GID}
+
 ENTRYPOINT ["./docker-entrypoint.sh"]
 EOF
 ```
@@ -669,7 +703,12 @@ docker build -f Dockerfile-java \
 **运行测试**
 
 ```
-docker run --name springboot3-demo \
-    --rm registry.lingo.local/service/springboot3-demo:v1.0 
+docker run --rm \
+    --name springboot3-demo \
+    -p 18080:8080 \
+    -e JAR_CMD="-jar springboot3-demo-v1.0.jar" \
+    -e JAVA_OPTS="-server -Xms128m -Xmx1024m" \
+    -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
+    registry.lingo.local/service/springboot3-demo:v1.0
 ```
 

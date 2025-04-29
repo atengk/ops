@@ -86,6 +86,8 @@ chmod +x docker-entrypoint.sh
 
 **创建 Dockerfile**
 
+如果有自定义的字体库需要导入进去，在Dockerfile中将其添加进去： `ADD fonts/* /usr/share/fonts/ateng/custom/`
+
 ```dockerfile
 cat > Dockerfile <<"EOF"
 FROM ubuntu:22.04
@@ -103,13 +105,30 @@ COPY --from=eclipse-temurin:8 /opt/java/openjdk /opt/jdk
 ADD kkFileView-${KK_VERSION}.tar.gz /tmp
 COPY docker-entrypoint.sh .
 
-RUN sed -i "s#http://.*ubuntu.com/ubuntu/#http://mirrors.aliyun.com/ubuntu/#g" /etc/apt/sources.list && \
-    apt-get update && apt-get upgrade -y && \
-    apt-get install --no-install-recommends -y locales tzdata curl ca-certificates fontconfig fonts-noto-cjk libreoffice-nogui && \
+RUN sed -i 's|http://.*ubuntu.com|http://mirrors.aliyun.com|g' /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install --no-install-recommends -y \
+        locales \
+        tzdata \
+        curl \
+        wget \
+        unzip \
+        ca-certificates \
+        fontconfig \
+        libreoffice-nogui=1:7.3.7-0ubuntu0.22.04.9 && \
+    apt-get install --no-install-recommends -y \
+        fonts-dejavu \
+        fonts-liberation \
+        fonts-noto \
+        fonts-noto-cjk \
+        fonts-noto-color-emoji \
+        fonts-noto-extra \
+        fonts-noto-ui-core \
+        fonts-droid-fallback && \
+    fc-cache -f -v && \
     apt-get clean && \
     echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
     locale-gen zh_CN.UTF-8 && \
-    update-locale LANG=zh_CN.UTF-8 && \
     mv /tmp/kkFileView-${KK_VERSION}/* . && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
@@ -121,8 +140,6 @@ ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 EXPOSE 8012
@@ -137,16 +154,6 @@ docker build -t registry.lingo.local/service/kkfileview:v4.4.0 .
 ```
 
 **运行测试**
-
-使用默认启动命令
-
-```
-docker run --rm --name kkfileview \
-    -p 18012:8012 \
-    registry.lingo.local/service/kkfileview:v4.4.0
-```
-
-自定义启动命令
 
 ```
 docker run --rm --name kkfileview \

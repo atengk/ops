@@ -8,24 +8,25 @@ ARG WORK_DIR=/opt/app
 
 WORKDIR ${WORK_DIR}
 
-COPY --from=eclipse-temurin:21 --chown=1001:1001 /opt/java/openjdk /opt/jdk
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
 COPY --chown=${UID}:${GID} docker-entrypoint.sh .
 COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
 
-RUN dnf -y update && \
-    dnf -y install shadow-utils glibc-locale-source glibc-langpack-zh tzdata ca-certificates fontconfig google-noto-sans-cjk-ttc-fonts && \
+RUN dnf -y install \
+        glibc-langpack-zh \
+        tzdata \
+        ca-certificates \
+        fontconfig && \
     dnf clean all && \
-    localedef -c -f UTF-8 -i zh_CN zh_CN.UTF-8 && \
     groupadd -g ${GID} ${GROUP_NAME} && \
     useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
     rm -rf /var/cache/dnf /tmp/* /var/tmp/*
 
 ENV JAVA_HOME=/opt/jdk
 ENV PATH=$PATH:$JAVA_HOME/bin
 ENV TZ=Asia/Shanghai
 ENV LANG=zh_CN.UTF-8
-ENV LANGUAGE=zh_CN:zh
-ENV LC_ALL=zh_CN.UTF-8
 
 USER ${UID}:${GID}
 
