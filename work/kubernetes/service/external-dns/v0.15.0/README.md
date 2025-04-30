@@ -130,7 +130,7 @@ etcdctl get /skydns --prefix --keys-only
 
 使用CoreDNS获取ExternalDNS的配置
 
-[参考文档](https://kongyu666.github.io/work/#/work/service/coredns/)
+[参考文档](https://atengk.github.io/work/#/work/service/coredns/)
 
 
 

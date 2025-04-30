@@ -8,7 +8,7 @@ Redis 是一个开源的高性能内存数据库，支持多种数据结构，�
 
 ## 编译安装 Redis
 
-**安装前先参考[前置条件](https://kongyu666.github.io/work/#/work/service/00-basic/)**
+**安装前先参考[前置条件](https://atengk.github.io/work/#/work/service/00-basic/)**
 
 ### 1. 安装依赖
 

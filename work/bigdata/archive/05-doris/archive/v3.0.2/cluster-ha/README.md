@@ -31,7 +31,7 @@
 
 ### 安装FoundationDB
 
-参考[文档](https://kongyu666.github.io/work/#/work/service/foundationdb/v7.1.38/)
+参考[文档](https://atengk.github.io/work/#/work/service/foundationdb/v7.1.38/)
 
 最终服务正常启动，查看配置文件
 
@@ -398,7 +398,7 @@ https://doris.apache.org/zh-CN/docs/3.0/sql-manual/sql-statements/Data-Definitio
 
 创建 S3 Storage Vault
 
-> MinIO安装文档参考：[地址](https://kongyu666.github.io/work/#/work/service/minio/v20241013/)
+> MinIO安装文档参考：[地址](https://atengk.github.io/work/#/work/service/minio/v20241013/)
 
 ```sql
 CREATE STORAGE VAULT IF NOT EXISTS minio_vault

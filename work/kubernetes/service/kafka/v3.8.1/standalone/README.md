@@ -113,7 +113,7 @@ kubectl delete pvc -n kongyu -l app.kubernetes.io/instance=kafka
 
 ## 云公网模式
 
-> 集群模式暂时不支持这样处理，如有需求参考**[大数据](https://kongyu666.github.io/work/#/work/bigdata/03-kafka/v3.6.1/cluster/)**篇章的相关文档
+> 集群模式暂时不支持这样处理，如有需求参考**[大数据](https://atengk.github.io/work/#/work/bigdata/03-kafka/v3.6.1/cluster/)**篇章的相关文档
 
 **查看版本**
 

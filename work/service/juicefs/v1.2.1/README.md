@@ -39,7 +39,7 @@ juicefs version 1.2.1+2024-08-30.cd871d1
 
 - [分布式模式](https://juicefs.com/docs/zh/community/getting-started/for_distributed)
 
-- [对象存储MinIO](https://kongyu666.github.io/work/#/work/service/minio/v20241013/)
+- [对象存储MinIO](https://atengk.github.io/work/#/work/service/minio/v20241013/)
 
 参考格式
 

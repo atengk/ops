@@ -16,7 +16,7 @@ https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner
 | ------------- |
 | 192.168.1.115 |
 
-如没有，参考[文档](https://kongyu666.github.io/work/#/work/service/nfs/)。
+如没有，参考[文档](https://atengk.github.io/work/#/work/service/nfs/)。
 
 2. 创建存储的目录
 

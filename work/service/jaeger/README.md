@@ -176,11 +176,11 @@ sudo journalctl -f -u jaeger.service
 
 ## 配置监控
 
-由 **[OpenTelemetry Collector](https://kongyu666.github.io/ops/#/work/service/opentelemetry/)** 将 `traces` 和 `metrics` 数据推送到 Jaeger，Jaeger配置prometheus指标，在prometheus中配置该指标拉取数据。
+由 **[OpenTelemetry Collector](https://atengk.github.io/ops/#/work/service/opentelemetry/)** 将 `traces` 和 `metrics` 数据推送到 Jaeger，Jaeger配置prometheus指标，在prometheus中配置该指标拉取数据。
 
 **Otel配置**
 
-在 **[OpenTelemetry Collector](https://kongyu666.github.io/ops/#/work/service/opentelemetry/)** 中将 `metrics` 也推送一份数据到 Jaeger 中，配置文件关键部分如下：
+在 **[OpenTelemetry Collector](https://atengk.github.io/ops/#/work/service/opentelemetry/)** 中将 `metrics` 也推送一份数据到 Jaeger 中，配置文件关键部分如下：
 
 ```yaml
 service:
@@ -421,7 +421,7 @@ $ ll /tmp/jaeger/ -h
 
 - [官网文档](https://www.jaegertracing.io/docs/2.4/badger/)
 - [Github文件参考](https://github.com/jaegertracing/jaeger/blob/v2.4.0/cmd/jaeger/config-badger.yaml)
-- [安装文档](https://kongyu666.github.io/ops/#/work/kubernetes/service/cassandra/v5.0.3/)
+- [安装文档](https://atengk.github.io/ops/#/work/kubernetes/service/cassandra/v5.0.3/)
 
 **编辑配置文件**
 

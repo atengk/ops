@@ -6,9 +6,9 @@ Harbor是一个开源的企业级容器镜像仓库，提供安全、高效的�
 
 
 
-## [前置条件](https://kongyu666.github.io/work/#/work/service/mysql/v8.4.3/?id=前置条件)
+## [前置条件](https://atengk.github.io/work/#/work/service/mysql/v8.4.3/?id=前置条件)
 
-- 参考：[基础配置](https://kongyu666.github.io/work/#/work/service/00-basic/)、[Docker安装文档](/work/docker/deploy/v27.3.1/)
+- 参考：[基础配置](https://atengk.github.io/work/#/work/service/00-basic/)、[Docker安装文档](/work/docker/deploy/v27.3.1/)
 
 
 

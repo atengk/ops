@@ -555,7 +555,7 @@ values  (1, '阿腾', 25, 118.124, '1993-03-15 06:34:51.619', '重庆市', '重�
 
 ### Iceberg
 
-参考：[使用Iceberg文档](https://kongyu666.github.io/ops/#/work/bigdata/06-iceberg/?id=spark)
+参考：[使用Iceberg文档](https://atengk.github.io/ops/#/work/bigdata/06-iceberg/?id=spark)
 
 **下载依赖包**
 

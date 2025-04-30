@@ -42,7 +42,7 @@ chmod +x kubesphere-delete.sh
 
 ### 推送镜像到仓库
 
-将下载的镜像推送到镜像仓库中，可以参考安装[registry](https://kongyu666.github.io/work/#/work/kubernetes/deploy/harbor/registry/)或者[harbor](https://kongyu666.github.io/work/#/work/kubernetes/deploy/harbor/v2.11.1/)仓库
+将下载的镜像推送到镜像仓库中，可以参考安装[registry](https://atengk.github.io/work/#/work/kubernetes/deploy/harbor/registry/)或者[harbor](https://atengk.github.io/work/#/work/kubernetes/deploy/harbor/v2.11.1/)仓库
 
 ```shell
 images_dir="./kubesphere-images" # 下载的镜像文件目录
@@ -65,7 +65,7 @@ done
 
 修改cluster-configuration.yaml
 
-> 存储类安装参考[openebs-hostpath](https://kongyu666.github.io/work/#/work/kubernetes/deploy/storage/openebs/local/)
+> 存储类安装参考[openebs-hostpath](https://atengk.github.io/work/#/work/kubernetes/deploy/storage/openebs/local/)
 
 ```shell
 # vi +10 cluster-configuration.yaml
@@ -133,7 +133,7 @@ chmod +x kubesphere-delete.sh
 
 修改cluster-configuration.yaml
 
-> 存储类安装参考[openebs-hostpath](https://kongyu666.github.io/work/#/work/kubernetes/deploy/storage/openebs/local/)
+> 存储类安装参考[openebs-hostpath](https://atengk.github.io/work/#/work/kubernetes/deploy/storage/openebs/local/)
 
 ```shell
 # vi +10 cluster-configuration.yaml

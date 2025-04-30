@@ -167,7 +167,7 @@ http://192.168.1.112:8001
 
 以下是使用 OpenSSL 创建自签名证书的步骤和命令：
 
-详细的生成证书参考：https://kongyu666.github.io/work/#/work/service/tls/tls-openssl/
+详细的生成证书参考：https://atengk.github.io/work/#/work/service/tls/tls-openssl/
 
 最终得到：`ateng-ca.crt`、 `ateng-server.crt` 、`ateng-server.key`
 

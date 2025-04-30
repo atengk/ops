@@ -196,7 +196,7 @@ kubectl delete -n kongyu -f deploy-separate.yaml
 
 ## 应用和镜像(源码依赖分离)分离
 
-开发文档参考：[源码依赖分离](https://kongyu666.github.io/dev/#/work/Ateng-Java/springboot3/doc/separate)
+开发文档参考：[源码依赖分离](https://atengk.github.io/dev/#/work/Ateng-Java/springboot3/doc/separate)
 
 使用JDK镜像，然后将Jar文件和依赖放到HTTP服务器上，通过busybox初始化容器下载到PVC中，最后自定义运行参数实现动态容器化Java应用的运行。
 

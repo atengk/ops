@@ -56,7 +56,7 @@ helm uninstall -n cert-manager cert-manager
 
 ### 创建CA的secret
 
-将根CA的key及证书文件存入secret中。如果没有CA证书，可以参考[链接](https://kongyu666.github.io/work/#/work/service/tls/tls-cfssl/v1.6.5/)手动创建。
+将根CA的key及证书文件存入secret中。如果没有CA证书，可以参考[链接](https://atengk.github.io/work/#/work/service/tls/tls-cfssl/v1.6.5/)手动创建。
 
 ```
 kubectl create secret tls ca-clusterissuer-keypair \

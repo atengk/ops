@@ -12,7 +12,7 @@ PostgreSQL 是一个功能强大的开源关系型数据库，支持标准 SQL �
 
 ## 安装PostgreSQL
 
-**安装前先参考[前置条件](https://kongyu666.github.io/work/#/work/service/00-basic/)**
+**安装前先参考[前置条件](https://atengk.github.io/work/#/work/service/00-basic/)**
 
 ### 安装软件包
 
