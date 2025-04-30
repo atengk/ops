@@ -18,7 +18,7 @@
 
 📚 系统级 Java 开发实践文档，涵盖微服务架构、大数据处理与异步任务调度等多个技术方向。
 
- 🔗 [Java开发网站](https://kongyu666.github.io/dev/)
+ 🔗 [Java开发网站](https://atengk.github.io/dev/)
 
 ------
 
@@ -74,7 +74,7 @@
 
 🧠 支持任务重试、分布式运行与自定义执行策略，适用于复杂业务流程的自动化调度。
 
- 📖 [Kubernetes部署](/work/kubernetes/service/snail-job/v1.4.0/)｜[Java开发文档](https://kongyu666.github.io/dev/#/work/Ateng-Java/task/snail-job/)
+ 📖 [Kubernetes部署](/work/kubernetes/service/snail-job/v1.4.0/)｜[Java开发文档](https://katengk.github.io/dev/#/work/Ateng-Java/task/snail-job/)
 
 ---
 

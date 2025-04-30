@@ -1,0 +1,36 @@
+FROM bitnami/minideb:bookworm
+
+ARG UID=1001
+ARG GID=1001
+ARG USER_NAME=admin
+ARG GROUP_NAME=ateng
+ARG WORK_DIR=/opt/app
+
+WORKDIR ${WORK_DIR}
+
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
+COPY --chown=${UID}:${GID} docker-entrypoint.sh .
+COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
+
+RUN sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list && \
+    install_packages \
+        locales \
+        curl \
+        ca-certificates \
+        fontconfig && \
+    apt-get clean && \
+    echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen zh_CN.UTF-8 && \
+    groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV JAVA_HOME=/opt/jdk
+ENV PATH=$PATH:$JAVA_HOME/bin
+ENV TZ=Asia/Shanghai
+ENV LANG=zh_CN.UTF-8
+
+USER ${UID}:${GID}
+
+ENTRYPOINT ["./docker-entrypoint.sh"]

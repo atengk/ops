@@ -1,5 +1,157 @@
 # 基于不同的操作系统构建容器应用
 
+## Minideb（推荐）
+
+Minideb 是一个基于 Debian 的轻量级容器基础镜像，由 Bitnami 构建。它在保留 APT 支持的同时移除多余组件，仅包含必要运行时和工具，适用于构建小体积、高安全性的容器应用，支持多架构和非 root 用户运行。
+ 官网：https://github.com/bitnami/minideb
+
+### 编译打包（可选）
+
+如果需要将源码编译打包Jar文件，可以参考该步骤。一般情况下是直接提供了Jar文件的，所以该步骤可选
+
+**创建maven配置文件**
+
+```
+cat > settings.xml <<"EOF"
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                              https://maven.apache.org/xsd/settings-1.0.0.xsd">
+  <mirrors>
+    <mirror>
+      <mirrorOf>central</mirrorOf>
+      <id>alimaven</id>
+      <name>阿里云中央仓库</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+    </mirror>
+  </mirrors>
+</settings>
+EOF
+```
+
+**编译打包**
+
+```shell
+docker run --rm \
+    --cpus="2" \
+    -m="2g" \
+    -v "/data/download/maven/repository":/root/.m2 \
+    -v "$PWD":/app \
+    -w /app \
+    maven:3.9-eclipse-temurin-21 \
+    mvn clean package -DskipTests \
+    -s settings.xml \
+    -f pom.xml
+```
+
+### 构建镜像
+
+**创建启动脚本**
+
+根据实际情况修改该脚本
+
+```shell
+cat > docker-entrypoint.sh <<"EOF"
+#!/bin/bash
+set -euo pipefail
+
+# 设置 Jar 启动的命令
+JAR_CMD=${JAR_CMD:--jar springboot3-demo-v1.0.jar}
+# 设置 JVM 参数
+JAVA_OPTS=${JAVA_OPTS:--Xms128m -Xmx1024m}
+# 设置 Spring Boot 参数
+SPRING_OPTS=${SPRING_OPTS:---spring.profiles.active=prod}
+# 设置应用启动命令
+RUN_CMD=${RUN_CMD:-java ${JAVA_OPTS} ${JAR_CMD} ${SPRING_OPTS}}
+
+# 打印命令并启动
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting application: ${RUN_CMD}"
+exec ${RUN_CMD}
+EOF
+chmod +x docker-entrypoint.sh
+```
+
+**创建Dockerfile**
+
+其中 `COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk` 可以根据实际情况修改JDK版本，以下JDK镜像版本参考
+
+- eclipse-temurin:21 eclipse-temurin:21-jre
+- eclipse-temurin:17 eclipse-temurin:17-jre
+- eclipse-temurin:11 eclipse-temurin:11-jre
+- eclipse-temurin:8 eclipse-temurin:8-jre
+
+```
+cat > Dockerfile-minideb <<"EOF"
+FROM bitnami/minideb:bookworm
+
+ARG UID=1001
+ARG GID=1001
+ARG USER_NAME=admin
+ARG GROUP_NAME=ateng
+ARG WORK_DIR=/opt/app
+
+WORKDIR ${WORK_DIR}
+
+COPY --from=eclipse-temurin:21-jre --chown=${UID}:${GID} /opt/java/openjdk /opt/jdk
+COPY --chown=${UID}:${GID} docker-entrypoint.sh .
+COPY --chown=${UID}:${GID} springboot3-demo-v1.0.jar .
+
+RUN sed -i 's|http://deb.debian.org|http://mirrors.aliyun.com|g' /etc/apt/sources.list && \
+    install_packages \
+        locales \
+        curl \
+        ca-certificates \
+        fontconfig && \
+    apt-get clean && \
+    echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen zh_CN.UTF-8 && \
+    groupadd -g ${GID} ${GROUP_NAME} && \
+    useradd -u ${UID} -g ${GROUP_NAME} -m ${USER_NAME} && \
+    chown -R ${UID}:${GID} ${WORK_DIR} && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV JAVA_HOME=/opt/jdk
+ENV PATH=$PATH:$JAVA_HOME/bin
+ENV TZ=Asia/Shanghai
+ENV LANG=zh_CN.UTF-8
+
+USER ${UID}:${GID}
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
+EOF
+```
+
+**拉取镜像**
+
+bitnami会每天发布安全更新，保证镜像是最新的
+
+```
+docker pull bitnami/minideb:bookworm
+```
+
+**构建镜像**
+
+```
+docker build -f Dockerfile-minideb \
+    -t registry.lingo.local/service/springboot3-demo:v1.0-minideb .
+```
+
+### 运行镜像
+
+**运行测试**
+
+```
+docker run --rm \
+    --name ateng-springboot3-demo \
+    -p 18080:8080 \
+    -e JAR_CMD="-jar springboot3-demo-v1.0.jar" \
+    -e JAVA_OPTS="-server -Xms128m -Xmx1024m" \
+    -e SPRING_OPTS="--server.port=8080 --spring.profiles.active=prod" \
+    registry.lingo.local/service/springboot3-demo:v1.0-minideb
+```
+
+
+
 ## Debian
 
 Debian 是一个由全球开发者社区共同维护的自由开源操作系统，以稳定、安全和高质量著称。它支持多种硬件架构，拥有超过 5 万个预编译的软件包，适用于服务器、桌面和嵌入式设备。Debian 的开发过程注重透明、开放与协作，强调自由软件理念，是众多其他 Linux 发行版（如 Ubuntu）的基础。其稳定版更新周期较长，适合对系统可靠性有高要求的场景。
