@@ -74,7 +74,7 @@
 
 🧠 支持任务重试、分布式运行与自定义执行策略，适用于复杂业务流程的自动化调度。
 
- 📖 [Kubernetes部署](/work/kubernetes/service/snail-job/v1.4.0/)｜[Java开发文档](https://katengk.github.io/dev/#/work/Ateng-Java/task/snail-job/)
+ 📖 [Kubernetes部署](/work/kubernetes/service/snail-job/v1.4.0/)｜[Java开发文档](https://atengk.github.io/dev/#/work/Ateng-Java/task/snail-job/)
 
 ---
 
@@ -120,6 +120,8 @@
         - Redis
             - [安装文档](/work/service/redis/v7.4.1/)
             - [使用文档](/work/service/redis/OPS.md)
+            - [Redis8 编译文档](/work/service/redis/v8.0.0/BUILD.md)
+            - [Redis8 安装文档](/work/service/redis/v8.0.0/)
         - PostgreSQL
             - [编译安装文档](/work/service/postgresql/v17.2.0/)
             - [编译PostGIS](/work/service/postgresql/v17.2.0/postgis/)
@@ -218,6 +220,7 @@
         - [kkFileView-Alpine](/work/docker/dockerfile/kkfileview/v4.4.0/alpine/)
         - [操作系统集合](/work/docker/dockerfile/os/)
     - 服务安装文档
+        - [DPanel-Docker可视化管理面板](/work/docker/service/dpanel/)
         - [mysql](/work/docker/service/mysql/)
         - [postgresql](/work/docker/service/postgresql/)
         - [nginx](/work/docker/service/nginx/)

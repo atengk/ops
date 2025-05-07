@@ -1,0 +1,27 @@
+FROM debian:12.10
+WORKDIR /opt/app
+
+ADD OpenJDK17U-*.tar.gz /opt/
+
+RUN sed -i "s#http.*\(com\|org\|cn\)#http://mirrors.aliyun.com#g" /etc/apt/sources.list.d/debian.sources && \
+    apt-get update && apt-get upgrade -y && \
+    apt-get install -y locales curl unzip zip vim net-tools iproute2 iputils-ping less wget jq dnsutils traceroute tcpdump nmap fontconfig fonts-dejavu-core fonts-liberation && \
+    apt-get clean && \
+    echo "zh_CN.UTF-8 UTF-8" > /etc/locale.gen && \
+    locale-gen zh_CN.UTF-8 && \
+    update-locale LANG=zh_CN.UTF-8 && \
+    groupadd -g 1001 ateng && \
+    useradd -u 1001 -g ateng -m admin && \
+    chown 1001:1001 -R /opt && \
+    mv /opt/jdk* /opt/jdk && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+ENV JAVA_HOME=/opt/jdk
+ENV PATH=$PATH:$JAVA_HOME/bin
+ENV TZ=Asia/Shanghai
+ENV LANG=zh_CN.UTF-8
+ENV LANGUAGE=zh_CN:zh
+ENV LC_ALL=zh_CN.UTF-8
+
+USER 1001:1001
+ENTRYPOINT ["java"]

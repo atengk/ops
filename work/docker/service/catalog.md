@@ -1,5 +1,6 @@
 # Docker 服务部署目录
 
+- [DPanel-Docker可视化管理面板](/work/docker/service/dpanel/)
 - [mysql](/work/docker/service/mysql/)
 - [postgresql](/work/docker/service/postgresql/)
 - [nginx](/work/docker/service/nginx/)
