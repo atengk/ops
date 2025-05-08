@@ -32,8 +32,9 @@
         - [安装使用文档](/work/service/restic/)
 - 数据存储
     - MySQL
-        - [安装文档](/work/service/mysql/v8.4.3/)
         - [编译安装文档](/work/service/mysql/v8.4.3/make/)
+        - [安装文档](/work/service/mysql/v8.4.3/)
+        - [安装MGR集群](/work/service/mysql/v8.4.3/MGR.md)
         - [使用文档](/work/service/mysql/OPS.md)
     - MariaDB Galera
         - [安装文档](/work/service/mariadb/v11.4.4/)
