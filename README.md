@@ -111,7 +111,11 @@
             - [使用文档](/work/service/juicefs/OPS.md)
         - 备份工具 Restic
             - [安装使用文档](/work/service/restic/)
-    - 数据存储
+        - 分布式存储 Ceph
+            - [安装文档-Quincy](/work/service/ceph/quincy/)
+            - [安装文档-Reef](/work/service/ceph/reef/)
+            - [使用文档](/work/service/ceph/)
+    - 数据库存储
         - MySQL
             - [编译安装文档](/work/service/mysql/v8.4.3/make/)
             - [安装文档](/work/service/mysql/v8.4.3/)

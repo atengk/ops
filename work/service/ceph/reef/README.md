@@ -41,12 +41,12 @@ Ceph 是一个开源的分布式存储系统，支持对象存储、块存储和
 
 版本说明
 
-| Ceph 版本号 | 对应版本名称             |
-| ----------- | ------------------------ |
-| 19.x        | Squid                    |
-| 18.x        | Reef                     |
-| 17.x        | Quincy *（文档当前版本） |
-| 16.x        | Pacific                  |
+| Ceph 版本号 | 对应版本名称           |
+| ----------- | ---------------------- |
+| 19.x        | Squid                  |
+| 18.x        | Reef *（文档当前版本） |
+| 17.x        | Quincy                 |
+| 16.x        | Pacific                |
 
 服务节点
 
@@ -85,15 +85,15 @@ sudo systemctl enable --now chronyd
 **安装cephadm**
 
 ```
-curl --silent --remote-name https://raw.githubusercontent.com/ceph/ceph/quincy/src/cephadm/cephadm
-chmod +x cephadm
-sudo mv cephadm /usr/bin
+curl --silent --remote-name https://raw.githubusercontent.com/ceph/ceph/reef/src/cephadm/cephadm.py
+chmod +x cephadm.py
+sudo mv cephadm.py /usr/bin/cephadm
 ```
 
 **拉取镜像**
 
 ```
-images="quay.io/ceph/ceph:v17
+images="quay.io/ceph/ceph:v18
 quay.io/ceph/ceph-grafana:9.4.7
 quay.io/prometheus/prometheus:v2.43.0
 quay.io/prometheus/alertmanager:v0.25.0
@@ -102,7 +102,7 @@ for image in $images
 do
     docker pull $image
 done
-docker save $images | gzip -c > images-ceph_v17.tar.gz
+docker save $images | gzip -c > images-ceph_v18.tar.gz
 ```
 
 **检查节点**
