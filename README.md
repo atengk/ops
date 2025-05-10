@@ -84,6 +84,7 @@
     - 服务器管理
         - [基础配置](/work/service/00-basic/)
         - [网络配置](/work/service/network/)
+        - [软件源配置](/work/service/mirrors/)
         - [系统性能监控](/work/linux/metrics/)
         - [时间同步服务](/work/service/chrony/)
     - 安全管理
@@ -152,6 +153,7 @@
             - [安装文档](/work/service/jenkins/)
             - [使用文档](/work/service/jenkins/OPS.md)
             - [Agent镜像构建](/work/service/jenkins/images/)
+            - [Agent镜像构建-使用builder](/work/service/jenkins/images/README_BUILER.md)
         - GitOps - Argo CD
             - [安装文档](/work/service/argo-cd/)
             - [使用文档](/work/service/argo-cd/OPS.md)
@@ -214,6 +216,7 @@
 - Docker
     - 使用文档
         - [安装文档](/work/docker/deploy/v27.3.1/)
+        - [快速安装文档](/work/docker/deploy/quick_install.md)
         - [使用文档](/work/docker/OPS.md)
     - Dockerfile
         - [JDK和应用](/work/docker/dockerfile/java/)

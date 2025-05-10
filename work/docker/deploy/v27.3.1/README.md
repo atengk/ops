@@ -158,9 +158,9 @@ wget https://github.com/docker/buildx/releases/download/v0.19.2/buildx-v0.19.2.l
 **安装插件**
 
 ```
-mkdir -p ~/.docker/cli-plugins
-cp buildx-v0.19.2.linux-amd64 ~/.docker/cli-plugins/docker-buildx
-chmod +x ~/.docker/cli-plugins/docker-buildx
+sudo mkdir -p /usr/local/libexec/docker/cli-plugins/
+sudo cp buildx-v0.19.2.linux-amd64 /usr/local/libexec/docker/cli-plugins/docker-buildx
+sudo chmod +x /usr/local/libexec/docker/cli-plugins/docker-buildx
 ```
 
 **验证安装**
@@ -183,13 +183,17 @@ wget https://github.com/docker/compose/releases/download/v2.31.0/docker-compose-
 **安装软件包**
 
 ```
-chmod +x docker-compose-linux-x86_64
-sudo cp docker-compose-linux-x86_64 /usr/bin/docker-compose
+sudo mkdir -p /usr/local/libexec/docker/cli-plugins/
+sudo cp docker-compose-linux-x86_64 /usr/local/libexec/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/libexec/docker/cli-plugins/docker-compose
+sudo ln -s /usr/local/libexec/docker/cli-plugins/docker-compose /usr/bin/docker-compose
 ```
 
 **查看版本**
 
 ```
+$ docker compose version
+Docker Compose version v2.31.0
 $ docker-compose version
 Docker Compose version v2.31.0
 ```

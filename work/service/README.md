@@ -73,6 +73,7 @@
         - [安装文档](/work/service/jenkins/)
         - [使用文档](/work/service/jenkins/OPS.md)
         - [Agent镜像构建](/work/service/jenkins/images/)
+        - [Agent镜像构建-使用builder](/work/service/jenkins/images/README_BUILER.md)
     - GitOps - Argo CD
         - [安装文档](/work/service/argo-cd/)
         - [使用文档](/work/service/argo-cd/OPS.md)
