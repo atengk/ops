@@ -27,3 +27,5 @@
 - [kkfileview](/work/docker/service/kkfileview/v4.4.0/)
 - [禅道](/work/docker/service/zentao/)
 - [Snail-Job](/work/docker/service/snail-job/)
+- [Nextcloud私有云存储平台](/work/docker/service/nextcloud/)
+- [Cloudreve网盘服务](/work/docker/service/cloudreve/)

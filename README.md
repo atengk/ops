@@ -115,7 +115,7 @@
             - [安装文档-Quincy](/work/service/ceph/quincy/)
             - [安装文档-Reef](/work/service/ceph/reef/)
             - [使用文档](/work/service/ceph/)
-    - 数据库存储
+    - 数据库服务
         - MySQL
             - [编译安装文档](/work/service/mysql/v8.4.3/make/)
             - [安装文档](/work/service/mysql/v8.4.3/)
@@ -149,6 +149,9 @@
         - Nginx
             - [安装文档](/work/service/nginx/v1.27.3/)
             - [使用文档](/work/service/nginx/OPS.md)
+        - OpenResty
+            - [安装文档](/work/service/openresty/v1.27.1.2/)
+            - [使用文档](/work/service/openresty/OPS.md)
         - Haproxy
             - [安装文档](/work/service/haproxy/)
             - [使用文档](/work/service/haproxy/OPS.md)
@@ -166,7 +169,8 @@
             - [OpenTelemetry](/work/service/opentelemetry/)
             - [Jaeger](/work/service/jaeger/)
         - 监控
-            - [Beszel](/work/service/beszel/)
+            - [Beszel服务器监控平台](/work/service/beszel/)
+            - [1panel服务器管理面板](/work/service/1panel/)
             - [Prometheus](/work/service/prometheus/v3.2.1/)
             - [Grafana](/work/service/grafana/v11.5.3/)
             - [Alertmanager](/work/service/alertmanager/v0.28.1/)
@@ -255,6 +259,8 @@
         - [kkfileview](/work/docker/service/kkfileview/v4.4.0/)
         - [禅道](/work/docker/service/zentao/)
         - [Snail-Job](/work/docker/service/snail-job/)
+        - [Nextcloud私有云存储平台](/work/docker/service/nextcloud/)
+        - [Cloudreve网盘服务](/work/docker/service/cloudreve/)
 - Kubernetes
     - 使用文档
         - [K8S使用文档](/work/kubernetes/OPS.md)

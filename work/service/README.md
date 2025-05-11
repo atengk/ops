@@ -34,7 +34,7 @@
         - [安装文档-Quincy](/work/service/ceph/quincy/)
         - [安装文档-Reef](/work/service/ceph/reef/)
         - [使用文档](/work/service/ceph/)
-- 数据库存储
+- 数据库服务
     - MySQL
         - [编译安装文档](/work/service/mysql/v8.4.3/make/)
         - [安装文档](/work/service/mysql/v8.4.3/)
@@ -66,6 +66,9 @@
     - Nginx
         - [安装文档](/work/service/nginx/v1.27.3/)
         - [使用文档](/work/service/nginx/OPS.md)
+    - OpenResty
+        - [安装文档](/work/service/openresty/v1.27.1.2/)
+        - [使用文档](/work/service/openresty/OPS.md)
     - Haproxy
         - [安装文档](/work/service/haproxy/)
         - [使用文档](/work/service/haproxy/OPS.md)
@@ -87,7 +90,8 @@
         - [Jaeger](/work/service/jaeger/)
 
     - 监控
-        - [Beszel](/work/service/beszel/)
+        - [Beszel服务器监控平台](/work/service/beszel/)
+        - [1panel服务器管理面板](/work/service/1panel/)
         - [Prometheus](/work/service/prometheus/v3.2.1/)
         - [Grafana](/work/service/grafana/v11.5.3/)
         - [Alertmanager](/work/service/alertmanager/v0.28.1/)
