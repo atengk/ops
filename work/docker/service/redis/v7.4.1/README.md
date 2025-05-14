@@ -7,20 +7,20 @@ Redis 是一个开源的内存数据库，支持多种数据结构，如字符�
 **下载镜像**
 
 ```
-docker pull bitnami/redis:8.0.0
+docker pull bitnami/redis:7.4.1
 ```
 
 **推送到仓库**
 
 ```
-docker tag bitnami/redis:8.0.0 registry.lingo.local/bitnami/redis:8.0.0
-docker push registry.lingo.local/bitnami/redis:8.0.0
+docker tag bitnami/redis:7.4.1 registry.lingo.local/bitnami/redis:7.4.1
+docker push registry.lingo.local/bitnami/redis:7.4.1
 ```
 
 **保存镜像**
 
 ```
-docker save registry.lingo.local/bitnami/redis:8.0.0 | gzip -c > image-redis_8.0.0.tar.gz
+docker save registry.lingo.local/bitnami/redis:7.4.1 | gzip -c > image-redis_7.4.1.tar.gz
 ```
 
 **创建目录**
@@ -43,7 +43,7 @@ maxmemory 8GB
 auto-aof-rewrite-percentage 100
 auto-aof-rewrite-min-size 64mb
 maxmemory-policy volatile-lru
-io-threads 8
+io-threads 10
 io-threads-do-reads yes
 EOF
 ```
@@ -57,7 +57,7 @@ docker run -d --name ateng-redis \
   -v /data/container/redis/data:/bitnami/redis/data \
   -e REDIS_PASSWORD=Admin@123 \
   -e TZ=Asia/Shanghai \
-  registry.lingo.local/bitnami/redis:8.0.0
+  registry.lingo.local/bitnami/redis:7.4.1
 ```
 
 **查看日志**
@@ -78,7 +78,7 @@ docker exec -it ateng-redis bash
 
 ```
 export REDISCLI_AUTH=Admin@123
-redis-cli -h 192.168.1.12 -p 20003 info server
+redis-cli -h 192.168.1.114 -p 20003 info server
 ```
 
 **删除服务**

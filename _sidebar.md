@@ -42,10 +42,9 @@
         - MariaDB Galera
             - [安装文档](/work/service/mariadb/v11.4.4/)
         - Redis
-            - [安装文档](/work/service/redis/v7.4.1/)
+            - [编译文档](/work/service/redis/v8.0.1/BUILD.md)
+            - [安装文档](/work/service/redis/v8.0.1/)
             - [使用文档](/work/service/redis/OPS.md)
-            - [Redis8 编译文档](/work/service/redis/v8.0.0/BUILD.md)
-            - [Redis8 安装文档](/work/service/redis/v8.0.0/)
         - PostgreSQL
             - [编译安装文档](/work/service/postgresql/v17.2.0/)
             - [编译PostGIS](/work/service/postgresql/v17.2.0/postgis/)
@@ -218,10 +217,10 @@
     - 中间件服务
         - 数据存储
             - Redis
-                - [单机模式](/work/kubernetes/service/redis/v7.4.1/standalone/)
-                - [主从模式](/work/kubernetes/service/redis/v7.4.1/replication/)
-                - [哨兵模式](/work/kubernetes/service/redis/v7.4.1/sentinel/)
-                - [集群模式](/work/kubernetes/service/redis/v7.4.1/cluster/)
+                - [单机模式](/work/kubernetes/service/redis/v8.0.1/standalone/)
+                - [主从模式](/work/kubernetes/service/redis/v8.0.1/replication/)
+                - [哨兵模式](/work/kubernetes/service/redis/v8.0.1/sentinel/)
+                - [集群模式](/work/kubernetes/service/redis/v8.0.1/cluster/)
             - Valkey
                 - [单机模式](/work/kubernetes/service/redis/valkey/v8.0.2/)
             - Mariadb Galera

@@ -1,0 +1,6 @@
+bitnami/redis-exporter:1.71.0
+bitnami/redis:8.0.1
+bitnami/redis-sentinel:8.0.1
+bitnami/redis-cluster:8.0.1
+bitnami/os-shell:12
+bitnami/kubectl:1.33.0

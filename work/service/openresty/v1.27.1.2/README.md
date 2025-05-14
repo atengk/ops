@@ -210,6 +210,19 @@ mkdir -p /data/service/frontend/demo
 echo "hello world" > /data/service/frontend/demo/index.html
 ```
 
+**检查配置正确性**
+
+```
+openresty -t
+```
+
+输出以下内容：
+
+```
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+
 **重新读取配置**
 
 ```

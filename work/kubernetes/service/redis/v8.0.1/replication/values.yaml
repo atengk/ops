@@ -1,0 +1,99 @@
+global:
+  security:
+    allowInsecureImages: true
+  defaultStorageClass: ""
+  redis:
+    password: "Admin@123"
+fullnameOverride: "redis"
+image:
+  debug: false
+  registry: registry.lingo.local
+  repository: bitnami/redis
+  tag: "8.0.1"
+  pullPolicy: IfNotPresent
+architecture: replication
+auth:
+  enabled: true
+commonConfiguration: |-
+  databases 20
+  appendonly yes
+  appendfsync always
+  save ""
+  maxclients 1024
+  maxmemory 8GB
+  auto-aof-rewrite-percentage 100
+  auto-aof-rewrite-min-size 64mb
+  maxmemory-policy volatile-lru
+  io-threads 8
+  io-threads-do-reads yes
+  loadmodule /opt/bitnami/redis/lib/redis/modules/redisbloom.so
+  loadmodule /opt/bitnami/redis/lib/redis/modules/redisearch.so
+  loadmodule /opt/bitnami/redis/lib/redis/modules/rejson.so
+  loadmodule /opt/bitnami/redis/lib/redis/modules/redistimeseries.so
+
+master:
+  count: 1
+  disableCommands:
+    - FLUSHDB
+    - FLUSHALL
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  containerPorts:
+    redis: 6379
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/redis="true"
+    type: "soft"
+    key: "kubernetes.service/redis"
+    values:
+      - "true"
+  persistence:
+    size: 50Gi
+  service:
+    type: NodePort
+    ports:
+      redis: 6379
+    nodePorts:
+      redis: ""
+
+replica:
+  replicaCount: 2
+  disableCommands:
+    - FLUSHDB
+    - FLUSHALL
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  containerPorts:
+    redis: 6379
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/redis="true"
+    type: "soft"
+    key: "kubernetes.service/redis"
+    values:
+      - "true"
+  persistence:
+    size: 50Gi
+  service:
+    type: NodePort
+    ports:
+      redis: 6379
+    nodePorts:
+      redis: ""

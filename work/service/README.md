@@ -43,7 +43,7 @@
     - MariaDB Galera
         - [安装文档](/work/service/mariadb/v11.4.4/)
     - Redis
-        - [安装文档](/work/service/redis/v7.4.1/)
+        - [安装文档](/work/service/redis/v8.0.1/)
         - [使用文档](/work/service/redis/OPS.md)
     - PostgreSQL
         - [编译安装文档](/work/service/postgresql/v17.2.0/)

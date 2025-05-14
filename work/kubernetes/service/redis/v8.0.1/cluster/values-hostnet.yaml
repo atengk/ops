@@ -1,0 +1,66 @@
+global:
+  security:
+    allowInsecureImages: true
+  defaultStorageClass: ""
+fullnameOverride: "redis"
+image:
+  debug: false
+  registry: registry.lingo.local
+  repository: bitnami/redis-cluster
+  tag: "8.0.1"
+  pullPolicy: IfNotPresent
+usePassword: true
+password: "Admin@123"
+service:
+  ports:
+    redis: 36379
+  nodePorts:
+    redis: ""
+  type: ClusterIP
+persistence:
+  size: 50Gi
+redis:
+  hostNetwork: true
+  configmap: |-
+    port 36379
+    appendonly yes
+    appendfsync always
+    save ""
+    maxclients 1024
+    maxmemory 8GB
+    auto-aof-rewrite-percentage 100
+    auto-aof-rewrite-min-size 64mb
+    maxmemory-policy volatile-lru
+    io-threads 8
+    io-threads-do-reads yes
+    loadmodule /opt/bitnami/redis/lib/redis/modules/redisbloom.so
+    loadmodule /opt/bitnami/redis/lib/redis/modules/redisearch.so
+    loadmodule /opt/bitnami/redis/lib/redis/modules/rejson.so
+    loadmodule /opt/bitnami/redis/lib/redis/modules/redistimeseries.so
+  extraEnvVars:
+    - name: TZ
+      value: Asia/Shanghai
+  terminationGracePeriodSeconds: 30
+  resourcesPreset: "none"
+  resources: {}
+  affinity: {}
+  nodeSelector: {}
+  # resources:
+  #   limits:
+  #     cpu: "1"
+  #     memory: "1Gi"
+  #   requests:
+  #     cpu: "500m"
+  #     memory: "512Mi"
+  # ## Allowed values: `soft` or `hard`
+  # #podAffinityPreset: "soft"  ## 调度到同一节点
+  podAntiAffinityPreset: "soft"  ## 调度到不同节点
+  nodeAffinityPreset:  ## 调度到包含指定标签的节点，例如创建节点标签：kubectl label node server02.lingo.local kubernetes.service/redis="true"
+    type: "soft"
+    key: "kubernetes.service/redis"
+    values:
+      - "true"
+cluster:
+  init: true
+  nodes: 6
+  replicas: 1
