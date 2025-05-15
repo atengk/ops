@@ -9,7 +9,7 @@
     - Valkey
         - [单机模式](/work/kubernetes/service/redis/valkey/v8.0.2/)
     - Mariadb Galera
-        - [Galera集群](/work/kubernetes/service/mariadb/v11.4.4/)
+        - [Galera集群](/work/kubernetes/service/mariadb/v11.4.6/)
     - PostgreSQL
         - [单机模式](/work/kubernetes/service/postgresql/v17.2.0/standalone/)
         - [主从模式](/work/kubernetes/service/postgresql/v17.2.0/replication/)

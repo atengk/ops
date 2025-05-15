@@ -69,14 +69,6 @@ redis-cli -h redis-node-0.redis-headless.kongyu -p 26379 info server sentinel ma
 redis-cli -h redis -p 26379 info server sentinel masters
 ```
 
-集群网络访问
-
-> 使用集群+NodePort访问
-
-```
-
-```
-
 **删除服务以及数据**
 
 ```

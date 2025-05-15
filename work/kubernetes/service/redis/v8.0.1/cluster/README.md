@@ -42,7 +42,7 @@ kubectl label nodes server03.lingo.local kubernetes.service/redis="true"
 **创建服务**
 
 ```
-helm install redis -n kongyu -f values-cluster.yaml redis-cluster-12.0.2.tgz
+helm install redis -n kongyu -f values-clusterip.yaml redis-cluster-12.0.2.tgz
 ```
 
 **查看服务**
@@ -57,7 +57,7 @@ kubectl logs -f -n kongyu redis-0
 创建客户端容器
 
 ```
-kubectl run redis-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/redis-cluster:8.0.1 --namespace kongyu --env REDISCLI_AUTH=Admin@123 --command -- bash
+kubectl run redis-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/redis-cluster:8.0.1 --namespace kongyu --env REDISCLI_AUTH=Admin@123 --command -- bash
 ```
 
 内部网络访问-headless
@@ -136,7 +136,7 @@ kubectl logs -f -n kongyu redis-0
 创建客户端容器
 
 ```
-kubectl run redis-client --rm --tty -i --restart='Never' --image  registry.lingo.local/service/redis-cluster:8.0.1 --namespace kongyu --env REDISCLI_AUTH=Admin@123 --command -- bash
+kubectl run redis-client --rm --tty -i --restart='Never' --image  registry.lingo.local/bitnami/redis-cluster:8.0.1 --namespace kongyu --env REDISCLI_AUTH=Admin@123 --command -- bash
 ```
 
 访问服务

@@ -18,7 +18,7 @@ service:
     redis: ""
   type: ClusterIP
 persistence:
-  size: 50Gi
+  size: 100Gi
 redis:
   hostNetwork: true
   configmap: |-
