@@ -12,20 +12,20 @@ Nacos通常与微服务架构中的其他组件一起使用，像是 Spring Clou
 **下载镜像**
 
 ```
-docker pull nacos/nacos-server:v3.2.3
+docker pull nacos/nacos-server:v3.2.1
 ```
 
 **推送到仓库**
 
 ```
-docker tag nacos/nacos-server:v3.2.3 registry.lingo.local/service/nacos-server:v3.2.3
-docker push registry.lingo.local/service/nacos-server:v3.2.3
+docker tag nacos/nacos-server:v3.2.1 registry.lingo.local/service/nacos-server:v3.2.1
+docker push registry.lingo.local/service/nacos-server:v3.2.1
 ```
 
 **保存镜像**
 
 ```
-docker save registry.lingo.local/service/nacos-server:v3.2.3 | gzip -c > image-nacos-server_v3.2.3.tar.gz
+docker save registry.lingo.local/service/nacos-server:v3.2.1 | gzip -c > image-nacos-server_v3.2.1.tar.gz
 ```
 
 **创建目录**
@@ -53,7 +53,7 @@ docker run -d --name ateng-nacos --user 1001 \
   -e JVM_XMS=2g \
   -e JVM_XMX=2g \
   -e TZ=Asia/Shanghai \
-  registry.lingo.local/service/nacos-server:v3.2.3
+  registry.lingo.local/service/nacos-server:v3.2.1
 ```
 
 **查看日志**
@@ -77,7 +77,7 @@ Password: Admin@123
 
 Nacos 首页
 
-![image-20260803110126815](./assets/image-20260803110126815.png)
+![image-20260505125903743](./assets/image-20260505125903743.png)
 
 **删除服务**
 
